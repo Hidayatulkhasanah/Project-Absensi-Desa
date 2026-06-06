@@ -1,0 +1,55 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+
+class UserSeeder extends Seeder
+{
+    public function run(): void {
+        DB::table('users')->insert([
+            [
+                'nik'        => '1111111111',
+                'nama'       => 'Ahmad Sulaiman',
+                'password'   => Hash::make('admin123'),
+                'jabatan'    => 'Kepala Desa',
+                'role'       => 'admin',
+                'aktif'      => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nik'        => '2222222222',
+                'nama'       => 'Budi Operator',
+                'password'   => Hash::make('operator123'),
+                'jabatan'    => 'Operator Desa',
+                'role'       => 'operator',
+                'aktif'      => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nik'        => '3333333333',
+                'nama'       => 'Siti Rahayu',
+                'password'   => Hash::make('user123'),
+                'jabatan'    => 'Staf Desa',
+                'role'       => 'user',
+                'aktif'      => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nik'        => '4444444444',
+                'nama'       => 'Rudi Hermawan',
+                'password'   => Hash::make('user123'),
+                'jabatan'    => 'Staf Desa',
+                'role'       => 'user',
+                'aktif'      => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
+    }
+}

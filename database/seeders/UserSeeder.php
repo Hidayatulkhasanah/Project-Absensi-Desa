@@ -1,0 +1,36 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+
+class UserSeeder extends Seeder
+{
+    public function run(): void {
+        DB::table('users')->insert([
+            ['nik'=>'3201076807790004','nama'=>'Hj. Nasih','password'=>Hash::make('dsmekarsari_01'),'jabatan'=>'Kepala Desa','role'=>'admin','aktif'=>1,'created_at'=>now(),'updated_at'=>now()],
+            ['nik'=>'3201071111920014','nama'=>'Dede Firdaus','password'=>Hash::make('dsmekarsari_01'),'jabatan'=>'Sekretaris Desa','role'=>'operator','aktif'=>1,'created_at'=>now(),'updated_at'=>now()],
+            ['nik'=>'3201076102010004','nama'=>'Annisa Sahida','password'=>Hash::make('dsmekarsari_02'),'jabatan'=>'Kasi Pemerintahan','role'=>'user','aktif'=>1,'created_at'=>now(),'updated_at'=>now()],
+            ['nik'=>'3201076801960001','nama'=>'Lika Lestanti','password'=>Hash::make('dsmekarsari_02'),'jabatan'=>'Kasi Pelayanan','role'=>'user','aktif'=>1,'created_at'=>now(),'updated_at'=>now()],
+            ['nik'=>'3201071801810001','nama'=>'Ican','password'=>Hash::make('dsmekarsari_02'),'jabatan'=>'Kasi Kesra','role'=>'user','aktif'=>1,'created_at'=>now(),'updated_at'=>now()],
+            ['nik'=>'3201074105980006','nama'=>'Selpi Melati Sukma','password'=>Hash::make('dsmekarsari_02'),'jabatan'=>'Kaur Keuangan','role'=>'user','aktif'=>1,'created_at'=>now(),'updated_at'=>now()],
+            ['nik'=>'3201071012030002','nama'=>'Muhamad Wahyu Firmansyah','password'=>Hash::make('dsmekarsari_02'),'jabatan'=>'Kaur Perencanaan','role'=>'user','aktif'=>1,'created_at'=>now(),'updated_at'=>now()],
+            ['nik'=>'3201071610820005','nama'=>'Ugim Mulyana','password'=>Hash::make('dsmekarsari_02'),'jabatan'=>'Kaur Tata Usaha & Umum','role'=>'user','aktif'=>1,'created_at'=>now(),'updated_at'=>now()],
+            ['nik'=>'3201070705750024','nama'=>'Iman Sudarmaji','password'=>Hash::make('dsmekarsari_02'),'jabatan'=>'Kepala Dusun I','role'=>'user','aktif'=>1,'created_at'=>now(),'updated_at'=>now()],
+            ['nik'=>'3201072402970012','nama'=>'Soepiyan Mulya Ilham Febriana','password'=>Hash::make('dsmekarsari_02'),'jabatan'=>'Kepala Dusun II','role'=>'user','aktif'=>1,'created_at'=>now(),'updated_at'=>now()],
+            ['nik'=>'3201071904820006','nama'=>'Agus Pitroh','password'=>Hash::make('dsmekarsari_02'),'jabatan'=>'Kepala Dusun III','role'=>'user','aktif'=>1,'created_at'=>now(),'updated_at'=>now()],
+            ['nik'=>'3201071212660010','nama'=>'Boing','password'=>Hash::make('dsmekarsari_02'),'jabatan'=>'Kepala Dusun IV','role'=>'user','aktif'=>1,'created_at'=>now(),'updated_at'=>now()],
+            ['nik'=>'3201070706780013','nama'=>'Anim Bin Kirun','password'=>Hash::make('dsmekarsari_02'),'jabatan'=>'-','role'=>'user','aktif'=>1,'created_at'=>now(),'updated_at'=>now()],
+            ['nik'=>'3201061703730010','nama'=>'Dedi','password'=>Hash::make('dsmekarsari_02'),'jabatan'=>'-','role'=>'user','aktif'=>1,'created_at'=>now(),'updated_at'=>now()],
+            ['nik'=>'3201070802600002','nama'=>'Idja','password'=>Hash::make('dsmekarsari_02'),'jabatan'=>'-','role'=>'user','aktif'=>1,'created_at'=>now(),'updated_at'=>now()],
+            ['nik'=>'3201075712710005','nama'=>'Imawati Utaminingsih','password'=>Hash::make('dsmekarsari_02'),'jabatan'=>'-','role'=>'user','aktif'=>1,'created_at'=>now(),'updated_at'=>now()],
+            ['nik'=>'3201071512000007','nama'=>'M. Syahro Romadhon','password'=>Hash::make('dsmekarsari_02'),'jabatan'=>'-','role'=>'user','aktif'=>1,'created_at'=>now(),'updated_at'=>now()],
+            ['nik'=>'3201071402700006','nama'=>'Matroji','password'=>Hash::make('dsmekarsari_02'),'jabatan'=>'-','role'=>'user','aktif'=>1,'created_at'=>now(),'updated_at'=>now()],
+            ['nik'=>'3201071203720023','nama'=>'Sabin','password'=>Hash::make('dsmekarsari_02'),'jabatan'=>'-','role'=>'user','aktif'=>1,'created_at'=>now(),'updated_at'=>now()],
+            ['nik'=>'3201070205730007','nama'=>'Saenan Permana','password'=>Hash::make('dsmekarsari_02'),'jabatan'=>'-','role'=>'user','aktif'=>1,'created_at'=>now(),'updated_at'=>now()],
+            ['nik'=>'3201070508710008','nama'=>'Wawan Kurniawan','password'=>Hash::make('dsmekarsari_02'),'jabatan'=>'-','role'=>'user','aktif'=>1,'created_at'=>now(),'updated_at'=>now()],
+        ]);
+    }
+}
