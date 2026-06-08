@@ -260,6 +260,7 @@ tbody tr:hover{background:#f5f8f4}
 @media(max-width:600px){.sc-grid,.ls-grid,.qa-grid{grid-template-columns:1fr}.dh-stats{grid-template-columns:1fr 1fr}.content{padding:14px}}
 .mob-show{display:none}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -1093,43 +1094,68 @@ function pgRekap(){
 //  PEGAWAI PAGE
 // ════════════════════════════════════════════════════
 function pgPeg(){
-  let users=DB.users();
-  if(fPeg.q){const q=fPeg.q.toLowerCase();users=users.filter(u=>u.nama.toLowerCase().includes(q)||u.nik.includes(q)||u.jabatan.toLowerCase().includes(q))}
-  const aktif=DB.users().filter(u=>u.aktif).length;
-  return`
-  <div class="sec-h"><div><div class="sec-t">Data Pegawai</div><div class="sec-sub">Manajemen perangkat desa</div></div>
-    <button class="btn btn-p" onclick="openAddPeg()">➕ Tambah Pegawai</button></div>
-  <div class="fb">
-    <div class="sw"><span class="si2">🔍</span><input class="fi" type="text" placeholder="Cari nama, NIK, jabatan..." value="${fPeg.q}" oninput="fPeg.q=this.value;nav('pegawai',document.querySelector('.ni.on'))"></div>
-    <span class="badge bh" style="padding:7px 12px">${aktif} Aktif</span>
-    <span class="badge ba" style="padding:7px 12px">${DB.users().length-aktif} Nonaktif</span>
-    <button class="btn btn-s btn-sm" onclick="fPeg.q='';nav('pegawai',document.querySelector('.ni.on'))">↺ Reset</button>
-  </div>
-  <div class="tw">
-    <table>
-      <thead><tr><th>Pegawai</th><th>NIK</th><th>Jabatan</th><th>No. HP</th><th>Role</th><th>Bergabung</th><th>Status</th><th>Aksi</th></tr></thead>
-      <tbody>
-        ${users.length===0?`<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--mu)">Tidak ada data</td></tr>`:
-        users.map(u=>{
-          const ini=u.nama.split(' ').map(n=>n[0]).slice(0,2).join('');
-          return`<tr>
-            <td><div style="display:flex;align-items:center;gap:8px"><div class="av-sm">${ini}</div><div><div class="tn">${u.nama}</div><div class="tm">ID: ${u.id}</div></div></div></td>
-            <td style="font-family:monospace;font-size:12px">${u.nik}</td>
-            <td style="font-size:12px">${u.jabatan}</td>
-            <td style="font-size:11px;color:var(--mu)">${u.hp||'–'}</td>
-            <td><span class="badge ${u.role==='admin'?'br-p':'bs'}">${u.role}</span></td>
-            <td style="font-size:11px;color:var(--mu)">${u.joinDate||'–'}</td>
-            <td><span class="badge ${u.aktif?'bh':'ba'}">${u.aktif?'Aktif':'Nonaktif'}</span></td>
-            <td><div class="ag">
-              <button class="btn btn-s btn-sm" onclick="openEditPeg(${u.id})">✏️ Edit</button>
-              <button class="btn ${u.aktif?'btn-d':'btn-ok'} btn-sm" onclick="togglePeg(${u.id})">${u.aktif?'🔴':'🟢'}</button>
-            </div></td>
-          </tr>`;
-        }).join('')}
-      </tbody>
-    </table>
-    <div class="pag"><div class="pag-info">Total ${users.length} pegawai</div></div>
-  </div>`;
+  const ca = document.getElementById('ca');
+  ca.innerHTML = `<div style="text-align:center;padding:60px;color:var(--mu)"><div style="font-size:32px">⏳</div><div>Memuat data pegawai...</div></div>`;
+
+  apiFetch('/pegawai').then(res=>{
+    if(!res) return;
+    let users = res.data ?? [];
+    if(fPeg.q){
+      const q = fPeg.q.toLowerCase();
+      users = users.filter(u=>u.nama.toLowerCase().includes(q)||u.nik.includes(q)||(u.jabatan||'').toLowerCase().includes(q));
+    }
+    const aktif    = users.filter(u=>u.aktif==1).length;
+    const nonaktif = users.filter(u=>u.aktif==0).length;
+
+    ca.innerHTML = `
+    <div class="sec-h">
+      <div><div class="sec-t">Data Pegawai</div><div class="sec-sub">Manajemen perangkat desa</div></div>
+      <button class="btn btn-p" onclick="openAddPeg()">➕ Tambah Pegawai</button>
+    </div>
+    <div class="fb">
+      <div class="sw"><span class="si2">🔍</span><input class="fi" type="text" placeholder="Cari nama, NIK, jabatan..." value="${fPeg.q}" oninput="fPeg.q=this.value;pgPeg()"></div>
+      <span class="badge bh" style="padding:7px 12px">${aktif} Aktif</span>
+      <span class="badge ba" style="padding:7px 12px">${nonaktif} Nonaktif</span>
+      <button class="btn btn-s btn-sm" onclick="fPeg.q='';pgPeg()">↺ Reset</button>
+    </div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Pegawai</th><th>NIK</th><th>Jabatan</th><th>Role</th><th>Status</th><th>Aksi</th></tr></thead>
+        <tbody>
+          ${users.length===0
+            ?`<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--mu)"><div style="font-size:32px;margin-bottom:8px">👥</div>Tidak ada data</td></tr>`
+            :users.map(u=>{
+              const ini = u.nama.split(' ').map(n=>n[0]).slice(0,2).join('');
+              return`<tr>
+                <td><div style="display:flex;align-items:center;gap:8px">
+                  <div class="av-sm">${ini}</div>
+                  <div><div class="tn">${u.nama}</div><div class="tm">NIK: ${u.nik}</div></div>
+                </div></td>
+                <td style="font-family:monospace;font-size:12px">${u.nik}</td>
+                <td style="font-size:12px">${u.jabatan||'–'}</td>
+                <td><span class="badge ${u.role==='admin'?'br-p':'bs'}">${u.role}</span></td>
+                <td><span class="badge ${u.aktif==1?'bh':'ba'}">${u.aktif==1?'Aktif':'Nonaktif'}</span></td>
+                <td><div class="ag">
+                  <button class="btn btn-s btn-sm" onclick="openEditPeg(${u.id})">✏️ Edit</button>
+                  <button class="btn ${u.aktif==1?'btn-d':'btn-ok'} btn-sm" onclick="togglePeg(${u.id},${u.aktif})">${u.aktif==1?'🔴 Nonaktif':'🟢 Aktif'}</button>
+                </div></td>
+              </tr>`;
+            }).join('')}
+        </tbody>
+      </table>
+      <div class="pag"><div class="pag-info">Total ${users.length} pegawai</div></div>
+    </div>`;
+
+    const peg = document.getElementById('peg-nb');
+    if(peg) peg.textContent = aktif;
+
+  }).catch(err=>{
+    ca.innerHTML=`<div style="text-align:center;padding:60px;color:var(--rs)">
+      <div style="font-size:32px">⚠️</div><div>${err.message}</div>
+      <button onclick="pgPeg()" style="margin-top:14px;padding:8px 20px;border-radius:8px;border:none;background:var(--gm);color:#fff;cursor:pointer;font-weight:600">🔄 Coba Lagi</button>
+    </div>`;
+  });
+  return '';
 }
 
 // ════════════════════════════════════════════════════
@@ -1331,9 +1357,15 @@ function savePeg(){
   }
   DB.saveU(users);cm('m-peg');nav(page,document.querySelector('.ni.on'));updateBadges();
 }
-function togglePeg(id){
-  const users=DB.users();const i=users.findIndex(u=>u.id===id);
-  if(i>-1){users[i].aktif=!users[i].aktif;DB.saveU(users);showToast(users[i].aktif?'Pegawai diaktifkan 🟢':'Pegawai dinonaktifkan 🔴');nav(page,document.querySelector('.ni.on'));updateBadges();}
+function togglePeg(id, aktif){
+  const newAktif = aktif==1 ? 0 : 1;
+  apiFetch(`/pegawai/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify({aktif: newAktif, role: 'user', nama: '–', jabatan: '–'})
+  }).then(()=>{
+    showToast(newAktif?'Pegawai diaktifkan 🟢':'Pegawai dinonaktifkan 🔴');
+    pgPeg();
+  });
 }
 
 // SPPD MODAL
@@ -1464,12 +1496,12 @@ function savePw(){
 
 // EXPORT
 function exportExcel(){
-  // Tampilkan pilihan periode
   const n = new Date();
   const bulan = fAbs.bulan || `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`;
   const [tahun, bln] = bulan.split('-');
+  const namaBulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'][parseInt(bln)-1];
+  const today = n.toISOString().split('T')[0];
 
-  // Buat modal pilihan periode
   const existing = document.getElementById('modal-export');
   if(existing) existing.remove();
 
@@ -1477,32 +1509,45 @@ function exportExcel(){
   modal.id = 'modal-export';
   modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:700;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)';
   modal.innerHTML = `
-    <div style="background:#fff;border-radius:20px;padding:28px;width:360px;box-shadow:0 24px 64px rgba(0,0,0,.2)">
-      <div style="font-family:Fraunces,serif;font-size:18px;font-weight:700;margin-bottom:6px">📥 Export Rekap Absensi</div>
+    <div style="background:#fff;border-radius:20px;padding:28px;width:400px;box-shadow:0 24px 64px rgba(0,0,0,.2)">
+      <div style="font-family:Fraunces,serif;font-size:18px;font-weight:700;margin-bottom:4px">📥 Export Rekap Absensi</div>
       <div style="font-size:12px;color:var(--mu);margin-bottom:20px">Pilih periode yang ingin diexport</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">
-        <button onclick="doExport('hari')" style="padding:14px;border-radius:12px;border:1.5px solid var(--cd);background:var(--cr);cursor:pointer;font-family:DM Sans,sans-serif;font-weight:600;font-size:13px;transition:all .2s" onmouseover="this.style.background='var(--gp)';this.style.borderColor='var(--gf)'" onmouseout="this.style.background='var(--cr)';this.style.borderColor='var(--cd)'">
-          <div style="font-size:24px;margin-bottom:6px">📅</div>
-          <div>1 Hari</div>
-          <div style="font-size:10px;color:var(--mu);margin-top:2px">Hari ini</div>
+
+      <!-- Pilihan cepat -->
+      <div style="font-size:10px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px">Pilihan Cepat</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px">
+        <button onclick="doExport('hari')" style="padding:12px;border-radius:10px;border:1.5px solid var(--cd);background:var(--cr);cursor:pointer;font-family:DM Sans,sans-serif;font-weight:600;font-size:12px">
+          <div style="font-size:20px;margin-bottom:4px">📅</div>Hari Ini
         </button>
-        <button onclick="doExport('3hari')" style="padding:14px;border-radius:12px;border:1.5px solid var(--cd);background:var(--cr);cursor:pointer;font-family:DM Sans,sans-serif;font-weight:600;font-size:13px;transition:all .2s" onmouseover="this.style.background='var(--gp)';this.style.borderColor='var(--gf)'" onmouseout="this.style.background='var(--cr)';this.style.borderColor='var(--cd)'">
-          <div style="font-size:24px;margin-bottom:6px">📆</div>
-          <div>3 Hari</div>
-          <div style="font-size:10px;color:var(--mu);margin-top:2px">3 hari terakhir</div>
+        <button onclick="doExport('3hari')" style="padding:12px;border-radius:10px;border:1.5px solid var(--cd);background:var(--cr);cursor:pointer;font-family:DM Sans,sans-serif;font-weight:600;font-size:12px">
+          <div style="font-size:20px;margin-bottom:4px">📆</div>3 Hari Terakhir
         </button>
-        <button onclick="doExport('minggu')" style="padding:14px;border-radius:12px;border:1.5px solid var(--cd);background:var(--cr);cursor:pointer;font-family:DM Sans,sans-serif;font-weight:600;font-size:13px;transition:all .2s" onmouseover="this.style.background='var(--gp)';this.style.borderColor='var(--gf)'" onmouseout="this.style.background='var(--cr)';this.style.borderColor='var(--cd)'">
-          <div style="font-size:24px;margin-bottom:6px">🗓️</div>
-          <div>7 Hari</div>
-          <div style="font-size:10px;color:var(--mu);margin-top:2px">Seminggu terakhir</div>
+        <button onclick="doExport('minggu')" style="padding:12px;border-radius:10px;border:1.5px solid var(--cd);background:var(--cr);cursor:pointer;font-family:DM Sans,sans-serif;font-weight:600;font-size:12px">
+          <div style="font-size:20px;margin-bottom:4px">🗓️</div>7 Hari Terakhir
         </button>
-        <button onclick="doExport('bulan')" style="padding:14px;border-radius:12px;border:1.5px solid var(--cd);background:var(--gp);cursor:pointer;font-family:DM Sans,sans-serif;font-weight:600;font-size:13px;border-color:var(--gf);transition:all .2s" onmouseover="this.style.background='var(--gm)';this.style.color='#fff'" onmouseout="this.style.background='var(--gp)';this.style.color='inherit'">
-          <div style="font-size:24px;margin-bottom:6px">📊</div>
-          <div>1 Bulan</div>
-          <div style="font-size:10px;color:var(--mu);margin-top:2px">${['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'][parseInt(bln)-1]} ${tahun}</div>
+        <button onclick="doExport('bulan')" style="padding:12px;border-radius:10px;border:1.5px solid var(--gf);background:var(--gp);cursor:pointer;font-family:DM Sans,sans-serif;font-weight:600;font-size:12px">
+          <div style="font-size:20px;margin-bottom:4px">📊</div>${namaBulan} ${tahun}
         </button>
       </div>
-      <button onclick="document.getElementById('modal-export').remove()" style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--cd);background:none;cursor:pointer;font-family:DM Sans,sans-serif;font-weight:600;font-size:13px">Batal</button>
+
+      <!-- Custom range -->
+      <div style="font-size:10px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px">Periode Custom</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+        <div>
+          <label style="font-size:10px;color:var(--mu);display:block;margin-bottom:4px">Dari Tanggal</label>
+          <input type="date" id="exp-dari" value="${today}" max="${today}" style="width:100%;padding:9px 12px;border:1.5px solid var(--cd);border-radius:9px;font-family:DM Sans,sans-serif;font-size:12px;outline:none">
+        </div>
+        <div>
+          <label style="font-size:10px;color:var(--mu);display:block;margin-bottom:4px">Sampai Tanggal</label>
+          <input type="date" id="exp-sampai" value="${today}" max="${today}" style="width:100%;padding:9px 12px;border:1.5px solid var(--cd);border-radius:9px;font-family:DM Sans,sans-serif;font-size:12px;outline:none">
+        </div>
+      </div>
+      <button onclick="doExport('custom')" style="width:100%;padding:11px;border-radius:10px;border:none;background:var(--gd);color:#fff;cursor:pointer;font-family:DM Sans,sans-serif;font-weight:600;font-size:13px;margin-bottom:10px">
+        📥 Export Periode Custom
+      </button>
+      <button onclick="document.getElementById('modal-export').remove()" style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--cd);background:none;cursor:pointer;font-family:DM Sans,sans-serif;font-weight:600;font-size:13px">
+        Batal
+      </button>
     </div>`;
   document.body.appendChild(modal);
   modal.addEventListener('click', e=>{ if(e.target===modal) modal.remove(); });
@@ -1521,65 +1566,93 @@ function doExport(periode){
     if(!res) return;
     let data = res.data ?? [];
 
-    // Filter berdasarkan periode
-    const today = n.toISOString().split('T')[0];
-    if(periode==='hari'){
-      data = data.filter(a=>a.tanggal===today);
-    } else if(periode==='3hari'){
-      const d3 = new Date(n); d3.setDate(d3.getDate()-2);
-      const dari = d3.toISOString().split('T')[0];
-      data = data.filter(a=>a.tanggal>=dari && a.tanggal<=today);
-    } else if(periode==='minggu'){
-      const d7 = new Date(n); d7.setDate(d7.getDate()-6);
-      const dari = d7.toISOString().split('T')[0];
-      data = data.filter(a=>a.tanggal>=dari && a.tanggal<=today);
-    }
+const today = n.toISOString().split('T')[0];
+let labelPeriode = {
+  'hari'  : `Harian - ${today}`,
+  '3hari' : `3 Hari Terakhir`,
+  'minggu': `7 Hari Terakhir`,
+  'bulan' : `${namaBulan} ${tahun}`,
+  'custom': ''
+}[periode];
 
-    const labelPeriode = {
-      'hari'  : `Harian - ${today}`,
-      '3hari' : `3 Hari Terakhir`,
-      'minggu': `7 Hari Terakhir`,
-      'bulan' : `${namaBulan} ${tahun}`
-    }[periode];
+if(periode==='hari'){
+  data = data.filter(a=>a.tanggal===today);
+} else if(periode==='3hari'){
+  const d3 = new Date(n); d3.setDate(d3.getDate()-2);
+  data = data.filter(a=>a.tanggal>=d3.toISOString().split('T')[0] && a.tanggal<=today);
+} else if(periode==='minggu'){
+  const d7 = new Date(n); d7.setDate(d7.getDate()-6);
+  data = data.filter(a=>a.tanggal>=d7.toISOString().split('T')[0] && a.tanggal<=today);
+} else if(periode==='custom'){
+  const dari   = document.getElementById('exp-dari')?.value;
+  const sampai = document.getElementById('exp-sampai')?.value;
+  if(!dari||!sampai){showToast('Pilih tanggal dari dan sampai','err');return;}
+  if(dari>sampai){showToast('Tanggal dari tidak boleh lebih besar dari sampai','err');return;}
+  data = data.filter(a=>a.tanggal>=dari && a.tanggal<=sampai);
+  labelPeriode = `${dari} s.d. ${sampai}`;
+}
 
-    const H = data.filter(a=>a.status==='Hadir').length;
-    const I = data.filter(a=>a.status==='Izin').length;
-    const A = data.filter(a=>a.status==='Alpha').length;
-    const S = data.filter(a=>a.status==='SPPD').length;
-    const HARI_LIST = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+    // Buat worksheet
+    const wb = XLSX.utils.book_new();
+    const wsData = [];
 
-    let csv = `\uFEFF`;
-    csv += `"REKAP ABSENSI DESA MEKARSARI"\n`;
-    csv += `"Periode:","${labelPeriode}"\n`;
-    csv += `"Dicetak:","${n.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}"\n`;
-    csv += `"Total Data:","${data.length} record"\n`;
-    csv += `\n`;
+    // Header info
+    wsData.push(['REKAP ABSENSI DESA MEKARSARI']);
+    wsData.push([`Periode: ${labelPeriode}`]);
+    wsData.push([`Dicetak: ${n.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}`]);
+    wsData.push([`Total Data: ${data.length} record`]);
+    wsData.push([]); // baris kosong
 
     // Header tabel
-    csv += `"No","Nama Pegawai","Jabatan","Tanggal","Hari","Jam Masuk","Jam Keluar","Status","Keterangan"\n`;
+    wsData.push(['No','Nama Pegawai','Jabatan','Tanggal','Hari','Jam Masuk','Jam Keluar','Status','Keterangan']);
 
-    // Rows
+    // Data rows
     data.forEach((a,i)=>{
-      const d    = new Date(a.tanggal);
-      const hari = HARI_LIST[d.getDay()];
-      const statusLabel = a.status==='Hadir'?'✓ Hadir':a.status==='Izin'?'~ Izin':a.status==='Alpha'?'✗ Alpha':'✈ SPPD';
-      // Cek terlambat (jam masuk > 08:00)
+      const d = new Date(a.tanggal);
+      const hari = HARI[d.getDay()];
       let ket = a.keterangan||'';
       if(a.status==='Hadir' && a.jam_masuk){
         const [hh,mm] = a.jam_masuk.split(':').map(Number);
         if(hh*60+mm > 8*60) ket = ket ? ket+' (Terlambat)' : 'Terlambat';
       }
-      csv += `"${i+1}","${a.nama}","${a.jabatan||'–'}","${a.tanggal}","${hari}","${a.jam_masuk||'–'}","${a.jam_keluar||'–'}","${statusLabel}","${ket||'–'}"\n`;
+      wsData.push([
+        i+1,
+        a.nama,
+        a.jabatan||'–',
+        a.tanggal,
+        hari,
+        a.jam_masuk||'–',
+        a.jam_keluar||'–',
+        a.status,
+        ket||'–'
+      ]);
     });
 
     // Ringkasan
-    csv += `\n`;
-    csv += `"RINGKASAN"\n`;
-    csv += `"Total Hadir","${H}","pegawai"\n`;
-    csv += `"Total Izin","${I}","pegawai"\n`;
-    csv += `"Total Alpha","${A}","pegawai"\n`;
-    csv += `"Total SPPD","${S}","pegawai"\n`;
-    csv += `"Total Keseluruhan","${data.length}","record"\n`;
+    wsData.push([]);
+    wsData.push(['RINGKASAN']);
+    wsData.push(['Total Hadir', H]);
+    wsData.push(['Total Izin', I]);
+    wsData.push(['Total Alpha', A]);
+    wsData.push(['Total SPPD', S]);
+    wsData.push(['Total Keseluruhan', data.length]);
+
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+    // Set lebar kolom
+    ws['!cols'] = [
+      {wch:5},  // No
+      {wch:25}, // Nama
+      {wch:22}, // Jabatan
+      {wch:13}, // Tanggal
+      {wch:10}, // Hari
+      {wch:12}, // Jam Masuk
+      {wch:12}, // Jam Keluar
+      {wch:10}, // Status
+      {wch:20}, // Keterangan
+    ];
+
+    XLSX.utils.book_append_sheet(wb, ws, `Absensi ${namaBulan}`);
 
     const namaFile = {
       'hari'  : `Absensi_Harian_${today}`,
@@ -1588,11 +1661,7 @@ function doExport(periode){
       'bulan' : `Absensi_${namaBulan}_${tahun}`
     }[periode];
 
-    const link = document.createElement('a');
-    link.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
-    link.download = `${namaFile}.csv`;
-    link.click();
-
+    XLSX.writeFile(wb, `${namaFile}.xlsx`);
     showToast(`📥 ${data.length} data berhasil diunduh!`);
   }).catch(()=>showToast('Gagal export data','err'));
 }
