@@ -17,15 +17,17 @@ Route::get('/', function () {
     return redirect('/login.html');
 });
 
-Route::get('/login', function () {
-    return redirect('/login.html');
-});
+// Route::get('/login', function () {
+//     return redirect('/login.html');
+// });
+//login yg mau ke user
 
 Route::get('/dashboard', function () {
     return redirect('/admin-absensi.html');
 });
+//admin
 
 Route::get('/absensi', function () {
     return redirect('/absensi.html');
 });
-
+//user
