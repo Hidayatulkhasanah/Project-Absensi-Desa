@@ -1464,67 +1464,133 @@ function savePw(){
 
 // EXPORT
 function exportExcel(){
+  // Tampilkan pilihan periode
   const n = new Date();
   const bulan = fAbs.bulan || `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`;
   const [tahun, bln] = bulan.split('-');
+
+  // Buat modal pilihan periode
+  const existing = document.getElementById('modal-export');
+  if(existing) existing.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'modal-export';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:700;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)';
+  modal.innerHTML = `
+    <div style="background:#fff;border-radius:20px;padding:28px;width:360px;box-shadow:0 24px 64px rgba(0,0,0,.2)">
+      <div style="font-family:Fraunces,serif;font-size:18px;font-weight:700;margin-bottom:6px">📥 Export Rekap Absensi</div>
+      <div style="font-size:12px;color:var(--mu);margin-bottom:20px">Pilih periode yang ingin diexport</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">
+        <button onclick="doExport('hari')" style="padding:14px;border-radius:12px;border:1.5px solid var(--cd);background:var(--cr);cursor:pointer;font-family:DM Sans,sans-serif;font-weight:600;font-size:13px;transition:all .2s" onmouseover="this.style.background='var(--gp)';this.style.borderColor='var(--gf)'" onmouseout="this.style.background='var(--cr)';this.style.borderColor='var(--cd)'">
+          <div style="font-size:24px;margin-bottom:6px">📅</div>
+          <div>1 Hari</div>
+          <div style="font-size:10px;color:var(--mu);margin-top:2px">Hari ini</div>
+        </button>
+        <button onclick="doExport('3hari')" style="padding:14px;border-radius:12px;border:1.5px solid var(--cd);background:var(--cr);cursor:pointer;font-family:DM Sans,sans-serif;font-weight:600;font-size:13px;transition:all .2s" onmouseover="this.style.background='var(--gp)';this.style.borderColor='var(--gf)'" onmouseout="this.style.background='var(--cr)';this.style.borderColor='var(--cd)'">
+          <div style="font-size:24px;margin-bottom:6px">📆</div>
+          <div>3 Hari</div>
+          <div style="font-size:10px;color:var(--mu);margin-top:2px">3 hari terakhir</div>
+        </button>
+        <button onclick="doExport('minggu')" style="padding:14px;border-radius:12px;border:1.5px solid var(--cd);background:var(--cr);cursor:pointer;font-family:DM Sans,sans-serif;font-weight:600;font-size:13px;transition:all .2s" onmouseover="this.style.background='var(--gp)';this.style.borderColor='var(--gf)'" onmouseout="this.style.background='var(--cr)';this.style.borderColor='var(--cd)'">
+          <div style="font-size:24px;margin-bottom:6px">🗓️</div>
+          <div>7 Hari</div>
+          <div style="font-size:10px;color:var(--mu);margin-top:2px">Seminggu terakhir</div>
+        </button>
+        <button onclick="doExport('bulan')" style="padding:14px;border-radius:12px;border:1.5px solid var(--cd);background:var(--gp);cursor:pointer;font-family:DM Sans,sans-serif;font-weight:600;font-size:13px;border-color:var(--gf);transition:all .2s" onmouseover="this.style.background='var(--gm)';this.style.color='#fff'" onmouseout="this.style.background='var(--gp)';this.style.color='inherit'">
+          <div style="font-size:24px;margin-bottom:6px">📊</div>
+          <div>1 Bulan</div>
+          <div style="font-size:10px;color:var(--mu);margin-top:2px">${['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'][parseInt(bln)-1]} ${tahun}</div>
+        </button>
+      </div>
+      <button onclick="document.getElementById('modal-export').remove()" style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--cd);background:none;cursor:pointer;font-family:DM Sans,sans-serif;font-weight:600;font-size:13px">Batal</button>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e=>{ if(e.target===modal) modal.remove(); });
+}
+
+function doExport(periode){
+  document.getElementById('modal-export')?.remove();
+  const n = new Date();
+  const bulan = fAbs.bulan || `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`;
+  const [tahun, bln] = bulan.split('-');
+  const namaBulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'][parseInt(bln)-1];
 
   showToast('⏳ Menyiapkan data...','inf');
 
   apiFetch(`/absensi?bulan=${bln}&tahun=${tahun}`).then(res=>{
     if(!res) return;
-    const data = res.data ?? [];
+    let data = res.data ?? [];
 
-    // Header
-    const header = ['No','NIK','Nama','Jabatan','Tanggal','Hari','Jam Masuk','Jam Keluar','Status','Keterangan'];
+    // Filter berdasarkan periode
+    const today = n.toISOString().split('T')[0];
+    if(periode==='hari'){
+      data = data.filter(a=>a.tanggal===today);
+    } else if(periode==='3hari'){
+      const d3 = new Date(n); d3.setDate(d3.getDate()-2);
+      const dari = d3.toISOString().split('T')[0];
+      data = data.filter(a=>a.tanggal>=dari && a.tanggal<=today);
+    } else if(periode==='minggu'){
+      const d7 = new Date(n); d7.setDate(d7.getDate()-6);
+      const dari = d7.toISOString().split('T')[0];
+      data = data.filter(a=>a.tanggal>=dari && a.tanggal<=today);
+    }
 
-    // Rows
-    const rows = data.map((a,i)=>{
-      const d = new Date(a.tanggal);
-      const hari = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'][d.getDay()];
-      return [
-        i+1,
-        a.nik||'–',
-        a.nama,
-        a.jabatan||'–',
-        a.tanggal,
-        hari,
-        a.jam_masuk||'–',
-        a.jam_keluar||'–',
-        a.status,
-        a.keterangan||'–'
-      ];
-    });
+    const labelPeriode = {
+      'hari'  : `Harian - ${today}`,
+      '3hari' : `3 Hari Terakhir`,
+      'minggu': `7 Hari Terakhir`,
+      'bulan' : `${namaBulan} ${tahun}`
+    }[periode];
 
-    // Buat CSV dengan separator yang rapi
-    const namaBulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'][parseInt(bln)-1];
-
-    let csv = `\uFEFF`;
-    csv += `REKAP ABSENSI DESA MEKARSARI\n`;
-    csv += `Periode: ${namaBulan} ${tahun}\n`;
-    csv += `Dicetak: ${n.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}\n`;
-    csv += `Total Data: ${data.length} record\n`;
-    csv += `\n`;
-    csv += header.join(',')+'\n';
-    rows.forEach(r=>{
-      csv += r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')+'\n';
-    });
-
-    // Ringkasan
     const H = data.filter(a=>a.status==='Hadir').length;
     const I = data.filter(a=>a.status==='Izin').length;
     const A = data.filter(a=>a.status==='Alpha').length;
     const S = data.filter(a=>a.status==='SPPD').length;
+    const HARI_LIST = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+
+    let csv = `\uFEFF`;
+    csv += `"REKAP ABSENSI DESA MEKARSARI"\n`;
+    csv += `"Periode:","${labelPeriode}"\n`;
+    csv += `"Dicetak:","${n.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}"\n`;
+    csv += `"Total Data:","${data.length} record"\n`;
     csv += `\n`;
-    csv += `RINGKASAN\n`;
-    csv += `"Total Hadir","${H}"\n`;
-    csv += `"Total Izin","${I}"\n`;
-    csv += `"Total Alpha","${A}"\n`;
-    csv += `"Total SPPD","${S}"\n`;
-    csv += `"Total Keseluruhan","${data.length}"\n`;
+
+    // Header tabel
+    csv += `"No","Nama Pegawai","Jabatan","Tanggal","Hari","Jam Masuk","Jam Keluar","Status","Keterangan"\n`;
+
+    // Rows
+    data.forEach((a,i)=>{
+      const d    = new Date(a.tanggal);
+      const hari = HARI_LIST[d.getDay()];
+      const statusLabel = a.status==='Hadir'?'✓ Hadir':a.status==='Izin'?'~ Izin':a.status==='Alpha'?'✗ Alpha':'✈ SPPD';
+      // Cek terlambat (jam masuk > 08:00)
+      let ket = a.keterangan||'';
+      if(a.status==='Hadir' && a.jam_masuk){
+        const [hh,mm] = a.jam_masuk.split(':').map(Number);
+        if(hh*60+mm > 8*60) ket = ket ? ket+' (Terlambat)' : 'Terlambat';
+      }
+      csv += `"${i+1}","${a.nama}","${a.jabatan||'–'}","${a.tanggal}","${hari}","${a.jam_masuk||'–'}","${a.jam_keluar||'–'}","${statusLabel}","${ket||'–'}"\n`;
+    });
+
+    // Ringkasan
+    csv += `\n`;
+    csv += `"RINGKASAN"\n`;
+    csv += `"Total Hadir","${H}","pegawai"\n`;
+    csv += `"Total Izin","${I}","pegawai"\n`;
+    csv += `"Total Alpha","${A}","pegawai"\n`;
+    csv += `"Total SPPD","${S}","pegawai"\n`;
+    csv += `"Total Keseluruhan","${data.length}","record"\n`;
+
+    const namaFile = {
+      'hari'  : `Absensi_Harian_${today}`,
+      '3hari' : `Absensi_3Hari_${today}`,
+      'minggu': `Absensi_Mingguan_${today}`,
+      'bulan' : `Absensi_${namaBulan}_${tahun}`
+    }[periode];
 
     const link = document.createElement('a');
     link.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
-    link.download = `Rekap_Absensi_${namaBulan}_${tahun}.csv`;
+    link.download = `${namaFile}.csv`;
     link.click();
 
     showToast(`📥 ${data.length} data berhasil diunduh!`);
