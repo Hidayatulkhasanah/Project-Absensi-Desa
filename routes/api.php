@@ -14,15 +14,15 @@ use App\Http\Controllers\PegawaiController;
 Route::post('/login', [AuthController::class, 'login']);
 
 // ==========================================
-// SEMUA USER YANG LOGIN
+// SEMUA USER YANG LOGIN (admin & user)
 // ==========================================
 Route::middleware('auth.custom')->group(function () {
-    Route::post('/logout',           [AuthController::class, 'logout']);
-    Route::get('/profile',           [AuthController::class, 'profile']);
-    Route::post('/change-password',  [AuthController::class, 'changePassword']); // TAMBAH INI
-    Route::get('/dashboard',         [DashboardController::class, 'index']);
+    Route::post('/logout',          [AuthController::class, 'logout']);
+    Route::get('/profile',          [AuthController::class, 'profile']);
+    Route::post('/change-password', [AuthController::class, 'changePassword']);
+    Route::get('/dashboard',        [DashboardController::class, 'index']);
 
-    // Absensi milik user sendiri
+    // Absensi milik sendiri
     Route::post('/absensi/checkin',  [AbsensiController::class, 'checkin']);
     Route::post('/absensi/checkout', [AbsensiController::class, 'checkout']);
     Route::get('/absensi/today',     [AbsensiController::class, 'today']);
@@ -31,29 +31,27 @@ Route::middleware('auth.custom')->group(function () {
 });
 
 // ==========================================
-// OPERATOR & ADMIN
+// ADMIN ONLY
 // ==========================================
-Route::middleware('auth.custom:operator')->group(function () {
-    // Kelola Absensi
-    Route::get('/absensi',           [AbsensiController::class, 'index']);
-    Route::put('/absensi/{id}',      [AbsensiController::class, 'update']);
-    Route::delete('/absensi/{id}',   [AbsensiController::class, 'destroy']);
+Route::middleware('auth.custom:admin')->group(function () {
+// Kelola Absensi
+Route::get('/absensi',         [AbsensiController::class, 'index']);
+Route::post('/absensi',        [AbsensiController::class, 'store']);
+Route::get('/absensi/{id}',    [AbsensiController::class, 'show']);
+Route::put('/absensi/{id}',    [AbsensiController::class, 'update']);
+Route::delete('/absensi/{id}', [AbsensiController::class, 'destroy']);
 
     // Kelola SPPD
-    Route::get('/sppd',                  [SppdController::class, 'index']);
-    Route::post('/sppd',                 [SppdController::class, 'store']);
-    Route::put('/sppd/{id}/verifikasi',  [SppdController::class, 'verifikasi']);
-    Route::delete('/sppd/{id}',          [SppdController::class, 'destroy']);
+    Route::get('/sppd',                 [SppdController::class, 'index']);
+    Route::post('/sppd',                [SppdController::class, 'store']);
+    Route::put('/sppd/{id}/verifikasi', [SppdController::class, 'verifikasi']);
+    Route::delete('/sppd/{id}',         [SppdController::class, 'destroy']);
 
     // Laporan
     Route::get('/laporan/bulanan',       [LaporanController::class, 'bulanan']);
     Route::get('/laporan/rekap-pegawai', [LaporanController::class, 'rekapPegawai']);
-});
 
-// ==========================================
-// ADMIN ONLY
-// ==========================================
-Route::middleware('auth.custom:admin')->group(function () {
+    // Pegawai
     Route::get('/pegawai',         [PegawaiController::class, 'index']);
     Route::post('/pegawai',        [PegawaiController::class, 'store']);
     Route::put('/pegawai/{id}',    [PegawaiController::class, 'update']);

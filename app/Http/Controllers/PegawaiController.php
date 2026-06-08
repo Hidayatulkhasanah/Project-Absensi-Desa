@@ -9,15 +9,18 @@ use App\Models\User;
 
 class PegawaiController extends Controller
 {
+    // GET /api/pegawai
     public function index()
     {
-        $pegawai = User::where('role', '!=', 'admin')
+        $pegawai = User::where('aktif', 1)
             ->select('id', 'nik', 'nama', 'jabatan', 'role', 'aktif')
+            ->orderBy('nama')
             ->get();
 
-        return response()->json($pegawai);
+        return response()->json(['data' => $pegawai]);
     }
 
+    // POST /api/pegawai
     public function store(Request $request)
     {
         $request->validate([
@@ -25,7 +28,7 @@ class PegawaiController extends Controller
             'nama'     => 'required',
             'password' => 'required|min:6',
             'jabatan'  => 'nullable',
-            'role'     => 'required|in:operator,user',
+            'role'     => 'required|in:admin,user',
         ]);
 
         $user = User::create([
@@ -43,12 +46,13 @@ class PegawaiController extends Controller
         ], 201);
     }
 
+    // PUT /api/pegawai/{id}
     public function update(Request $request, int $id)
     {
         $request->validate([
             'nama'    => 'required',
             'jabatan' => 'nullable',
-            'role'    => 'required|in:operator,user',
+            'role'    => 'required|in:admin,user',
             'aktif'   => 'required|in:0,1',
         ]);
 
@@ -69,9 +73,13 @@ class PegawaiController extends Controller
         return response()->json(['message' => 'Pegawai berhasil diupdate.']);
     }
 
+    // DELETE /api/pegawai/{id} — nonaktifkan
     public function destroy(int $id)
     {
-        DB::table('users')->where('id', $id)->update(['aktif' => 0]);
+        DB::table('users')->where('id', $id)->update([
+            'aktif'      => 0,
+            'updated_at' => now(),
+        ]);
         return response()->json(['message' => 'Pegawai berhasil dinonaktifkan.']);
     }
 }

@@ -603,15 +603,13 @@ function updateBadges(){
   if(peg) peg.textContent=DB.users().filter(u=>u.aktif).length;
 }
 
-/// ════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════
 //  DASHBOARD PAGE — dari Laravel API
 // ════════════════════════════════════════════════════
 function pgDash(){
   const ca = document.getElementById('ca');
   const n = new Date();
-  const today = n.toISOString().split('T')[0];
 
-  // Tampil loading dulu
   ca.innerHTML = `
     <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:300px;gap:12px;color:var(--mu)">
       <div style="font-size:36px;animation:spin 1s linear infinite">⏳</div>
@@ -633,12 +631,10 @@ function pgDash(){
     const mT        = d.total_hari_kerja ?? 1;
     const kehadiran = aktif > 0 ? Math.round((hadir / aktif) * 100) : 0;
 
-    // Ambil nama & setting dari localStorage (tetap pakai lokal)
     const currentUser = JSON.parse(localStorage.getItem('current_user')) || {};
     const setting     = DB.setting();
 
     ca.innerHTML = `
-    <!-- HERO BANNER -->
     <div class="dash-hero">
       <div class="dh-top">
         <div>
@@ -663,7 +659,6 @@ function pgDash(){
       </div>
     </div>
 
-    <!-- STAT CARDS -->
     <div class="sc-grid">
       <div class="sc cg" onclick="nav('absensi',document.querySelectorAll('.ni')[1])">
         <div class="si">✅</div><div class="sn">${hadir}</div>
@@ -692,7 +687,6 @@ function pgDash(){
       </div>
     </div>
 
-    <!-- SPPD PENDING -->
     ${sppdList.length > 0 ? `
     <div style="margin-bottom:20px">
       <div class="sec-h">
@@ -711,7 +705,6 @@ function pgDash(){
         </div>`).join('')}
     </div>` : ''}
 
-    <!-- CHART + QUICK ACTIONS -->
     <div class="two-col-7">
       <div class="card card-p">
         <div class="sec-h">
@@ -751,7 +744,6 @@ function pgDash(){
       </div>
     </div>`;
 
-    // Update badge sidebar juga
     const pnb = document.getElementById('sppd-nb');
     if(pnb) pnb.textContent = sppdPend;
     const nd = document.getElementById('notif-dot');
@@ -770,288 +762,331 @@ function pgDash(){
       </div>`;
   });
 
-  // Return string kosong karena render async
   return '';
 }
 
+
 // ════════════════════════════════════════════════════
-//  ABSENSI PAGE
+//  ABSENSI PAGE — dari Laravel API
 // ════════════════════════════════════════════════════
 function pgAbs(){
-  let data=DB.absensi();
-  if(fAbs.search){const q=fAbs.search.toLowerCase();data=data.filter(a=>{const u=DB.byId(a.uid);return u.nama.toLowerCase().includes(q)||a.tgl.includes(q)||a.st.toLowerCase().includes(q)})}
-  if(fAbs.bulan) data=data.filter(a=>a.tgl.startsWith(fAbs.bulan));
-  if(fAbs.st) data=data.filter(a=>a.st===fAbs.st);
-  data.sort((a,b)=>new Date(b.tgl)-new Date(a.tgl));
-  const H=data.filter(a=>a.st==='Hadir').length,S=data.filter(a=>a.st==='SPPD').length,I=data.filter(a=>a.st==='Izin').length,A=data.filter(a=>a.st==='Alpha').length;
-  return`
-  <div class="sec-h"><div><div class="sec-t">Kelola Absensi</div><div class="sec-sub">CRUD data kehadiran pegawai</div></div>
-    <button class="btn btn-p" onclick="openAddAbs()">➕ Tambah Data</button></div>
-  <div class="fb">
-    <div class="sw"><span class="si2">🔍</span><input class="fi" type="text" placeholder="Cari nama, tanggal..." value="${fAbs.search}" oninput="fAbs.search=this.value;nav('absensi',document.querySelector('.ni.on'))"></div>
-    <input class="fi" type="month" value="${fAbs.bulan}" onchange="fAbs.bulan=this.value;nav('absensi',document.querySelector('.ni.on'))" style="min-width:150px">
-    <select class="fi" style="cursor:pointer" onchange="fAbs.st=this.value;nav('absensi',document.querySelector('.ni.on'))">
-      <option value="" ${!fAbs.st?'selected':''}>Semua Status</option>
-      <option value="Hadir" ${fAbs.st==='Hadir'?'selected':''}>Hadir</option>
-      <option value="Izin" ${fAbs.st==='Izin'?'selected':''}>Izin</option>
-      <option value="SPPD" ${fAbs.st==='SPPD'?'selected':''}>SPPD</option>
-      <option value="Alpha" ${fAbs.st==='Alpha'?'selected':''}>Alpha</option>
-    </select>
-    <button class="btn btn-xl" onclick="exportExcel()">📥 Export Excel</button>
-    <button class="btn btn-s btn-sm" onclick="fAbs={bulan:'2026-06',search:'',st:''};nav('absensi',document.querySelector('.ni.on'))">↺ Reset</button>
-  </div>
-  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px">
-    ${[['✅','Hadir',H,'cg'],['✈️','SPPD',S,'cb'],['📝','Izin',I,'ca'],['❌','Alpha',A,'cr2']].map(([ic,lb,v,c])=>`
-    <div class="sc ${c}" style="padding:14px;cursor:default">
-      <div style="display:flex;align-items:center;justify-content:space-between">
-        <div><div class="sn" style="font-size:22px">${v}</div><div class="sl" style="margin-top:3px">${lb}</div></div>
-        <div style="font-size:22px">${ic}</div>
-      </div>
-    </div>`).join('')}
-  </div>
-  <div class="tw">
-    <table>
-      <thead><tr><th>Pegawai</th><th>Tanggal</th><th>Masuk</th><th>Keluar</th><th>Status</th><th>Keterangan</th><th>Aksi</th></tr></thead>
-      <tbody>
-        ${data.length===0?`<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--mu)">Tidak ada data</td></tr>`:
-        data.map(a=>{
-          const u=DB.byId(a.uid);const ini=u.nama.split(' ').map(n=>n[0]).slice(0,2).join('');
-          const bc=a.st==='Hadir'?'bh':a.st==='Izin'?'bi':a.st==='SPPD'?'bs':'ba';
-          const d=new Date(a.tgl);const tgl=d.toLocaleDateString('id-ID',{weekday:'short',day:'numeric',month:'short'});
-          return`<tr>
-            <td><div style="display:flex;align-items:center;gap:8px"><div class="av-sm">${ini}</div><div><div class="tn">${u.nama}</div><div class="tm">NIK: ${u.nik}</div></div></div></td>
-            <td style="font-weight:500;white-space:nowrap;font-size:12px">${tgl}</td>
-            <td>${a.in||'–'}</td><td>${a.out||'–'}</td>
-            <td><span class="badge ${bc}">${a.st}</span></td>
-            <td style="font-size:11px;color:var(--mu);max-width:140px;overflow:hidden;text-overflow:ellipsis">${a.ket||'–'}</td>
-            <td><div class="ag">
-              <button class="btn btn-s btn-sm" onclick="openEditAbs(${a.id})">✏️</button>
-              <button class="btn btn-d btn-sm" onclick="showConf('abs',${a.id})">🗑️</button>
-            </div></td>
-          </tr>`;
-        }).join('')}
-      </tbody>
-    </table>
-    <div class="pag"><div class="pag-info">Total ${data.length} data</div><div class="pag-btns"><button class="pb2">‹</button><button class="pb2 on">1</button><button class="pb2">›</button></div></div>
-  </div>`;
+  const ca = document.getElementById('ca');
+  const n = new Date();
+  const bulanDefault = `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`;
+  if(!fAbs.bulan) fAbs.bulan = bulanDefault;
+
+  ca.innerHTML = `<div style="text-align:center;padding:60px;color:var(--mu)"><div style="font-size:32px">⏳</div><div>Memuat data absensi...</div></div>`;
+
+  const [tahun, bulan] = fAbs.bulan.split('-');
+
+  apiFetch(`/absensi?bulan=${bulan}&tahun=${tahun}`).then(res => {
+    if(!res) return;
+    let data = res.data ?? [];
+
+    // Filter search
+    if(fAbs.search){
+      const q = fAbs.search.toLowerCase();
+      data = data.filter(a => a.nama.toLowerCase().includes(q) || a.tanggal.includes(q));
+    }
+
+    // Filter status
+    if(fAbs.st) data = data.filter(a => a.status === fAbs.st);
+
+    const H = data.filter(a=>a.status==='Hadir').length;
+    const S = data.filter(a=>a.status==='SPPD').length;
+    const I = data.filter(a=>a.status==='Izin').length;
+    const A = data.filter(a=>a.status==='Alpha').length;
+
+    ca.innerHTML = `
+    <div class="sec-h">
+      <div><div class="sec-t">Kelola Absensi</div><div class="sec-sub">CRUD data kehadiran pegawai</div></div>
+      <button class="btn btn-p" onclick="openAddAbs()">➕ Tambah Data</button>
+    </div>
+    <div class="fb">
+      <div class="sw"><span class="si2">🔍</span><input class="fi" type="text" placeholder="Cari nama, tanggal..." value="${fAbs.search}" oninput="fAbs.search=this.value;pgAbs()"></div>
+      <input class="fi" type="month" value="${fAbs.bulan}" onchange="fAbs.bulan=this.value;pgAbs()" style="min-width:150px">
+      <select class="fi" style="cursor:pointer" onchange="fAbs.st=this.value;pgAbs()">
+        <option value="" ${!fAbs.st?'selected':''}>Semua Status</option>
+        <option value="Hadir" ${fAbs.st==='Hadir'?'selected':''}>Hadir</option>
+        <option value="Izin" ${fAbs.st==='Izin'?'selected':''}>Izin</option>
+        <option value="SPPD" ${fAbs.st==='SPPD'?'selected':''}>SPPD</option>
+        <option value="Alpha" ${fAbs.st==='Alpha'?'selected':''}>Alpha</option>
+      </select>
+      <button class="btn btn-xl" onclick="exportExcel()">📥 Export Excel</button>
+      <button class="btn btn-s btn-sm" onclick="fAbs={bulan:'${bulanDefault}',search:'',st:''};pgAbs()">↺ Reset</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px">
+      ${[['✅','Hadir',H,'cg'],['✈️','SPPD',S,'cb'],['📝','Izin',I,'ca'],['❌','Alpha',A,'cr2']].map(([ic,lb,v,c])=>`
+      <div class="sc ${c}" style="padding:14px;cursor:default">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div><div class="sn" style="font-size:22px">${v}</div><div class="sl" style="margin-top:3px">${lb}</div></div>
+          <div style="font-size:22px">${ic}</div>
+        </div>
+      </div>`).join('')}
+    </div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Pegawai</th><th>Tanggal</th><th>Masuk</th><th>Keluar</th><th>Status</th><th>Keterangan</th><th>Aksi</th></tr></thead>
+        <tbody>
+          ${data.length===0
+            ? `<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--mu)"><div style="font-size:32px;margin-bottom:8px">📭</div>Tidak ada data absensi</td></tr>`
+            : data.map(a => {
+                const ini = a.nama.split(' ').map(n=>n[0]).slice(0,2).join('');
+                const bc  = a.status==='Hadir'?'bh':a.status==='Izin'?'bi':a.status==='SPPD'?'bs':'ba';
+                const d   = new Date(a.tanggal);
+                const tgl = d.toLocaleDateString('id-ID',{weekday:'short',day:'numeric',month:'short'});
+                return `<tr>
+                  <td><div style="display:flex;align-items:center;gap:8px">
+                    <div class="av-sm">${ini}</div>
+                    <div><div class="tn">${a.nama}</div><div class="tm">${a.jabatan}</div></div>
+                  </div></td>
+                  <td style="font-weight:500;white-space:nowrap;font-size:12px">${tgl}</td>
+                  <td>${a.jam_masuk||'–'}</td>
+                  <td>${a.jam_keluar||'–'}</td>
+                  <td><span class="badge ${bc}">${a.status}</span></td>
+                  <td style="font-size:11px;color:var(--mu);max-width:140px;overflow:hidden;text-overflow:ellipsis">${a.keterangan||'–'}</td>
+                  <td><div class="ag">
+                    <button class="btn btn-s btn-sm" onclick="openEditAbs(${a.id})">✏️</button>
+                    <button class="btn btn-d btn-sm" onclick="showConf('abs',${a.id})">🗑️</button>
+                  </div></td>
+                </tr>`;
+              }).join('')}
+        </tbody>
+      </table>
+      <div class="pag"><div class="pag-info">Total ${data.length} data</div></div>
+    </div>`;
+
+  }).catch(err => {
+    ca.innerHTML = `<div style="text-align:center;padding:60px;color:var(--rs)">
+      <div style="font-size:32px">⚠️</div>
+      <div style="font-weight:700">Gagal memuat data</div>
+      <div style="font-size:12px;color:var(--mu);margin-top:6px">${err.message}</div>
+      <button onclick="pgAbs()" style="margin-top:14px;padding:8px 20px;border-radius:8px;border:none;background:var(--gm);color:#fff;cursor:pointer;font-weight:600">🔄 Coba Lagi</button>
+    </div>`;
+  });
+
+  return '';
 }
 
 // ════════════════════════════════════════════════════
 //  SPPD PAGE
 // ════════════════════════════════════════════════════
 function pgSppd(){
-  let list=DB.sppd();
-  if(fSppd.st) list=list.filter(s=>s.st===fSppd.st);
-  const P=DB.sppd().filter(s=>s.st==='pending').length,AP=DB.sppd().filter(s=>s.st==='approved').length,RJ=DB.sppd().filter(s=>s.st==='rejected').length;
-  return`
-  <div class="sec-h"><div><div class="sec-t">Kelola SPPD</div><div class="sec-sub">Verifikasi surat perjalanan dinas</div></div>
-    ${P>0?`<span class="badge bp" style="padding:7px 12px">⏳ ${P} menunggu verifikasi</span>`:''}
-  </div>
-  <div class="fb">
-    <select class="fi" style="cursor:pointer" onchange="fSppd.st=this.value;nav('sppd',document.querySelector('.ni.on'))">
-      <option value="" ${!fSppd.st?'selected':''}>Semua Status</option>
-      <option value="pending" ${fSppd.st==='pending'?'selected':''}>Menunggu</option>
-      <option value="approved" ${fSppd.st==='approved'?'selected':''}>Disetujui</option>
-      <option value="rejected" ${fSppd.st==='rejected'?'selected':''}>Ditolak</option>
-    </select>
-    <button class="btn btn-s btn-sm" onclick="fSppd.st='';nav('sppd',document.querySelector('.ni.on'))">↺ Reset</button>
-  </div>
-  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px">
-    ${[['⏳','Menunggu',P,'ca'],['✅','Disetujui',AP,'cg'],['❌','Ditolak',RJ,'cr2']].map(([ic,lb,v,c])=>`
-    <div class="sc ${c}" style="padding:14px;cursor:default">
-      <div style="display:flex;align-items:center;justify-content:space-between">
-        <div><div class="sn" style="font-size:22px">${v}</div><div class="sl" style="margin-top:3px">${lb}</div></div>
-        <div style="font-size:22px">${ic}</div>
-      </div>
-    </div>`).join('')}
-  </div>
-  <div class="tw">
-    <table>
-      <thead><tr><th>Pegawai</th><th>Nomor Surat</th><th>Tujuan</th><th>Keperluan</th><th>Periode</th><th>Status</th><th>Aksi</th></tr></thead>
-      <tbody>
-        ${list.length===0?`<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--mu)"><div style="font-size:32px;margin-bottom:8px">✈️</div>Tidak ada data SPPD</td></tr>`:
-        list.map(s=>{
-          const u=DB.byId(s.uid);const ini=u.nama.split(' ').map(n=>n[0]).slice(0,2).join('');
-          const sc=s.st==='pending'?'bp':s.st==='approved'?'bap':'brj';
-          const sl=s.st==='pending'?'⏳ Menunggu':s.st==='approved'?'✅ Disetujui':'❌ Ditolak';
-          return`<tr>
-            <td><div style="display:flex;align-items:center;gap:8px"><div class="av-sm">${ini}</div><div><div class="tn">${u.nama}</div><div class="tm">${s.created}</div></div></div></td>
-            <td style="font-size:11px;color:var(--mu)">${s.nomor}</td>
-            <td style="font-weight:500;font-size:12px">${s.tujuan}</td>
-            <td style="font-size:11px;color:var(--mu)">${s.kep}</td>
-            <td style="font-size:11px;white-space:nowrap">${s.tgl1}<br><span style="color:var(--mu)">${s.tgl2}</span></td>
-            <td><span class="badge ${sc}">${sl}</span></td>
-            <td><div class="ag">
-              <button class="btn btn-p btn-sm" onclick="openVerif(${s.id})">🔍 Periksa</button>
-              <button class="btn btn-d btn-sm" onclick="showConf('sppd',${s.id})">🗑️</button>
-            </div></td>
-          </tr>`;
-        }).join('')}
-      </tbody>
-    </table>
-  </div>`;
+  const ca = document.getElementById('ca');
+  ca.innerHTML = `<div style="text-align:center;padding:60px;color:var(--mu)"><div style="font-size:32px">⏳</div><div>Memuat data SPPD...</div></div>`;
+
+  apiFetch('/sppd').then(res => {
+    if(!res) return;
+    let list = Array.isArray(res) ? res : (res.data ?? []);
+    if(fSppd.st) list = list.filter(s => s.status === fSppd.st);
+
+    const P  = list.filter(s=>s.status==='menunggu').length;
+    const AP = list.filter(s=>s.status==='disetujui').length;
+    const RJ = list.filter(s=>s.status==='ditolak').length;
+
+    ca.innerHTML = `
+    <div class="sec-h">
+      <div><div class="sec-t">Kelola SPPD</div><div class="sec-sub">Verifikasi surat perjalanan dinas</div></div>
+      ${P>0?`<span class="badge bp" style="padding:7px 12px">⏳ ${P} menunggu verifikasi</span>`:''}
+    </div>
+    <div class="fb">
+      <select class="fi" style="cursor:pointer" onchange="fSppd.st=this.value;pgSppd()">
+        <option value="" ${!fSppd.st?'selected':''}>Semua Status</option>
+        <option value="menunggu"  ${fSppd.st==='menunggu'?'selected':''}>Menunggu</option>
+        <option value="disetujui" ${fSppd.st==='disetujui'?'selected':''}>Disetujui</option>
+        <option value="ditolak"   ${fSppd.st==='ditolak'?'selected':''}>Ditolak</option>
+      </select>
+      <button class="btn btn-s btn-sm" onclick="fSppd.st='';pgSppd()">↺ Reset</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px">
+      ${[['⏳','Menunggu',P,'ca'],['✅','Disetujui',AP,'cg'],['❌','Ditolak',RJ,'cr2']].map(([ic,lb,v,c])=>`
+      <div class="sc ${c}" style="padding:14px;cursor:default">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div><div class="sn" style="font-size:22px">${v}</div><div class="sl" style="margin-top:3px">${lb}</div></div>
+          <div style="font-size:22px">${ic}</div>
+        </div>
+      </div>`).join('')}
+    </div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Pegawai</th><th>Nomor Surat</th><th>Tujuan</th><th>Keperluan</th><th>Periode</th><th>Status</th><th>Aksi</th></tr></thead>
+        <tbody>
+          ${list.length===0
+            ?`<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--mu)"><div style="font-size:32px;margin-bottom:8px">✈️</div>Tidak ada data SPPD</td></tr>`
+            :list.map(s=>{
+              const ini = s.nama.split(' ').map(n=>n[0]).slice(0,2).join('');
+              const sc  = s.status==='menunggu'?'bp':s.status==='disetujui'?'bap':'brj';
+              const sl  = s.status==='menunggu'?'⏳ Menunggu':s.status==='disetujui'?'✅ Disetujui':'❌ Ditolak';
+              return`<tr>
+                <td><div style="display:flex;align-items:center;gap:8px">
+                  <div class="av-sm">${ini}</div>
+                  <div><div class="tn">${s.nama}</div><div class="tm">${s.jabatan}</div></div>
+                </div></td>
+                <td style="font-size:11px;color:var(--mu)">${s.nomor_sppd}</td>
+                <td style="font-weight:500;font-size:12px">${s.tujuan}</td>
+                <td style="font-size:11px;color:var(--mu)">${s.keperluan}</td>
+                <td style="font-size:11px;white-space:nowrap">${s.tanggal_berangkat}<br><span style="color:var(--mu)">${s.tanggal_kembali}</span></td>
+                <td><span class="badge ${sc}">${sl}</span></td>
+                <td><div class="ag">
+                  <button class="btn btn-p btn-sm" onclick="openVerif(${s.id})">🔍 Periksa</button>
+                  <button class="btn btn-d btn-sm" onclick="showConf('sppd',${s.id})">🗑️</button>
+                </div></td>
+              </tr>`;
+            }).join('')}
+        </tbody>
+      </table>
+    </div>`;
+
+    const nb = document.getElementById('sppd-nb');
+    if(nb) nb.textContent = P;
+    const nd = document.getElementById('notif-dot');
+    if(nd) nd.style.display = P > 0 ? 'block' : 'none';
+
+  }).catch(err=>{
+    ca.innerHTML=`<div style="text-align:center;padding:60px;color:var(--rs)">
+      <div style="font-size:32px">⚠️</div><div>${err.message}</div>
+      <button onclick="pgSppd()" style="margin-top:14px;padding:8px 20px;border-radius:8px;border:none;background:var(--gm);color:#fff;cursor:pointer;font-weight:600">🔄 Coba Lagi</button>
+    </div>`;
+  });
+  return '';
 }
 
 // ════════════════════════════════════════════════════
 //  LAPORAN PAGE
 // ════════════════════════════════════════════════════
 function pgLap(){
-  const abs=DB.absensi(),peg=DB.pegawai();
-  const mo='2026-06',mAbs=abs.filter(a=>a.tgl.startsWith(mo));
-  const H=mAbs.filter(a=>a.st==='Hadir').length,S=mAbs.filter(a=>a.st==='SPPD').length,I=mAbs.filter(a=>a.st==='Izin').length,A=mAbs.filter(a=>a.st==='Alpha').length;
-  const T=H+S+I+A||1,pct=Math.round(((H+S)/T)*100);
-  const hadirData=mAbs.filter(a=>a.st==='Hadir'&&a.in&&a.in!=='');
-  const avgJam=hadirData.length>0?(()=>{
-    const tot=hadirData.reduce((acc,a)=>{const[h,m]=a.in.split(':').map(Number);return acc+h*60+m;},0);
-    const avg=Math.round(tot/hadirData.length);
-    return`${String(Math.floor(avg/60)).padStart(2,'0')}:${String(avg%60).padStart(2,'0')}`;
-  })():'–';
-  const tepat=hadirData.filter(a=>{const[h,m]=a.in.split(':').map(Number);return h*60+m<=8*60;}).length;
-  const perUser=peg.map(u=>{
-    const uA=mAbs.filter(a=>a.uid===u.id);
-    const uH=uA.filter(a=>a.st==='Hadir').length,uS=uA.filter(a=>a.st==='SPPD').length,uI=uA.filter(a=>a.st==='Izin').length,uAl=uA.filter(a=>a.st==='Alpha').length;
-    const uT=uH+uS+uI+uAl||1,uP=Math.round(((uH+uS)/uT)*100);
-    return{...u,h:uH,s:uS,i:uI,a:uAl,p:uP,total:uT};
-  });
-  return`
-  <div class="sec-h">
-    <div><div class="sec-t">Laporan Bulanan</div><div class="sec-sub">Rekap kehadiran Juni 2026</div></div>
-    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-      <select class="fi" style="cursor:pointer"><option>Juni 2026</option><option>Mei 2026</option><option>April 2026</option><option>Maret 2026</option></select>
+  const ca = document.getElementById('ca');
+  const n  = new Date();
+  const bulan = n.getMonth()+1;
+  const tahun = n.getFullYear();
+
+  ca.innerHTML = `<div style="text-align:center;padding:60px;color:var(--mu)"><div style="font-size:32px">⏳</div><div>Memuat laporan...</div></div>`;
+
+  apiFetch(`/laporan/bulanan?bulan=${bulan}&tahun=${tahun}`).then(res=>{
+    if(!res) return;
+    const data = res.data ?? [];
+    const H = data.reduce((a,u)=>a+(parseInt(u.hadir)||0),0);
+    const I = data.reduce((a,u)=>a+(parseInt(u.izin)||0),0);
+    const A = data.reduce((a,u)=>a+(parseInt(u.alpha)||0),0);
+    const T = H+I+A||1;
+    const pct = Math.round((H/T)*100);
+
+    ca.innerHTML = `
+    <div class="sec-h">
+      <div><div class="sec-t">Laporan Bulanan</div><div class="sec-sub">Rekap kehadiran ${MONS[n.getMonth()]} ${tahun}</div></div>
       <button class="btn btn-xl" onclick="exportExcel()">📥 Export Excel</button>
     </div>
-  </div>
-  <div class="ls-grid">
-    <div class="ls cg2"><div class="ln">${H}</div><div class="ll">Hadir</div></div>
-    <div class="ls cb2"><div class="ln">${S}</div><div class="ll">SPPD</div></div>
-    <div class="ls ca2"><div class="ln">${I}</div><div class="ll">Izin</div></div>
-    <div class="ls cr3"><div class="ln">${A}</div><div class="ll">Alpha</div></div>
-    <div class="ls cp2"><div class="ln">${pct}%</div><div class="ll">Kehadiran</div></div>
-  </div>
-  <div class="three-col" style="margin-bottom:20px">
-    <div class="card card-p" style="grid-column:span 2">
+    <div class="ls-grid">
+      <div class="ls cg2"><div class="ln">${H}</div><div class="ll">Hadir</div></div>
+      <div class="ls ca2"><div class="ln">${I}</div><div class="ll">Izin</div></div>
+      <div class="ls cr3"><div class="ln">${A}</div><div class="ll">Alpha</div></div>
+      <div class="ls cp2"><div class="ln">${pct}%</div><div class="ll">Kehadiran</div></div>
+    </div>
+    <div class="card card-p" style="margin-bottom:20px">
       <div class="sec-h"><div class="sec-t">Tingkat Kehadiran</div><span style="font-size:18px;font-weight:700;color:var(--gm)">${pct}%</span></div>
       <div class="pb-wrap" style="height:10px"><div class="pb-fill pb-g" style="width:${pct}%"></div></div>
-      <div style="display:flex;gap:16px;margin-top:10px;flex-wrap:wrap;font-size:11px">
+      <div style="display:flex;gap:16px;margin-top:10px;font-size:11px;flex-wrap:wrap">
         <span style="color:var(--gm);font-weight:600">✓ ${H} Hadir</span>
-        <span style="color:var(--bl);font-weight:600">✈ ${S} SPPD</span>
         <span style="color:var(--amd);font-weight:600">~ ${I} Izin</span>
         <span style="color:var(--rs);font-weight:600">✗ ${A} Alpha</span>
       </div>
       <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--cd)">
-        ${perUser.map(u=>{
-          const c=u.p>=80?'var(--gf)':u.p>=60?'var(--am)':'var(--rs)';
+        ${data.map(u=>{
+          const p = parseInt(u.persentase)||0;
+          const c = p>=80?'var(--gf)':p>=60?'var(--am)':'var(--rs)';
           return`<div class="bar-row">
             <div class="bar-lbl">${u.nama.split(' ')[0]}</div>
-            <div class="bar-tr"><div class="bar-fi" style="width:${u.p}%;background:${c}"></div></div>
-            <div class="bar-ct" style="color:${c}">${u.p}%</div>
+            <div class="bar-tr"><div class="bar-fi" style="width:${p}%;background:${c}"></div></div>
+            <div class="bar-ct" style="color:${c}">${p}%</div>
           </div>`;
         }).join('')}
       </div>
     </div>
-    <div class="card card-p">
-      <div class="sec-t" style="margin-bottom:14px">📊 Statistik Jam</div>
-      <div class="info-row"><div class="ir-label">Rata-rata masuk</div><div class="ir-val" style="color:var(--gm);font-weight:700">${avgJam} WIB</div></div>
-      <div class="info-row"><div class="ir-label">Tepat waktu</div><div class="ir-val">${tepat} hari</div></div>
-      <div class="info-row"><div class="ir-label">Terlambat</div><div class="ir-val" style="color:var(--rs)">${hadirData.length-tepat} hari</div></div>
-      <div class="info-row"><div class="ir-label">Total hari hadir</div><div class="ir-val">${H} hari</div></div>
-      <div class="info-row"><div class="ir-label">Total hari SPPD</div><div class="ir-val">${S} hari</div></div>
-      <div class="info-row"><div class="ir-label">Total hari izin</div><div class="ir-val">${I} hari</div></div>
-      <div class="info-row" style="padding-bottom:0"><div class="ir-label">Total alpha</div><div class="ir-val" style="color:var(--rs)">${A} hari</div></div>
-    </div>
-  </div>
-  <div class="sec-h"><div class="sec-t">Detail Per Pegawai</div></div>
-  <div class="tw">
-    <table>
-      <thead><tr><th>Pegawai</th><th>Jabatan</th><th>Hadir</th><th>SPPD</th><th>Izin</th><th>Alpha</th><th>Persentase</th><th>Status</th></tr></thead>
-      <tbody>
-        ${perUser.map(u=>{
-          const ini=u.nama.split(' ').map(n=>n[0]).slice(0,2).join('');
-          const c=u.p>=80?'var(--gf)':u.p>=60?'var(--am)':'var(--rs)';
-          const st=u.p>=80?'bh':u.p>=60?'bi':'ba';
-          const stl=u.p>=80?'Baik':u.p>=60?'Cukup':'Perlu Perhatian';
-          return`<tr>
-            <td><div style="display:flex;align-items:center;gap:8px"><div class="av-sm">${ini}</div><div><div class="tn">${u.nama}</div><div class="tm">NIK: ${u.nik}</div></div></div></td>
-            <td style="font-size:11px;color:var(--mu)">${u.jabatan}</td>
-            <td><span style="font-weight:700;color:var(--gm)">${u.h}</span></td>
-            <td><span style="font-weight:700;color:var(--bl)">${u.s}</span></td>
-            <td><span style="font-weight:700;color:var(--amd)">${u.i}</span></td>
-            <td><span style="font-weight:700;color:var(--rs)">${u.a}</span></td>
-            <td style="width:130px">
-              <div style="display:flex;align-items:center;gap:7px">
-                <div class="bar-tr" style="flex:1"><div class="bar-fi" style="height:100%;border-radius:5px;width:${u.p}%;background:${c}"></div></div>
-                <span style="font-size:11px;font-weight:700;color:${c};min-width:32px">${u.p}%</span>
-              </div>
-            </td>
-            <td><span class="badge ${st}">${stl}</span></td>
-          </tr>`;
-        }).join('')}
-      </tbody>
-    </table>
-  </div>`;
+    <div class="sec-h"><div class="sec-t">Detail Per Pegawai</div></div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Pegawai</th><th>Jabatan</th><th>Hadir</th><th>Izin</th><th>Alpha</th><th>Persentase</th><th>Status</th></tr></thead>
+        <tbody>
+          ${data.length===0
+            ?`<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--mu)">Tidak ada data</td></tr>`
+            :data.map(u=>{
+              const ini = u.nama.split(' ').map(n=>n[0]).slice(0,2).join('');
+              const p   = parseInt(u.persentase)||0;
+              const c   = p>=80?'var(--gf)':p>=60?'var(--am)':'var(--rs)';
+              const st  = p>=80?'bh':p>=60?'bi':'ba';
+              const stl = p>=80?'Baik':p>=60?'Cukup':'Perlu Perhatian';
+              return`<tr>
+                <td><div style="display:flex;align-items:center;gap:8px"><div class="av-sm">${ini}</div><div><div class="tn">${u.nama}</div><div class="tm">NIK: ${u.nik}</div></div></div></td>
+                <td style="font-size:11px;color:var(--mu)">${u.jabatan}</td>
+                <td><span style="font-weight:700;color:var(--gm)">${u.hadir}</span></td>
+                <td><span style="font-weight:700;color:var(--amd)">${u.izin}</span></td>
+                <td><span style="font-weight:700;color:var(--rs)">${u.alpha}</span></td>
+                <td style="width:130px">
+                  <div style="display:flex;align-items:center;gap:7px">
+                    <div class="bar-tr" style="flex:1"><div class="bar-fi" style="height:100%;border-radius:5px;width:${p}%;background:${c}"></div></div>
+                    <span style="font-size:11px;font-weight:700;color:${c};min-width:32px">${p}%</span>
+                  </div>
+                </td>
+                <td><span class="badge ${st}">${stl}</span></td>
+              </tr>`;
+            }).join('')}
+        </tbody>
+      </table>
+    </div>`;
+  }).catch(err=>{
+    ca.innerHTML=`<div style="text-align:center;padding:60px;color:var(--rs)">
+      <div style="font-size:32px">⚠️</div><div>${err.message}</div>
+      <button onclick="pgLap()" style="margin-top:14px;padding:8px 20px;border-radius:8px;border:none;background:var(--gm);color:#fff;cursor:pointer;font-weight:600">🔄 Coba Lagi</button>
+    </div>`;
+  });
+  return '';
 }
 
 // ════════════════════════════════════════════════════
 //  REKAP PAGE
 // ════════════════════════════════════════════════════
 function pgRekap(){
-  const peg=DB.pegawai();
-  const sel=fRekap.uid?parseInt(fRekap.uid):peg[0]?.id;
-  const user=DB.users().find(u=>u.id===sel)||peg[0];
-  if(!user) return`<div style="text-align:center;padding:60px;color:var(--mu)">Tidak ada pegawai</div>`;
-  const abs=DB.absensi().filter(a=>a.uid===user.id);
-  const months=[...new Set(abs.map(a=>a.tgl.substring(0,7)))].sort((a,b)=>b.localeCompare(a));
-  const ini=user.nama.split(' ').map(n=>n[0]).slice(0,2).join('');
-  return`
-  <div class="sec-h"><div><div class="sec-t">Rekap Per Pegawai</div><div class="sec-sub">Riwayat lengkap absensi individu</div></div>
-    <select class="fi" style="cursor:pointer;min-width:200px" onchange="fRekap.uid=this.value;nav('rekap',document.querySelector('.ni.on'))">
-      ${peg.map(u=>`<option value="${u.id}" ${u.id===sel?'selected':''}>${u.nama}</option>`).join('')}
-    </select>
-  </div>
-  <div class="two-col-7">
-    <div class="card card-p">
-      <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--cd)">
-        <div class="av-sm" style="width:48px;height:48px;border-radius:13px;font-size:16px">${ini}</div>
-        <div style="flex:1">
-          <div style="font-family:'Fraunces',serif;font-size:16px;font-weight:700">${user.nama}</div>
-          <div style="font-size:12px;color:var(--mu);margin-top:2px">${user.jabatan} · NIK: ${user.nik}</div>
-        </div>
-        <span class="badge ${user.aktif?'bh':'ba'}">${user.aktif?'Aktif':'Nonaktif'}</span>
-      </div>
-      ${months.length===0?`<div style="text-align:center;padding:24px;color:var(--mu)">Belum ada data absensi</div>`:
-      months.map(mo=>{
-        const moAbs=abs.filter(a=>a.tgl.startsWith(mo));
-        const H=moAbs.filter(a=>a.st==='Hadir').length,S=moAbs.filter(a=>a.st==='SPPD').length,I=moAbs.filter(a=>a.st==='Izin').length,A=moAbs.filter(a=>a.st==='Alpha').length;
-        const T=H+S+I+A||1,P=Math.round(((H+S)/T)*100);
-        const [yr,mn]=mo.split('-');
-        return`<div style="margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--cd)">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-            <div style="font-weight:600;font-size:13px">${MONS[parseInt(mn)-1]} ${yr}</div>
-            <span style="font-size:12px;font-weight:700;color:${P>=80?'var(--gm)':P>=60?'var(--amd)':'var(--rs)'}">${P}%</span>
-          </div>
-          <div class="pb-wrap" style="margin-bottom:7px"><div class="pb-fill" style="width:${P}%;background:${P>=80?'var(--gf)':P>=60?'var(--am)':'var(--rs)'}"></div></div>
-          <div style="display:flex;gap:12px;font-size:10px;flex-wrap:wrap">
-            <span style="color:var(--gm);font-weight:600">${H} Hadir</span>
-            <span style="color:var(--bl);font-weight:600">${S} SPPD</span>
-            <span style="color:var(--amd);font-weight:600">${I} Izin</span>
-            <span style="color:var(--rs);font-weight:600">${A} Alpha</span>
-          </div>
-        </div>`;
-      }).join('')}
+  const ca = document.getElementById('ca');
+  ca.innerHTML = `<div style="text-align:center;padding:60px;color:var(--mu)"><div style="font-size:32px">⏳</div><div>Memuat rekap...</div></div>`;
+
+  apiFetch('/laporan/rekap-pegawai').then(res=>{
+    if(!res) return;
+    const data = Array.isArray(res) ? res : (res.data ?? []);
+
+    ca.innerHTML = `
+    <div class="sec-h">
+      <div><div class="sec-t">Rekap Per Pegawai</div><div class="sec-sub">Rekap kehadiran keseluruhan</div></div>
     </div>
-    <div class="card card-p">
-      <div class="sec-t" style="margin-bottom:12px">📋 Data Terbaru</div>
-      ${abs.sort((a,b)=>new Date(b.tgl)-new Date(a.tgl)).slice(0,8).map(a=>{
-        const bc=a.st==='Hadir'?'bh':a.st==='Izin'?'bi':a.st==='SPPD'?'bs':'ba';
-        const d=new Date(a.tgl);
-        return`<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--cd)">
-          <div><div style="font-size:12px;font-weight:500">${d.getDate()} ${MONS_S[d.getMonth()]} ${d.getFullYear()}</div><div style="font-size:10px;color:var(--mu)">${a.in?'Masuk '+a.in:a.st}</div></div>
-          <span class="badge ${bc}">${a.st}</span>
-        </div>`;
-      }).join('')}
-      <button class="btn btn-xl" onclick="exportExcel()" style="width:100%;justify-content:center;margin-top:12px">📥 Export Data Pegawai</button>
-    </div>
-  </div>`;
+    <div class="tw">
+      <table>
+        <thead><tr><th>Pegawai</th><th>Jabatan</th><th>Hadir</th><th>Izin</th><th>Alpha</th></tr></thead>
+        <tbody>
+          ${data.length===0
+            ?`<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--mu)">Tidak ada data</td></tr>`
+            :data.map(u=>{
+              const ini = u.nama.split(' ').map(n=>n[0]).slice(0,2).join('');
+              return`<tr>
+                <td><div style="display:flex;align-items:center;gap:8px">
+                  <div class="av-sm">${ini}</div>
+                  <div><div class="tn">${u.nama}</div><div class="tm">NIK: ${u.nik}</div></div>
+                </div></td>
+                <td style="font-size:11px;color:var(--mu)">${u.jabatan||'–'}</td>
+                <td><span style="font-weight:700;color:var(--gm)">${u.hadir}</span></td>
+                <td><span style="font-weight:700;color:var(--amd)">${u.izin}</span></td>
+                <td><span style="font-weight:700;color:var(--rs)">${u.alpha}</span></td>
+              </tr>`;
+            }).join('')}
+        </tbody>
+      </table>
+      <div class="pag"><div class="pag-info">Total ${data.length} pegawai</div></div>
+    </div>`;
+  }).catch(err=>{
+    ca.innerHTML=`<div style="text-align:center;padding:60px;color:var(--rs)">
+      <div style="font-size:32px">⚠️</div><div>${err.message}</div>
+      <button onclick="pgRekap()" style="margin-top:14px;padding:8px 20px;border-radius:8px;border:none;background:var(--gm);color:#fff;cursor:pointer;font-weight:600">🔄 Coba Lagi</button>
+    </div>`;
+  });
+  return '';
 }
 
 // ════════════════════════════════════════════════════
@@ -1181,35 +1216,71 @@ function openAddAbs(){
   document.getElementById('mabs-out').value='';
   document.getElementById('mabs-ket').value='';
   const sel=document.getElementById('mabs-user');
-  sel.innerHTML='<option value="">-- Pilih Pegawai --</option>';
-  DB.users().filter(u=>u.aktif).forEach(u=>{sel.innerHTML+=`<option value="${u.id}">${u.nama} (${u.nik})</option>`});
+  sel.innerHTML='<option value="">-- Memuat pegawai... --</option>';
+  apiFetch('/pegawai').then(res=>{
+    sel.innerHTML='<option value="">-- Pilih Pegawai --</option>';
+    (res?.data??[]).forEach(u=>{
+      sel.innerHTML+=`<option value="${u.id}">${u.nama} (${u.nik})</option>`;
+    });
+  });
   om('m-abs');
 }
+
 function openEditAbs(id){
-  const a=DB.absensi().find(x=>x.id===id);if(!a) return;
   document.getElementById('mabs-id').value=id;
   document.getElementById('mabs-t').textContent='Edit Data Absensi';
   const sel=document.getElementById('mabs-user');
-  sel.innerHTML='<option value="">-- Pilih Pegawai --</option>';
-  DB.users().filter(u=>u.aktif).forEach(u=>{sel.innerHTML+=`<option value="${u.id}" ${u.id===a.uid?'selected':''}>${u.nama} (${u.nik})</option>`});
-  document.getElementById('mabs-tgl').value=a.tgl;
-  document.getElementById('mabs-status').value=a.st;
-  document.getElementById('mabs-in').value=a.in||'';
-  document.getElementById('mabs-out').value=a.out||'';
-  document.getElementById('mabs-ket').value=a.ket||'';
+  sel.innerHTML='<option value="">-- Memuat pegawai... --</option>';
+
+  // Ambil data absensi by id dari API
+  apiFetch(`/absensi/${id}`).then(res=>{
+    const a = res?.data;
+    if(!a) return;
+    document.getElementById('mabs-tgl').value=a.tanggal;
+    document.getElementById('mabs-status').value=a.status;
+    document.getElementById('mabs-in').value=a.jam_masuk?.substring(0,5)||'';
+    document.getElementById('mabs-out').value=a.jam_keluar?.substring(0,5)||'';
+    document.getElementById('mabs-ket').value=a.keterangan||'';
+
+    apiFetch('/pegawai').then(res2=>{
+      sel.innerHTML='<option value="">-- Pilih Pegawai --</option>';
+      (res2?.data??[]).forEach(u=>{
+        sel.innerHTML+=`<option value="${u.id}" ${u.id===a.user_id?'selected':''}>${u.nama} (${u.nik})</option>`;
+      });
+    });
+  });
   om('m-abs');
 }
+
 function saveAbs(){
-  const uid=parseInt(document.getElementById('mabs-user').value);
+  const uid=document.getElementById('mabs-user').value;
   const tgl=document.getElementById('mabs-tgl').value;
   const st=document.getElementById('mabs-status').value;
   if(!uid||!tgl||!st){showToast('Pegawai, tanggal & status wajib diisi','err');return;}
   const id=document.getElementById('mabs-id').value;
-  const all=DB.absensi();
-  const rec={uid,tgl,st,in:document.getElementById('mabs-in').value,out:document.getElementById('mabs-out').value,ket:document.getElementById('mabs-ket').value};
-  if(id){const i=all.findIndex(a=>a.id===parseInt(id));if(i>-1)all[i]={...all[i],...rec};showToast('Data absensi diubah ✓');}
-  else{rec.id=Date.now();all.unshift(rec);showToast('Data absensi ditambahkan ✓');}
-  DB.saveA(all);cm('m-abs');nav(page,document.querySelector('.ni.on'));
+  const body=JSON.stringify({
+    user_id: parseInt(uid),
+    tanggal: tgl,
+    status: st,
+    jam_masuk: document.getElementById('mabs-in').value||null,
+    jam_keluar: document.getElementById('mabs-out').value||null,
+    keterangan: document.getElementById('mabs-ket').value||null,
+  });
+
+  const req = id
+    ? apiFetch(`/absensi/${id}`, {method:'PUT', body})
+    : apiFetch('/absensi', {method:'POST', body});
+
+  req.then(res=>{
+    if(res?.message){
+      showToast(id?'Data absensi diubah ✓':'Data absensi ditambahkan ✓');
+      cm('m-abs');
+      pgAbs();
+      pgDash();
+    } else {
+      showToast(res?.error||'Gagal menyimpan','err');
+    }
+  }).catch(()=>showToast('Gagal terhubung ke server','err'));
 }
 
 // PEGAWAI MODAL
@@ -1267,25 +1338,40 @@ function togglePeg(id){
 
 // SPPD MODAL
 function openVerif(id){
-  curSppd=id;
-  const s=DB.sppd().find(x=>x.id===id);const u=DB.byId(s.uid);
-  document.getElementById('sv-file').textContent=s.file||'Tidak ada file';
-  document.getElementById('sv-nama').textContent=u.nama;
-  document.getElementById('sv-nomor').textContent=s.nomor||'–';
-  document.getElementById('sv-tujuan').textContent=s.tujuan;
-  document.getElementById('sv-tgl1').textContent=s.tgl1;
-  document.getElementById('sv-tgl2').textContent=s.tgl2;
-  document.getElementById('sv-kep').textContent=s.kep||'–';
-  document.getElementById('sv-cat').value=s.cat||'';
-  const stLbl=document.getElementById('msppd-stat-lbl');
-  stLbl.textContent=s.st==='pending'?'⏳ Menunggu verifikasi':s.st==='approved'?'✅ Sudah disetujui':'❌ Sudah ditolak';
-  om('m-sppd');
+  curSppd = id;
+  apiFetch('/sppd').then(res=>{
+    const list = Array.isArray(res) ? res : (res.data ?? []);
+    const s = list.find(x=>x.id===id);
+    if(!s) return;
+    document.getElementById('sv-file').textContent   = s.file_path || 'Tidak ada file';
+    document.getElementById('sv-nama').textContent   = s.nama;
+    document.getElementById('sv-nomor').textContent  = s.nomor_sppd || '–';
+    document.getElementById('sv-tujuan').textContent = s.tujuan;
+    document.getElementById('sv-tgl1').textContent   = s.tanggal_berangkat;
+    document.getElementById('sv-tgl2').textContent   = s.tanggal_kembali;
+    document.getElementById('sv-kep').textContent    = s.keperluan || '–';
+    document.getElementById('sv-cat').value          = s.keterangan || '';
+    const stLbl = document.getElementById('msppd-stat-lbl');
+    stLbl.textContent = s.status==='menunggu'?'⏳ Menunggu verifikasi':s.status==='disetujui'?'✅ Sudah disetujui':'❌ Sudah ditolak';
+    om('m-sppd');
+  });
 }
+
 function verifSPPD(st){
-  const all=DB.sppd();const i=all.findIndex(s=>s.id===curSppd);
-  if(i>-1){all[i].st=st;all[i].cat=document.getElementById('sv-cat').value;DB.saveS(all);}
-  showToast(st==='approved'?'SPPD disetujui ✅':'SPPD ditolak ❌',st==='approved'?'':'wrn');
-  cm('m-sppd');nav(page,document.querySelector('.ni.on'));updateBadges();
+  const ket = document.getElementById('sv-cat').value;
+  apiFetch(`/sppd/${curSppd}/verifikasi`, {
+    method: 'PUT',
+    body: JSON.stringify({ status: st, keterangan: ket })
+  }).then(res=>{
+    if(res?.message){
+      showToast(st==='disetujui'?'SPPD disetujui ✅':'SPPD ditolak ❌', st==='disetujui'?'':'wrn');
+      cm('m-sppd');
+      pgSppd();
+      pgDash();
+    } else {
+      showToast(res?.error||'Gagal memverifikasi','err');
+    }
+  });
 }
 
 // CONFIRM
@@ -1306,22 +1392,41 @@ function showConf(type,id){
 function confOk(){
   if(!confAct){cm('m-conf');return;}
   const{type,id}=confAct;
+
   if(type==='logout'){
-    localStorage.removeItem('current_user');
-    cm('m-conf');
-    showToast('Anda telah keluar','inf');
-    setTimeout(() => {
-      window.location.href = 'login.html';
-    }, 1000);
+    apiFetch('/logout',{method:'POST'}).finally(()=>{
+      localStorage.clear();
+      cm('m-conf');
+      showToast('Anda telah keluar','inf');
+      setTimeout(()=>{ window.location.href='login.html'; },1000);
+    });
     return;
   }
+
   if(type==='reset'){
     ['v2_users','v2_abs','v2_sppd','v2_set'].forEach(k=>localStorage.removeItem(k));
-    cm('m-conf');showToast('Data direset ke default ✓');nav(page,document.querySelector('.ni.on'));updateBadges();return;
+    cm('m-conf');showToast('Data lokal direset ✓');
+    nav(page,document.querySelector('.ni.on'));
+    return;
   }
-  if(type==='abs'){DB.saveA(DB.absensi().filter(a=>a.id!==id));showToast('Data absensi dihapus');}
-  if(type==='sppd'){DB.saveS(DB.sppd().filter(s=>s.id!==id));showToast('Data SPPD dihapus');updateBadges();}
-  cm('m-conf');nav(page,document.querySelector('.ni.on'));confAct=null;
+
+  if(type==='abs'){
+    apiFetch(`/absensi/${id}`,{method:'DELETE'}).then(()=>{
+      showToast('Data absensi dihapus');
+      cm('m-conf');
+      pgAbs();
+    });
+  }
+
+  if(type==='sppd'){
+    apiFetch(`/sppd/${id}`,{method:'DELETE'}).then(()=>{
+      showToast('Data SPPD dihapus');
+      cm('m-conf');
+      pgSppd();
+    });
+  }
+
+  confAct=null;
 }
 
 // SETTINGS
@@ -1359,12 +1464,71 @@ function savePw(){
 
 // EXPORT
 function exportExcel(){
-  const abs=DB.absensi(),H=`NIK,Nama,Jabatan,Tanggal,Jam Masuk,Jam Keluar,Status,Keterangan\n`;
-  const rows=abs.map(a=>{const u=DB.byId(a.uid);return`${u.nik},${u.nama},${u.jabatan},${a.tgl},${a.in||''},${a.out||''},${a.st},${a.ket||''}`;}).join('\n');
-  const link=document.createElement('a');
-  link.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(H+rows);
-  link.download='Rekap_Absensi_Desa.csv';link.click();
-  showToast('📥 File berhasil diunduh!');
+  const n = new Date();
+  const bulan = fAbs.bulan || `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`;
+  const [tahun, bln] = bulan.split('-');
+
+  showToast('⏳ Menyiapkan data...','inf');
+
+  apiFetch(`/absensi?bulan=${bln}&tahun=${tahun}`).then(res=>{
+    if(!res) return;
+    const data = res.data ?? [];
+
+    // Header
+    const header = ['No','NIK','Nama','Jabatan','Tanggal','Hari','Jam Masuk','Jam Keluar','Status','Keterangan'];
+
+    // Rows
+    const rows = data.map((a,i)=>{
+      const d = new Date(a.tanggal);
+      const hari = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'][d.getDay()];
+      return [
+        i+1,
+        a.nik||'–',
+        a.nama,
+        a.jabatan||'–',
+        a.tanggal,
+        hari,
+        a.jam_masuk||'–',
+        a.jam_keluar||'–',
+        a.status,
+        a.keterangan||'–'
+      ];
+    });
+
+    // Buat CSV dengan separator yang rapi
+    const namaBulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'][parseInt(bln)-1];
+
+    let csv = `\uFEFF`;
+    csv += `REKAP ABSENSI DESA MEKARSARI\n`;
+    csv += `Periode: ${namaBulan} ${tahun}\n`;
+    csv += `Dicetak: ${n.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}\n`;
+    csv += `Total Data: ${data.length} record\n`;
+    csv += `\n`;
+    csv += header.join(',')+'\n';
+    rows.forEach(r=>{
+      csv += r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')+'\n';
+    });
+
+    // Ringkasan
+    const H = data.filter(a=>a.status==='Hadir').length;
+    const I = data.filter(a=>a.status==='Izin').length;
+    const A = data.filter(a=>a.status==='Alpha').length;
+    const S = data.filter(a=>a.status==='SPPD').length;
+    csv += `\n`;
+    csv += `RINGKASAN\n`;
+    csv += `"Total Hadir","${H}"\n`;
+    csv += `"Total Izin","${I}"\n`;
+    csv += `"Total Alpha","${A}"\n`;
+    csv += `"Total SPPD","${S}"\n`;
+    csv += `"Total Keseluruhan","${data.length}"\n`;
+
+    const link = document.createElement('a');
+    link.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+    link.download = `Rekap_Absensi_${namaBulan}_${tahun}.csv`;
+    link.click();
+
+    showToast(`📥 ${data.length} data berhasil diunduh!`);
+  }).catch(()=>showToast('Gagal export data','err'));
 }
 
 // TOAST

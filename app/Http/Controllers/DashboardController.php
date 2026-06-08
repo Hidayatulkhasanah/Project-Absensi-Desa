@@ -25,9 +25,10 @@ class DashboardController extends Controller
             ->where('status', 'alpha')
             ->count();
 
+        // Hanya hitung role 'user' (pegawai biasa)
         $totalPegawai = DB::table('users')
             ->where('aktif', 1)
-            ->where('role', '!=', 'admin')
+            ->where('role', 'user')
             ->count();
 
         $sppdMenunggu = DB::table('sppd')
@@ -46,7 +47,7 @@ class DashboardController extends Controller
             ->where('status', 'hadir')
             ->count();
 
-        $persentase = $totalHariKerja > 0
+        $persentase = ($totalHariKerja > 0 && $totalPegawai > 0)
             ? round(($totalHadirBulan / ($totalHariKerja * $totalPegawai)) * 100)
             : 0;
 
@@ -59,16 +60,16 @@ class DashboardController extends Controller
             ->get();
 
         return response()->json([
-            'today'               => $today,
-            'total_hadir'         => $totalHadir,
-            'total_izin'          => $totalIzin,
-            'total_alpha'         => $totalAlpha,
-            'total_pegawai'       => $totalPegawai,
-            'sppd_menunggu'       => $sppdMenunggu,
-            'persentase_kehadiran'=> $persentase,
-            'total_hari_kerja'    => $totalHariKerja,
-            'total_hadir_bulan'   => $totalHadirBulan,
-            'sppd_list'           => $sppdList,
+            'today'                => $today,
+            'total_hadir'          => $totalHadir,
+            'total_izin'           => $totalIzin,
+            'total_alpha'          => $totalAlpha,
+            'total_pegawai'        => $totalPegawai,
+            'sppd_menunggu'        => $sppdMenunggu,
+            'persentase_kehadiran' => $persentase,
+            'total_hari_kerja'     => $totalHariKerja,
+            'total_hadir_bulan'    => $totalHadirBulan,
+            'sppd_list'            => $sppdList,
         ]);
     }
 }
