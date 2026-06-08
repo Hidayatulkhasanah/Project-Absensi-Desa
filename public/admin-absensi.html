@@ -314,8 +314,7 @@ tbody tr:hover{background:#f5f8f4}
     <div class="tb-r">
       <button class="ico-btn" onclick="showToast('🔄 Data diperbarui','inf')">🔄</button>
       <button class="ico-btn" onclick="nav('sppd',document.querySelectorAll('.ni')[2])"><span>🔔</span><span class="dot" id="notif-dot"></span></button>
-      <div class="av" id="top-av" onclick="nav('pengaturan',document.querySelectorAll('.ni')[8])">AS</div>
-    </div>
+<div class="av" id="top-av" onclick="nav('pengaturan',document.querySelectorAll('.ni')[6])">AS</div>    </div>
   </header>
   <div class="content" id="ca"></div>
 </div>
@@ -514,12 +513,19 @@ const DB={
     ]));
   },
   saveS(s){localStorage.setItem('v2_sppd',JSON.stringify(s))},
-  setting(){
-    return JSON.parse(localStorage.getItem('v2_set')||JSON.stringify({desa:'Desa Sukamaju',kec:'Kecamatan Cikaret',jamMasuk:'08:00',radius:200,sesi:8,kades:'Ahmad Sulaiman'}));
-  },
-  saveSetting(s){localStorage.setItem('v2_set',JSON.stringify(s))},
-  byId(id){return this.users().find(u=>u.id===id)||{nama:'?',jabatan:'?',nik:'?'}},
-  pegawai(){return this.users().filter(u=>u.role==='pegawai')},
+setting(){
+  return JSON.parse(localStorage.getItem('v2_set')||JSON.stringify({
+    desa      : 'Desa Mekarsari',
+    kec       : 'Kecamatan Cileungsi',
+    kades     : 'Hj. Nasih',
+    jamMasuk  : '08:00',
+    jamPulang : '17:00',
+    radius    : 100,
+    lat       : '-6.408900',
+    lng       : '107.012300',
+    sesi      : 8,
+  }));
+},
 };
 
 // ════════════════════════════════════════════════════
@@ -567,6 +573,12 @@ tick(); setInterval(tick,1000);
 // ════════════════════════════════════════════════════
 function nav(p,btn){
   page=p;
+  // Reset filter saat pindah halaman
+  if(p!=='pegawai') fPeg.q='';
+  if(p!=='rekap'){ fRekap.q=''; fRekap.sort=''; }
+  if(p!=='sppd') fSppd.st='';
+  if(p!=='absensi'){ fAbs.search=''; }
+
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
   if(btn) btn.classList.add('on');
   const T={dashboard:'Dashboard',absensi:'Kelola Absensi',sppd:'Kelola SPPD',laporan:'Laporan Bulanan',rekap:'Rekap Pegawai',pegawai:'Data Pegawai',pengaturan:'Pengaturan',password:'Ubah Kata Sandi'};
@@ -575,13 +587,13 @@ function nav(p,btn){
   const ca=document.getElementById('ca');
   ca.style.opacity='0';
   ca.style.transform='translateY(8px)';
-  setTimeout(()=>{
-    if(p==='dashboard') ca.innerHTML=pgDash();
-    else if(p==='absensi') ca.innerHTML=pgAbs();
-    else if(p==='sppd') ca.innerHTML=pgSppd();
-    else if(p==='laporan') ca.innerHTML=pgLap();
-    else if(p==='rekap') ca.innerHTML=pgRekap();
-    else if(p==='pegawai') ca.innerHTML=pgPeg();
+setTimeout(()=>{
+    if(p==='dashboard') pgDash();
+    else if(p==='absensi') pgAbs();
+    else if(p==='sppd') pgSppd();
+    else if(p==='laporan') pgLap();
+    else if(p==='rekap') pgRekap();
+    else if(p==='pegawai') pgPeg();
     else if(p==='pengaturan') ca.innerHTML=pgSet();
     else if(p==='password') ca.innerHTML=pgPass();
     ca.style.opacity='1';
@@ -591,7 +603,6 @@ function nav(p,btn){
   updateBadges();
   if(window.innerWidth<900) document.getElementById('sb').classList.remove('open');
 }
-function toggleSb(){document.getElementById('sb').classList.toggle('open')}
 
 // ════════════════════════════════════════════════════
 //  BADGE UPDATE
@@ -1067,7 +1078,7 @@ function pgRekap(){
 
     ca.innerHTML = `
     <div class="sec-h">
-      <div><div class="sec-t">Rekap Per Pegawai</div><div class="sec-sub">Rekap kehadiran keseluruhan</div></div>
+      <div><div class="sec-t">Rekap Pegawai</div><div class="sec-sub">Rekap kehadiran keseluruhan</div></div>
       <button class="btn btn-xl" onclick="exportRekapExcel()">📥 Export Excel</button>
     </div>
     <div class="fb">
@@ -1226,66 +1237,182 @@ function pgPeg(){
 }
 
 // ════════════════════════════════════════════════════
-//  PENGATURAN PAGE
+//  PENGATURAN PAGE — dari API
 // ════════════════════════════════════════════════════
 function pgSet(){
-  const s=DB.setting();
-  return`
-  <div class="sec-h"><div><div class="sec-t">Pengaturan Sistem</div><div class="sec-sub">Konfigurasi aplikasi Absensi Desa</div></div></div>
-  <div class="two-col">
-    <div class="card card-p">
-      <div class="sec-t" style="margin-bottom:16px">🏛️ Informasi Desa</div>
-      <div class="fg"><label class="fl">Nama Desa</label><input class="fc" type="text" id="s-desa" value="${s.desa}"></div>
-      <div class="fg"><label class="fl">Kecamatan</label><input class="fc" type="text" id="s-kec" value="${s.kec}"></div>
-      <div class="fg" style="margin-bottom:0"><label class="fl">Kepala Desa</label><input class="fc" type="text" id="s-kades" value="${s.kades}"></div>
+  const ca = document.getElementById('ca');
+  ca.innerHTML = `<div style="text-align:center;padding:60px;color:var(--mu)"><div style="font-size:32px">⏳</div><div>Memuat pengaturan...</div></div>`;
+
+  Promise.all([
+    apiFetch('/dashboard'),
+    apiFetch('/pegawai')
+  ]).then(([dash, peg]) => {
+    const s = DB.setting(); // setting lokal
+    const totalPeg    = (peg?.data ?? []).length;
+    const aktifPeg    = (peg?.data ?? []).filter(u=>u.aktif==1).length;
+    const totalAbs    = dash?.total_hadir_bulan ?? 0;
+    const sppdPending = dash?.sppd_menunggu ?? 0;
+
+    ca.innerHTML = `
+    <div class="sec-h"><div><div class="sec-t">Pengaturan Sistem</div><div class="sec-sub">Konfigurasi aplikasi Absensi Desa</div></div></div>
+    <div class="two-col">
+      <div class="card card-p">
+        <div class="sec-t" style="margin-bottom:16px">🏛️ Informasi Desa</div>
+        <div class="fg"><label class="fl">Nama Desa</label><input class="fc" type="text" id="s-desa" value="${s.desa}"></div>
+        <div class="fg"><label class="fl">Kecamatan</label><input class="fc" type="text" id="s-kec" value="${s.kec}"></div>
+        <div class="fg" style="margin-bottom:0"><label class="fl">Kepala Desa</label><input class="fc" type="text" id="s-kades" value="${s.kades}"></div>
+      </div>
+      <div class="card card-p">
+        <div class="sec-t" style="margin-bottom:16px">⚙️ Konfigurasi Absensi</div>
+        <div class="fg">
+          <label class="fl">Jam Masuk</label>
+          <input class="fc" type="time" id="s-jam" value="${s.jamMasuk||'08:00'}">
+        </div>
+        <div class="fg">
+          <label class="fl">Jam Pulang</label>
+          <input class="fc" type="time" id="s-jampulang" value="${s.jamPulang||'17:00'}">
+        </div>
+        <div class="fg">
+          <label class="fl">Radius GPS (meter)</label>
+          <input class="fc" type="number" id="s-rad" value="${s.radius||100}">
+          <div style="font-size:10px;color:var(--mu);margin-top:4px">📍 Jika diluar radius → otomatis Alpha</div>
+        </div>
+        <div class="fg">
+          <label class="fl">Latitude Kantor</label>
+          <input class="fc" type="text" id="s-lat" placeholder="-6.xxxxxxx" value="${s.lat||''}">
+        </div>
+        <div class="fg" style="margin-bottom:0">
+          <label class="fl">Longitude Kantor</label>
+          <input class="fc" type="text" id="s-lng" placeholder="107.xxxxxxx" value="${s.lng||''}">
+          <div style="font-size:10px;color:var(--mu);margin-top:4px">
+            <a href="https://maps.google.com" target="_blank" style="color:var(--bl)">🗺️ Buka Google Maps untuk cari koordinat</a>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="card card-p">
-      <div class="sec-t" style="margin-bottom:16px">⚙️ Konfigurasi Absensi</div>
-      <div class="fg"><label class="fl">Jam Masuk (Toleransi)</label><input class="fc" type="time" id="s-jam" value="${s.jamMasuk}"></div>
-      <div class="fg"><label class="fl">Radius GPS (meter)</label><input class="fc" type="number" id="s-rad" value="${s.radius}"></div>
-      <div class="fg" style="margin-bottom:0"><label class="fl">Durasi Sesi Login (jam)</label><input class="fc" type="number" id="s-sesi" value="${s.sesi}"></div>
+
+    <!-- Aturan Absensi -->
+    <div class="card card-p" style="margin-bottom:14px">
+      <div class="sec-t" style="margin-bottom:14px">📋 Aturan Absensi</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div style="background:var(--rsp);border:1.5px solid rgba(224,92,92,.2);border-radius:10px;padding:12px">
+          <div style="font-size:12px;font-weight:700;color:var(--rsd);margin-bottom:6px">⏰ Keterlambatan</div>
+          <div style="font-size:11px;color:var(--mu)">Check-in setelah <strong>${s.jamMasuk||'08:00'}</strong> → Tercatat Terlambat</div>
+          <div style="font-size:11px;color:var(--mu);margin-top:4px">Tidak check-in sama sekali → Otomatis <strong style="color:var(--rs)">Alpha</strong></div>
+        </div>
+        <div style="background:var(--rsp);border:1.5px solid rgba(224,92,92,.2);border-radius:10px;padding:12px">
+          <div style="font-size:12px;font-weight:700;color:var(--rsd);margin-bottom:6px">📍 Lokasi GPS</div>
+          <div style="font-size:11px;color:var(--mu)">Diluar radius <strong>${s.radius||100}m</strong> dari kantor → Ditolak</div>
+          <div style="font-size:11px;color:var(--mu);margin-top:4px">GPS tidak aktif → Tidak bisa absen</div>
+        </div>
+        <div style="background:var(--blp);border:1.5px solid rgba(37,99,192,.2);border-radius:10px;padding:12px">
+          <div style="font-size:12px;font-weight:700;color:var(--bld);margin-bottom:6px">🚪 Jam Pulang</div>
+          <div style="font-size:11px;color:var(--mu)">Checkout sebelum <strong>${s.jamPulang||'17:00'}</strong> → Tercatat Pulang Cepat</div>
+        </div>
+        <div style="background:var(--gp);border:1.5px solid rgba(64,145,108,.2);border-radius:10px;padding:12px">
+          <div style="font-size:12px;font-weight:700;color:var(--gd);margin-bottom:6px">📸 Foto Selfie</div>
+          <div style="font-size:11px;color:var(--mu)">Foto wajib saat check-in sebagai bukti kehadiran</div>
+        </div>
+      </div>
     </div>
-  </div>
-  <div class="card card-p" style="margin-top:0">
-    <div class="sec-t" style="margin-bottom:16px">ℹ️ Info Sistem</div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
-      ${[['Total Pegawai',DB.users().length,'👥'],['Pegawai Aktif',DB.users().filter(u=>u.aktif).length,'✅'],['Total Absensi',DB.absensi().length,'📋'],['SPPD Pending',DB.sppd().filter(s=>s.st==='pending').length,'⏳'],['SPPD Approved',DB.sppd().filter(s=>s.st==='approved').length,'✔️'],['Versi Aplikasi','1.0.0','🚀']].map(([l,v,ic])=>`
-      <div style="background:var(--cr);border-radius:10px;padding:12px;border:1px solid var(--cd)">
-        <div style="font-size:20px;margin-bottom:5px">${ic}</div>
-        <div style="font-family:'Fraunces',serif;font-size:18px;font-weight:700">${v}</div>
-        <div style="font-size:10px;color:var(--mu);margin-top:2px">${l}</div>
-      </div>`).join('')}
+
+    <!-- Info Sistem -->
+    <div class="card card-p" style="margin-bottom:14px">
+      <div class="sec-t" style="margin-bottom:16px">ℹ️ Info Sistem</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+        ${[
+          ['Total Pegawai', totalPeg, '👥'],
+          ['Pegawai Aktif', aktifPeg, '✅'],
+          ['Hadir Bulan Ini', totalAbs, '📋'],
+          ['SPPD Menunggu', sppdPending, '⏳'],
+          ['Radius GPS', (s.radius||100)+'m', '📍'],
+          ['Versi Aplikasi', '1.0.0', '🚀']
+        ].map(([l,v,ic])=>`
+        <div style="background:var(--cr);border-radius:10px;padding:12px;border:1px solid var(--cd)">
+          <div style="font-size:20px;margin-bottom:5px">${ic}</div>
+          <div style="font-family:'Fraunces',serif;font-size:18px;font-weight:700">${v}</div>
+          <div style="font-size:10px;color:var(--mu);margin-top:2px">${l}</div>
+        </div>`).join('')}
+      </div>
     </div>
-  </div>
-  <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
-    <button class="btn btn-p" onclick="saveSettingPage()">💾 Simpan Pengaturan</button>
-    <button class="btn btn-s" onclick="showConf('reset')">🔄 Reset Data Demo</button>
-  </div>`;
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-p" onclick="saveSettingPage()">💾 Simpan Pengaturan</button>
+    </div>`;
+  });
+  return '';
+}
+
+function saveSettingPage(){
+  const s = {
+    desa      : document.getElementById('s-desa')?.value || 'Desa Mekarsari',
+    kec       : document.getElementById('s-kec')?.value  || 'Kecamatan Cikarang',
+    kades     : document.getElementById('s-kades')?.value|| '',
+    jamMasuk  : document.getElementById('s-jam')?.value  || '08:00',
+    jamPulang : document.getElementById('s-jampulang')?.value || '17:00',
+    radius    : parseInt(document.getElementById('s-rad')?.value)||100,
+    lat       : document.getElementById('s-lat')?.value  || '',
+    lng       : document.getElementById('s-lng')?.value  || '',
+    sesi      : 8,
+  };
+  DB.saveSetting(s);
+  showToast('✅ Pengaturan berhasil disimpan!');
+
+  // Refresh halaman pengaturan untuk update info aturan
+  setTimeout(()=>pgSet(), 500);
 }
 
 // ════════════════════════════════════════════════════
 //  PASSWORD PAGE
 // ════════════════════════════════════════════════════
 function pgPass(){
+  const user = JSON.parse(localStorage.getItem('current_user')) || {};
+  const ini  = (user.nama||'AD').split(' ').map(n=>n[0]).slice(0,2).join('').toUpperCase();
   return`
-  <div class="sec-h"><div><div class="sec-t">Ubah Kata Sandi</div><div class="sec-sub">Ganti sandi akun admin</div></div></div>
-  <div style="max-width:460px">
+  <div style="max-width:600px;margin:0 auto">
+    <div style="background:linear-gradient(135deg,var(--gd) 0%,#0f2a1c 100%);border-radius:var(--r);padding:28px 24px;margin-bottom:18px;position:relative;overflow:hidden">
+      <div style="position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:rgba(116,198,157,.08)"></div>
+      <div style="display:flex;align-items:center;gap:18px;position:relative">
+        <div style="width:68px;height:68px;border-radius:18px;background:rgba(116,198,157,.2);border:2px solid rgba(116,198,157,.4);display:flex;align-items:center;justify-content:center;font-family:Fraunces,serif;font-size:24px;font-weight:700;color:var(--gl);flex-shrink:0">${ini}</div>
+        <div>
+          <div style="font-family:Fraunces,serif;font-size:22px;font-weight:700;color:#fff;letter-spacing:-.3px">${user.nama||'Admin'}</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.55);margin-top:3px">${user.jabatan||'Administrator'}</div>
+          <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+            <span style="background:rgba(116,198,157,.15);color:var(--gl);font-size:10px;font-weight:700;padding:3px 10px;border-radius:8px;border:1px solid rgba(116,198,157,.25);text-transform:uppercase">👑 ${user.role||'admin'}</span>
+            <span style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.6);font-size:10px;font-weight:600;padding:3px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.12)">🏛️ Desa Mekarsari</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card-p" style="margin-bottom:14px">
+      <div style="font-family:Fraunces,serif;font-size:15px;font-weight:600;margin-bottom:14px">👤 Informasi Akun</div>
+      <div class="info-row"><div class="ir-label">Nama Lengkap</div><div class="ir-val">${user.nama||'–'}</div></div>
+      <div class="info-row"><div class="ir-label">NIK</div><div class="ir-val" style="font-family:monospace">${user.nik||'–'}</div></div>
+      <div class="info-row"><div class="ir-label">Jabatan</div><div class="ir-val">${user.jabatan||'–'}</div></div>
+      <div class="info-row"><div class="ir-label">Role</div><div class="ir-val"><span class="badge br-p">${user.role||'admin'}</span></div></div>
+      <div class="info-row" style="border:none"><div class="ir-label">Login Terakhir</div><div class="ir-val" style="font-size:11px;color:var(--mu)">${user.loginTime?new Date(user.loginTime).toLocaleString('id-ID'):'–'}</div></div>
+    </div>
+
     <div class="card card-p">
-      <div class="fg"><label class="fl">Sandi Lama <span class="req">*</span></label><input class="fc" type="password" id="pw-old" placeholder="Sandi saat ini"></div>
+      <div style="font-family:Fraunces,serif;font-size:15px;font-weight:600;margin-bottom:6px">🔒 Ubah Kata Sandi</div>
+      <div style="font-size:12px;color:var(--mu);margin-bottom:16px">Pastikan sandi baru minimal 8 karakter dengan huruf kapital dan angka</div>
+      <div class="fg"><label class="fl">Sandi Lama <span class="req">*</span></label><input class="fc" type="password" id="pw-old" placeholder="Masukkan sandi saat ini"></div>
       <div class="fg"><label class="fl">Sandi Baru <span class="req">*</span></label><input class="fc" type="password" id="pw-new" placeholder="Min. 8 karakter" oninput="checkPw()"></div>
-      <div style="margin-bottom:12px">
-        <div id="pr-len" style="font-size:11px;color:var(--mu);display:flex;align-items:center;gap:6px;margin-bottom:4px"><span>●</span> Minimal 8 karakter</div>
-        <div id="pr-up" style="font-size:11px;color:var(--mu);display:flex;align-items:center;gap:6px;margin-bottom:4px"><span>●</span> Huruf kapital</div>
-        <div id="pr-num" style="font-size:11px;color:var(--mu);display:flex;align-items:center;gap:6px"><span>●</span> Minimal 1 angka</div>
+      <div style="margin-bottom:14px;padding:12px;background:var(--cr);border-radius:10px;border:1px solid var(--cd)">
+        <div id="pr-len" style="font-size:11px;color:var(--mu);display:flex;align-items:center;gap:7px;margin-bottom:5px"><span>●</span> Minimal 8 karakter</div>
+        <div id="pr-up"  style="font-size:11px;color:var(--mu);display:flex;align-items:center;gap:7px;margin-bottom:5px"><span>●</span> Huruf kapital</div>
+        <div id="pr-num" style="font-size:11px;color:var(--mu);display:flex;align-items:center;gap:7px"><span>●</span> Minimal 1 angka</div>
       </div>
       <div class="fg" style="margin-bottom:20px"><label class="fl">Konfirmasi Sandi Baru <span class="req">*</span></label><input class="fc" type="password" id="pw-conf" placeholder="Ulangi sandi baru"></div>
       <div style="display:flex;gap:9px">
-        <button class="btn btn-s" onclick="nav('dashboard',document.querySelectorAll('.ni')[0])">Batal</button>
-        <button class="btn btn-p" onclick="savePw()">🔒 Simpan Sandi</button>
+        <button class="btn btn-s" onclick="nav('dashboard',document.querySelectorAll('.ni')[0])">← Kembali</button>
+        <button class="btn btn-p" onclick="savePw()" style="flex:1;justify-content:center">🔒 Simpan Sandi Baru</button>
       </div>
     </div>
   </div>`;
 }
+
 function checkPw(){
   const v=document.getElementById('pw-new')?.value||'';
   const set=(id,ok)=>{const e=document.getElementById(id);if(e){e.style.color=ok?'var(--gf)':'var(--mu)';e.querySelector('span').textContent=ok?'✓':'●';}};
@@ -1529,27 +1656,37 @@ function confOk(){
 }
 
 // SETTINGS
-function saveSettingPage(){
-  const s={
-    desa:document.getElementById('s-desa')?.value||DB.setting().desa,
-    kec:document.getElementById('s-kec')?.value||DB.setting().kec,
-    kades:document.getElementById('s-kades')?.value||DB.setting().kades,
-    jamMasuk:document.getElementById('s-jam')?.value||DB.setting().jamMasuk,
-    radius:parseInt(document.getElementById('s-rad')?.value)||DB.setting().radius,
-    sesi:parseInt(document.getElementById('s-sesi')?.value)||DB.setting().sesi,
-  };
-  DB.saveSetting(s);showToast('Pengaturan disimpan ✓');
-}
 function saveSetting(){
-  const s={
-    desa:document.getElementById('set-desa')?.value||DB.setting().desa,
-    kec:document.getElementById('set-kec')?.value||DB.setting().kec,
-    kades:document.getElementById('set-kades')?.value||DB.setting().kades,
-    jamMasuk:document.getElementById('set-jam')?.value||DB.setting().jamMasuk,
-    radius:parseInt(document.getElementById('set-radius')?.value)||DB.setting().radius,
-    sesi:parseInt(document.getElementById('set-sesi')?.value)||DB.setting().sesi,
+  const s = {
+    desa      : document.getElementById('set-desa')?.value      || 'Desa Mekarsari',
+    kec       : document.getElementById('set-kec')?.value       || 'Kecamatan Cileungsi',
+    kades     : document.getElementById('set-kades')?.value     || 'Hj. Nasih',
+    jamMasuk  : document.getElementById('set-jam')?.value       || '08:00',
+    jamPulang : '17:00',
+    radius    : parseInt(document.getElementById('set-radius')?.value) || 100,
+    lat       : '-6.408900',
+    lng       : '107.012300',
+    sesi      : parseInt(document.getElementById('set-sesi')?.value) || 8,
   };
-  DB.saveSetting(s);cm('m-set');showToast('Pengaturan disimpan ✓');
+  DB.saveSetting(s);
+  cm('m-set');
+  showToast('✅ Pengaturan berhasil disimpan!');
+}
+function saveSettingPage(){
+  const s = {
+    desa      : document.getElementById('s-desa')?.value      || 'Desa Mekarsari',
+    kec       : document.getElementById('s-kec')?.value       || 'Kecamatan Cileungsi',
+    kades     : document.getElementById('s-kades')?.value     || 'Hj. Nasih',
+    jamMasuk  : document.getElementById('s-jam')?.value       || '08:00',
+    jamPulang : document.getElementById('s-jampulang')?.value || '17:00',
+    radius    : parseInt(document.getElementById('s-rad')?.value) || 100,
+    lat       : document.getElementById('s-lat')?.value       || '-6.408900',
+    lng       : document.getElementById('s-lng')?.value       || '107.012300',
+    sesi      : 8,
+  };
+  DB.saveSetting(s);
+  showToast('✅ Pengaturan berhasil disimpan!');
+  setTimeout(()=>pgSet(), 500);
 }
 function savePw(){
   const o=document.getElementById('pw-old')?.value,n=document.getElementById('pw-new')?.value,c=document.getElementById('pw-conf')?.value;
