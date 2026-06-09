@@ -29,7 +29,15 @@
 html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--cr);color:var(--ink);}
 body{display:flex;align-items:flex-start;justify-content:center;min-height:100vh;background:#e8e3d8;}
 
-/* ── PHONE ── */
+/* ── RESPONSIVE DESKTOP ── */
+@media(min-width:768px){
+  body{background:linear-gradient(135deg,var(--gd) 0%,#0d2318 100%);align-items:center;justify-content:center;min-height:100vh;}
+  .phone{border-radius:40px;box-shadow:0 32px 80px rgba(0,0,0,.5);height:90vh;max-height:850px;}
+}
+@media(max-width:767px){
+  .phone{border-radius:0;height:100vh;max-height:100vh;}
+  body{background:var(--cr);}
+}
 .phone{width:100%;max-width:430px;min-height:100vh;background:var(--cr);display:flex;flex-direction:column;box-shadow:0 0 60px rgba(0,0,0,.15);position:relative;}
 
 /* ── HEADER ── */
@@ -387,25 +395,50 @@ body{display:flex;align-items:flex-start;justify-content:center;min-height:100vh
         </div>
       </div>
 
-      <!-- Keterangan -->
+      <!-- Pilihan Status -->
       <div id="ket-wrap" class="mb-3">
-        <label class="form-lbl">Keterangan (opsional)</label>
+        <label class="form-lbl">Status Kehadiran <span style="color:var(--rs)">*</span></label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px" id="status-picker">
+          <div onclick="pilihStatus('Hadir')" id="st-Hadir"
+            style="padding:12px;border-radius:12px;border:2px solid var(--gf);background:var(--gp);cursor:pointer;text-align:center;transition:all .18s">
+            <div style="font-size:20px;margin-bottom:4px">✅</div>
+            <div style="font-size:12px;font-weight:700;color:var(--gd)">Hadir</div>
+          </div>
+          <div onclick="pilihStatus('Izin')" id="st-Izin"
+            style="padding:12px;border-radius:12px;border:2px solid var(--cd);background:#fff;cursor:pointer;text-align:center;transition:all .18s">
+            <div style="font-size:20px;margin-bottom:4px">📝</div>
+            <div style="font-size:12px;font-weight:700;color:var(--mu)">Izin</div>
+          </div>
+          <div onclick="pilihStatus('Sakit')" id="st-Sakit"
+            style="padding:12px;border-radius:12px;border:2px solid var(--cd);background:#fff;cursor:pointer;text-align:center;transition:all .18s">
+            <div style="font-size:20px;margin-bottom:4px">🤒</div>
+            <div style="font-size:12px;font-weight:700;color:var(--mu)">Sakit</div>
+          </div>
+          <div onclick="pilihStatus('Alpha')" id="st-Alpha"
+            style="padding:12px;border-radius:12px;border:2px solid var(--cd);background:#fff;cursor:pointer;text-align:center;transition:all .18s">
+            <div style="font-size:20px;margin-bottom:4px">❌</div>
+            <div style="font-size:12px;font-weight:700;color:var(--mu)">Alpha</div>
+          </div>
+        </div>
+        <input type="hidden" id="inp-status" value="Hadir">
+        <label class="form-lbl" style="margin-top:4px">Keterangan (opsional)</label>
         <input class="form-inp" type="text" id="inp-ket" placeholder="Misal: hadir tepat waktu...">
       </div>
 
       <!-- Tombol -->
       <div id="btn-absen-wrap">
         <button class="btn-absen btn-masuk" id="btn-absen-main" onclick="doCheckin()">
-          <i class="bi bi-geo-alt-fill"></i> Check-in Sekarang
+          <i class="bi bi-geo-alt-fill"></i> Simpan Absensi
         </button>
       </div>
 
       <!-- Syarat -->
       <div style="background:#fff;border-radius:12px;padding:13px 14px;box-shadow:0 1px 6px rgba(26,58,42,.07);margin-top:10px;">
-        <div style="font-size:11px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Syarat Absensi</div>
-        <div style="font-size:12px;margin-bottom:5px;display:flex;gap:7px;align-items:center"><span>📍</span><span>GPS aktif & dalam radius 200m</span></div>
-        <div style="font-size:12px;margin-bottom:5px;display:flex;gap:7px;align-items:center"><span>📸</span><span>Foto selfie wajib diambil</span></div>
-        <div style="font-size:12px;display:flex;gap:7px;align-items:center"><span>⏰</span><span>1x check-in & 1x checkout per hari</span></div>
+        <div style="font-size:11px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">⚠️ Aturan Absensi</div>
+        <div style="font-size:12px;margin-bottom:5px;display:flex;gap:7px;align-items:center"><span>📍</span><span>Harus dalam radius <strong>100m</strong> dari kantor desa</span></div>
+        <div style="font-size:12px;margin-bottom:5px;display:flex;gap:7px;align-items:center"><span>⏰</span><span>Jam kerja <strong>08:00 – 17:00</strong> · Lewat 08:00 = Terlambat</span></div>
+        <div style="font-size:12px;margin-bottom:5px;display:flex;gap:7px;align-items:center"><span>📸</span><span>Foto selfie wajib diambil saat check-in</span></div>
+        <div style="font-size:12px;display:flex;gap:7px;align-items:center"><span>🚫</span><span>Tidak absen = otomatis <strong style="color:var(--rs)">Alpha</strong></span></div>
       </div>
     </div>
   </div>
@@ -696,149 +729,316 @@ function getTodayRec() {
 }
 
 function updateAbsensiStatus() {
-  const rec   = getTodayRec();
-  const card  = document.getElementById('abs-status-card');
-  const ic    = document.getElementById('abs-s-ic');
-  const title = document.getElementById('abs-s-title');
-  const sub   = document.getElementById('abs-s-sub');
-  const tInfo = document.getElementById('abs-time-info');
-  const ketW  = document.getElementById('ket-wrap');
-  const btnW  = document.getElementById('btn-absen-wrap');
-  const camS  = document.getElementById('cam-section');
-  if (!card) return;
-  if (rec) {
-    tInfo.style.display = 'block';
-    document.getElementById('info-masuk').textContent  = rec.in  || '–';
-    document.getElementById('info-keluar').textContent = rec.out || '–';
-    if (rec.out) {
-      card.className='abs-status sudah';
-      ic.style.background='var(--gp)'; ic.textContent='✅';
-      title.textContent='Absen Lengkap ✓';
-      sub.textContent='Check-in '+rec.in+' · Checkout '+rec.out;
-      btnW.innerHTML='<button class="btn-absen" disabled style="background:var(--cd);color:var(--mu);cursor:not-allowed;border-radius:12px;">✅ Absen Sudah Selesai Hari Ini</button>';
-      ketW.style.display='none'; camS.style.display='none';
+  const token = localStorage.getItem('auth_token');
+  fetch('/api/absensi/today', {
+    headers: { 'Authorization':'Bearer '+token, 'Accept':'application/json' }
+  })
+  .then(r => r.json())
+  .then(data => {
+    const rec   = data.data;
+    absenToday  = rec;
+    const card  = document.getElementById('abs-status-card');
+    const ic    = document.getElementById('abs-s-ic');
+    const title = document.getElementById('abs-s-title');
+    const sub   = document.getElementById('abs-s-sub');
+    const tInfo = document.getElementById('abs-time-info');
+    const ketW  = document.getElementById('ket-wrap');
+    const btnW  = document.getElementById('btn-absen-wrap');
+    const camS  = document.getElementById('cam-section');
+    if (!card) return;
+    if (rec) {
+      tInfo.style.display = 'block';
+      const masuk  = rec.jam_masuk  ? rec.jam_masuk.substring(0,5)  : '–';
+      const keluar = rec.jam_keluar ? rec.jam_keluar.substring(0,5) : '–';
+      document.getElementById('info-masuk').textContent  = masuk;
+      document.getElementById('info-keluar').textContent = keluar;
+      if (rec.jam_keluar) {
+        card.className='abs-status sudah';
+        ic.style.background='var(--gp)'; ic.textContent='✅';
+        title.textContent='Absen Lengkap ✓';
+        sub.textContent='Check-in '+masuk+' · Checkout '+keluar;
+        btnW.innerHTML='<button class="btn-absen" disabled style="background:var(--cd);color:var(--mu);cursor:not-allowed;border-radius:12px;">✅ Absen Sudah Selesai Hari Ini</button>';
+        ketW.style.display='none'; camS.style.display='none';
+      } else {
+        card.className='abs-status checkout';
+        ic.style.background='var(--amp)'; ic.textContent='🟡';
+        title.textContent='Sudah Check-in';
+        sub.textContent='Masuk '+masuk+' · Belum checkout';
+        btnW.innerHTML='<button class="btn-absen btn-pulang" onclick="doCheckout()"><i class="bi bi-box-arrow-right"></i> Check-out Sekarang</button>';
+        ketW.style.display='none'; camS.style.display='block';
+      }
     } else {
-      card.className='abs-status checkout';
-      ic.style.background='var(--amp)'; ic.textContent='🟡';
-      title.textContent='Sudah Check-in';
-      sub.textContent='Masuk '+rec.in+' · Belum checkout';
-      btnW.innerHTML='<button class="btn-absen btn-pulang" onclick="doCheckout()"><i class="bi bi-box-arrow-right"></i> Check-out Sekarang</button>';
-      ketW.style.display='none'; camS.style.display='block';
+      card.className='abs-status belum';
+      ic.style.background='var(--amp)'; ic.textContent='⏰';
+      title.textContent='Belum Check-in';
+      sub.textContent='Aktifkan kamera & GPS untuk absen';
+      tInfo.style.display='none';
+      btnW.innerHTML='<button class="btn-absen btn-masuk" id="btn-absen-main" onclick="doCheckin()"><i class="bi bi-geo-alt-fill"></i> Simpan Absensi</button>';
+      ketW.style.display='block'; camS.style.display='block';
     }
-  } else {
-    card.className='abs-status belum';
-    ic.style.background='var(--amp)'; ic.textContent='⏰';
-    title.textContent='Belum Check-in';
-    sub.textContent='Aktifkan kamera & GPS untuk absen';
-    tInfo.style.display='none';
-    btnW.innerHTML='<button class="btn-absen btn-masuk" onclick="doCheckin()"><i class="bi bi-geo-alt-fill"></i> Check-in Sekarang</button>';
-    ketW.style.display='block'; camS.style.display='block';
+  })
+  .catch(() => {
+    // Fallback ke localStorage jika API gagal
+    const today = new Date().toISOString().split('T')[0];
+    const rec = DB.getAbsensi().find(a => a.uid===currentUser?.nik && a.tgl===today);
+    const btnW = document.getElementById('btn-absen-wrap');
+    if(!rec && btnW) btnW.innerHTML='<button class="btn-absen btn-masuk" id="btn-absen-main" onclick="doCheckin()"><i class="bi bi-geo-alt-fill"></i> Simpan Absensi</button>';
+  });
+}
+
+// ════════════════════════════════════
+//  PILIH STATUS
+// ════════════════════════════════════
+const STATUS_CONFIG = {
+  'Hadir': { border:'var(--gf)', bg:'var(--gp)', color:'var(--gd)', needFoto:true,  needGPS:true  },
+  'Izin':  { border:'var(--am)', bg:'var(--amp)', color:'var(--amd)', needFoto:false, needGPS:false },
+  'Sakit': { border:'var(--bl)', bg:'var(--blp)', color:'var(--bld)', needFoto:false, needGPS:false },
+  'Alpha': { border:'var(--rs)', bg:'var(--rsp)', color:'var(--rsd)', needFoto:false, needGPS:false },
+};
+
+function pilihStatus(st) {
+  document.getElementById('inp-status').value = st;
+  // Reset semua card
+  Object.keys(STATUS_CONFIG).forEach(s => {
+    const el = document.getElementById('st-'+s);
+    if(!el) return;
+    el.style.border   = '2px solid var(--cd)';
+    el.style.background = '#fff';
+    el.querySelector('div:last-child').style.color = 'var(--mu)';
+  });
+  // Highlight yang dipilih
+  const cfg = STATUS_CONFIG[st];
+  const el  = document.getElementById('st-'+st);
+  if(el && cfg) {
+    el.style.border     = `2px solid ${cfg.border}`;
+    el.style.background = cfg.bg;
+    el.querySelector('div:last-child').style.color = cfg.color;
+  }
+  // Tampilkan/sembunyikan kamera & GPS sesuai status
+  const camS = document.getElementById('cam-section');
+  const gpsC = document.querySelector('.gps-card');
+  if(camS) camS.style.display = cfg?.needFoto ? 'block' : 'none';
+
+  // Update placeholder keterangan
+  const ketInput = document.getElementById('inp-ket');
+  if(ketInput) {
+    const ph = {
+      'Hadir': 'Misal: hadir tepat waktu...',
+      'Izin':  'Misal: keperluan keluarga...',
+      'Sakit': 'Misal: demam, flu...',
+      'Alpha': 'Alasan tidak hadir...'
+    };
+    ketInput.placeholder = ph[st] || '';
   }
 }
 
 function doCheckin() {
-  if (!capturedPhoto) { showToast('📸 Ambil foto selfie dulu!','err'); return; }
-  if (!gpsData)       { showToast('📍 GPS belum aktif!','err'); getGPS(); return; }
-  const today = new Date().toISOString().split('T')[0];
+  const selectedStatus = document.getElementById('inp-status')?.value || 'Hadir';
+  const cfg = STATUS_CONFIG[selectedStatus] || STATUS_CONFIG['Hadir'];
+
+  // Validasi foto hanya jika status Hadir
+  if (cfg.needFoto && !capturedPhoto) { showToast('📸 Ambil foto selfie dulu!','err'); return; }
+  if (cfg.needGPS  && !gpsData)       { showToast('📍 GPS belum aktif!','err'); getGPS(); return; }
+
   const n     = new Date();
-  const time  = String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
-  const ket   = document.getElementById('inp-ket')?.value || '';
-  const all   = DB.getAbsensi();
-  all.unshift({
-    id: Date.now(), uid: currentUser.nik,
-    tgl: today, in: time, out: '',
-    st: 'Hadir', ket: ket,
-    foto: capturedPhoto,
-    lat: gpsData.lat, lng: gpsData.lng, acc: gpsData.acc,
-    alamat: document.getElementById('gps-alamat')?.textContent || ''
+  const jam   = n.getHours();
+  const menit = n.getMinutes();
+  const time  = String(jam).padStart(2,'0')+':'+String(menit).padStart(2,'0');
+  const token = localStorage.getItem('auth_token');
+  let ketTambahan = '';
+
+  if (selectedStatus === 'Hadir') {
+    // Validasi GPS radius
+    const KANTOR_LAT = -6.408900;
+    const KANTOR_LNG = 107.012300;
+    const MAX_RADIUS = 100;
+    const dist = hitungJarak(parseFloat(gpsData.lat), parseFloat(gpsData.lng), KANTOR_LAT, KANTOR_LNG);
+    if (dist > MAX_RADIUS) {
+      showToast(`📍 Lokasi terlalu jauh! ${Math.round(dist)}m dari kantor (maks. ${MAX_RADIUS}m)`, 'err');
+      return;
+    }
+    // Validasi jam
+    if (jam >= 17) {
+      showToast('⏰ Sudah melewati jam kerja (17:00). Absensi ditutup!', 'err');
+      return;
+    }
+    if (jam > 8 || (jam === 8 && menit > 0)) ketTambahan = ' (Terlambat)';
+  }
+
+  const ket = (document.getElementById('inp-ket')?.value || '') + ketTambahan;
+  const btn = document.getElementById('btn-absen-main');
+  if(btn){ btn.disabled=true; btn.textContent='⏳ Menyimpan...'; }
+
+  fetch('/api/absensi/checkin', {
+    method: 'POST',
+    headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+token, 'Accept':'application/json' },
+    body: JSON.stringify({
+      status: selectedStatus,
+      latitude:  gpsData ? parseFloat(gpsData.lat) : null,
+      longitude: gpsData ? parseFloat(gpsData.lng) : null,
+      keterangan: ket,
+      foto_base64: capturedPhoto || null
+    })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if(btn){ btn.disabled=false; btn.textContent='Simpan Absensi'; }
+    if (data.error) { showToast('❌ '+data.error,'err'); if(btn){btn.disabled=false;btn.textContent='Simpan Absensi';} return; }
+    absenToday = data.data;
+    capturedPhoto = null;
+    const msgMap = {
+      'Hadir': ketTambahan ? '⚠️ Check-in berhasil tapi TERLAMBAT! Jam '+time : '✅ Check-in berhasil! Jam '+time,
+      'Izin':  '📝 Izin berhasil dicatat',
+      'Sakit': '🤒 Sakit berhasil dicatat',
+      'Alpha': '❌ Alpha berhasil dicatat',
+    };
+    showToast(msgMap[selectedStatus] || '✅ Absensi berhasil!', ketTambahan ? 'err' : 'ok');
+    updateAbsensiStatus();
+    updateKehadiranMini();
+  })
+  .catch(() => {
+    if(btn){ btn.disabled=false; btn.textContent='Simpan Absensi'; }
+    showToast('❌ Gagal terhubung ke server','err');
   });
-  DB.saveAbsensi(all);
-  capturedPhoto = null;
-  showToast('✅ Check-in berhasil! Jam '+time,'ok');
-  updateAbsensiStatus();
-  updateKehadiranMini();
+}
+
+function hitungJarak(lat1, lng1, lat2, lng2) {
+  const R = 6371000; // meter
+  const dLat = (lat2-lat1) * Math.PI/180;
+  const dLng = (lng2-lng1) * Math.PI/180;
+  const a = Math.sin(dLat/2)*Math.sin(dLat/2) +
+            Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*
+            Math.sin(dLng/2)*Math.sin(dLng/2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
 function doCheckout() {
   if (!capturedPhoto) { showToast('📸 Ambil foto checkout dulu!','err'); return; }
   if (!gpsData)       { showToast('📍 GPS belum aktif!','err'); getGPS(); return; }
-  const today = new Date().toISOString().split('T')[0];
-  const n     = new Date();
-  const time  = String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
-  const all   = DB.getAbsensi();
-  const idx   = all.findIndex(a => a.uid===currentUser.nik && a.tgl===today && !a.out);
-  if (idx===-1) { showToast('Tidak ada absensi masuk hari ini','err'); return; }
-  all[idx].out = time;
-  all[idx].foto_out = capturedPhoto;
-  all[idx].lat_out  = gpsData.lat;
-  all[idx].lng_out  = gpsData.lng;
-  DB.saveAbsensi(all);
-  capturedPhoto = null;
-  showToast('👋 Check-out berhasil! Jam '+time,'ok');
-  updateAbsensiStatus();
-  updateKehadiranMini();
+
+  // Validasi jarak
+  const KANTOR_LAT = -6.408900;
+  const KANTOR_LNG = 107.012300;
+  const MAX_RADIUS = 100;
+  const dist = hitungJarak(parseFloat(gpsData.lat), parseFloat(gpsData.lng), KANTOR_LAT, KANTOR_LNG);
+  if (dist > MAX_RADIUS) {
+    showToast(`📍 Lokasi terlalu jauh! ${Math.round(dist)}m dari kantor`, 'err');
+    return;
+  }
+
+  const n    = new Date();
+  const jam  = n.getHours();
+  const time = String(jam).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+
+  let ketTambahan = '';
+  if (jam < 17) ketTambahan = ' (Pulang Cepat)';
+
+  const token = localStorage.getItem('auth_token');
+
+  fetch('/api/absensi/checkout', {
+    method: 'POST',
+    headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+token, 'Accept':'application/json' },
+    body: JSON.stringify({ latitude: parseFloat(gpsData.lat), longitude: parseFloat(gpsData.lng) })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.error) { showToast('❌ '+data.error,'err'); return; }
+    capturedPhoto = null;
+    if(ketTambahan) showToast('⚠️ Checkout berhasil tapi PULANG CEPAT! Jam '+time, 'err');
+    else showToast('👋 Check-out berhasil! Jam '+time,'ok');
+    updateAbsensiStatus();
+    updateKehadiranMini();
+  })
+  .catch(() => showToast('❌ Gagal terhubung ke server','err'));
 }
 
 // ════════════════════════════════════
 //  KEHADIRAN MINI
 // ════════════════════════════════════
 function updateKehadiranMini() {
-  if (!currentUser) return;
-  const n  = new Date();
-  const mo = n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0');
-  const abs= DB.getAbsensi().filter(a => a.uid===currentUser.nik && a.tgl.startsWith(mo));
-  const H  = abs.filter(a=>a.st==='Hadir').length;
-  const S  = abs.filter(a=>a.st==='SPPD').length;
-  const I  = abs.filter(a=>a.st==='Izin').length;
-  const A  = abs.filter(a=>a.st==='Alpha').length;
-  const T  = H+S+I+A||1;
-  const pct= Math.round(((H+S)/T)*100);
-  const e  = id => document.getElementById(id);
-  if(e('kh-pct'))  { e('kh-pct').textContent=pct+'%'; e('kh-pct').style.color=pct>=80?'var(--gm)':pct>=60?'var(--amd)':'var(--rs)'; }
-  if(e('kh-prog')) e('kh-prog').style.width=pct+'%';
-  if(e('kh-h'))    e('kh-h').textContent=H;
-  if(e('kh-s'))    e('kh-s').textContent=S;
-  if(e('kh-i'))    e('kh-i').textContent=I;
-  if(e('kh-a'))    e('kh-a').textContent=A;
+  const token = localStorage.getItem('auth_token');
+  const n = new Date();
+  fetch(`/api/absensi/laporan?bulan=${n.getMonth()+1}&tahun=${n.getFullYear()}`, {
+    headers: { 'Authorization':'Bearer '+token, 'Accept':'application/json' }
+  })
+  .then(r => r.json())
+  .then(data => {
+    const s   = data.summary;
+    if(!s) return;
+    const H   = parseInt(s.hadir)||0;
+    const S   = parseInt(s.sppd)||0;
+    const I   = parseInt(s.izin)||0;
+    const A   = parseInt(s.alpha)||0;
+    const T   = H+S+I+A||1;
+    const pct = Math.round(((H+S)/T)*100);
+    const e   = id => document.getElementById(id);
+    if(e('kh-pct'))  { e('kh-pct').textContent=pct+'%'; e('kh-pct').style.color=pct>=80?'var(--gm)':pct>=60?'var(--amd)':'var(--rs)'; }
+    if(e('kh-prog')) e('kh-prog').style.width=pct+'%';
+    if(e('kh-h'))    e('kh-h').textContent=H;
+    if(e('kh-s'))    e('kh-s').textContent=S;
+    if(e('kh-i'))    e('kh-i').textContent=I;
+    if(e('kh-a'))    e('kh-a').textContent=A;
+  })
+  .catch(()=>{});
 }
 
 // ════════════════════════════════════
 //  RIWAYAT
 // ════════════════════════════════════
 function loadRiwayat() {
-  if (!currentUser) return;
-  const abs  = DB.getAbsensi().filter(a=>a.uid===currentUser.nik).sort((a,b)=>new Date(b.tgl)-new Date(a.tgl));
-  const wrap = document.getElementById('riwayat-list');
+  const token = localStorage.getItem('auth_token');
+  const wrap  = document.getElementById('riwayat-list');
   if (!wrap) return;
-  if (abs.length===0) {
-    wrap.innerHTML='<div style="text-align:center;padding:40px;color:var(--mu)"><div style="font-size:40px;margin-bottom:10px">📭</div><div style="font-weight:600">Belum ada riwayat</div></div>'; return;
-  }
-  const bcMap={Hadir:'bdg-h',Izin:'bdg-i',Alpha:'bdg-a',SPPD:'bdg-s'};
-  const icBg ={Hadir:'var(--gp)',Izin:'var(--amp)',Alpha:'var(--rsp)',SPPD:'var(--blp)'};
-  const icEm ={Hadir:'✅',Izin:'📝',Alpha:'❌',SPPD:'✈️'};
-  wrap.innerHTML = abs.map(a => {
-    const d   = new Date(a.tgl);
-    const tgl = DAYS[d.getDay()]+', '+d.getDate()+' '+MONS_S[d.getMonth()]+' '+d.getFullYear();
-    const fotoHtml = a.foto ? `<img src="${a.foto}" class="rw-foto" onclick="showFotoModal('${a.id}')" alt="Foto">` : '';
-    return `<div class="riwayat-item" data-id="${a.id}">
-      <div class="rw-ic" style="background:${icBg[a.st]||'var(--cd)'}">${icEm[a.st]||'📋'}</div>
-      <div style="flex:1">
-        <div class="rw-tgl">${tgl}</div>
-        <div class="rw-time">${a.in?'Masuk '+a.in:''} ${a.out?'· Keluar '+a.out:''}</div>
-        ${a.lat?`<div style="font-size:10px;color:var(--hi);font-family:monospace;margin-top:2px">📍 ${a.lat}, ${a.lng}</div>`:''}
-      </div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
-        <span class="bdg ${bcMap[a.st]||''}">${a.st}</span>
-        ${fotoHtml}
-      </div>
-    </div>`;
-  }).join('');
+  wrap.innerHTML = '<div style="text-align:center;padding:40px;color:var(--mu)"><div style="font-size:32px">⏳</div><div>Memuat riwayat...</div></div>';
+
+  fetch('/api/absensi/riwayat?limit=30', {
+    headers: { 'Authorization':'Bearer '+token, 'Accept':'application/json' }
+  })
+  .then(r => r.json())
+  .then(data => {
+    const abs = data.data ?? [];
+    if (abs.length===0) {
+      wrap.innerHTML='<div style="text-align:center;padding:40px;color:var(--mu)"><div style="font-size:40px;margin-bottom:10px">📭</div><div style="font-weight:600">Belum ada riwayat</div></div>';
+      return;
+    }
+    const bcMap={Hadir:'bdg-h',Izin:'bdg-i',Alpha:'bdg-a',SPPD:'bdg-s'};
+    const icBg ={Hadir:'var(--gp)',Izin:'var(--amp)',Alpha:'var(--rsp)',SPPD:'var(--blp)'};
+    const icEm ={Hadir:'✅',Izin:'📝',Alpha:'❌',SPPD:'✈️'};
+    wrap.innerHTML = abs.map(a => {
+      const d    = new Date(a.tanggal);
+      const tgl  = DAYS[d.getDay()]+', '+d.getDate()+' '+MONS_S[d.getMonth()]+' '+d.getFullYear();
+      const masuk  = a.jam_masuk  ? a.jam_masuk.substring(0,5)  : '';
+      const keluar = a.jam_keluar ? a.jam_keluar.substring(0,5) : '';
+      const fotoUrl = a.foto_path ? `http://127.0.0.1:8000/${a.foto_path}` : null;
+      const fotoHtml = fotoUrl ? `<img src="${fotoUrl}" class="rw-foto" onclick="showFotoUrl('${fotoUrl}')" alt="Foto" onerror="this.style.display='none'">` : '';
+     const timeInfo = masuk || keluar
+        ? `<div class="rw-time">${masuk?'<span style="color:var(--gm);font-weight:600">▲ '+masuk+'</span>':''} ${keluar?'<span style="color:var(--rs);font-weight:600"> ▼ '+keluar+'</span>':''}</div>`
+        : `<div class="rw-time" style="color:var(--mu);font-style:italic">Tidak ada jam</div>`;
+
+      return `<div class="riwayat-item">
+        <div class="rw-ic" style="background:${icBg[a.status]||'var(--cd)'}">
+          <span style="font-size:18px">${icEm[a.status]||'📋'}</span>
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">
+            <div class="rw-tgl">${tgl}</div>
+            <span class="bdg ${bcMap[a.status]||''}">${a.status}</span>
+          </div>
+          ${timeInfo}
+          ${a.latitude?`<div style="font-size:10px;color:var(--hi);font-family:monospace;margin-top:3px">📍 ${parseFloat(a.latitude).toFixed(4)}, ${parseFloat(a.longitude).toFixed(4)}</div>`:''}
+          ${a.keterangan?`<div style="font-size:11px;color:var(--mu);margin-top:3px;font-style:italic">"${a.keterangan}"</div>`:''}
+        </div>
+        ${fotoHtml ? `<div style="flex-shrink:0;margin-left:8px">${fotoHtml}</div>` : ''}
+      </div>`;
+    }).join('');
+  })
+  .catch(() => {
+    wrap.innerHTML='<div style="text-align:center;padding:40px;color:var(--rs)"><div style="font-size:32px">⚠️</div><div>Gagal memuat riwayat</div></div>';
+  });
 }
 
-function showFotoModal(id) {
-  const rec = DB.getAbsensi().find(a=>String(a.id)===String(id));
-  if (!rec || !rec.foto) return;
-  document.getElementById('foto-modal-img').src = rec.foto;
+function showFotoUrl(url) {
+  document.getElementById('foto-modal-img').src = url;
   document.getElementById('foto-modal').classList.add('show');
 }
 function closeFotoModal() {
@@ -849,15 +1049,24 @@ function closeFotoModal() {
 //  LAPORAN
 // ════════════════════════════════════
 function loadLaporan() {
-  if (!currentUser) return;
+  const token = localStorage.getItem('auth_token');
   const n  = new Date();
-  const mo = n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0');
-  const abs= DB.getAbsensi().filter(a=>a.uid===currentUser.nik && a.tgl.startsWith(mo));
-  const H=abs.filter(a=>a.st==='Hadir').length,S=abs.filter(a=>a.st==='SPPD').length;
-  const I=abs.filter(a=>a.st==='Izin').length,A=abs.filter(a=>a.st==='Alpha').length;
-  const T=H+S+I+A||1,pct=Math.round(((H+S)/T)*100);
-  const c  = pct>=80?'var(--gm)':pct>=60?'var(--amd)':'var(--rs)';
-  document.getElementById('laporan-content').innerHTML = `
+  const wrap = document.getElementById('laporan-content');
+  if(!wrap) return;
+  wrap.innerHTML = '<div style="text-align:center;padding:40px;color:var(--mu)"><div style="font-size:32px">⏳</div></div>';
+
+  fetch(`/api/absensi/laporan?bulan=${n.getMonth()+1}&tahun=${n.getFullYear()}`, {
+    headers: { 'Authorization':'Bearer '+token, 'Accept':'application/json' }
+  })
+  .then(r => r.json())
+  .then(data => {
+    const s   = data.summary;
+    const det = data.detail ?? [];
+    const H=parseInt(s?.hadir)||0, S=parseInt(s?.sppd)||0;
+    const I=parseInt(s?.izin)||0,  A=parseInt(s?.alpha)||0;
+    const T=H+S+I+A||1, pct=Math.round(((H+S)/T)*100);
+    const c = pct>=80?'var(--gm)':pct>=60?'var(--amd)':'var(--rs)';
+    wrap.innerHTML = `
     <div style="font-size:12px;color:var(--mu);margin-bottom:14px">${MONS[n.getMonth()]} ${n.getFullYear()}</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
       <div class="lap-stat" style="border-top:3px solid var(--gm)"><div class="lap-num" style="color:var(--gm)">${H}</div><div class="lap-lbl">Hadir</div></div>
@@ -875,19 +1084,26 @@ function loadLaporan() {
     </div>
     <div style="background:#fff;border-radius:14px;padding:16px;box-shadow:0 1px 6px rgba(26,58,42,.07)">
       <div style="font-size:13px;font-weight:700;margin-bottom:12px">Detail Absensi</div>
-      ${abs.length===0?'<div style="text-align:center;color:var(--mu);padding:16px">Belum ada data</div>':
-        abs.sort((a,b)=>new Date(b.tgl)-new Date(a.tgl)).map(a=>{
-          const d=new Date(a.tgl);const bcMap={Hadir:'bdg-h',Izin:'bdg-i',Alpha:'bdg-a',SPPD:'bdg-s'};
+      ${det.length===0?'<div style="text-align:center;color:var(--mu);padding:16px">Belum ada data</div>':
+        det.map(a=>{
+          const d=new Date(a.tanggal);
+          const bcMap={Hadir:'bdg-h',Izin:'bdg-i',Alpha:'bdg-a',SPPD:'bdg-s'};
+          const masuk  = a.jam_masuk  ? a.jam_masuk.substring(0,5)  : '–';
+          const keluar = a.jam_keluar ? a.jam_keluar.substring(0,5) : '';
           return`<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--cd)">
             <div>
               <div style="font-size:12px;font-weight:500">${d.getDate()} ${MONS_S[d.getMonth()]}</div>
-              <div style="font-size:10px;color:var(--mu)">${a.in?'Masuk '+a.in:'–'} ${a.out?'· Keluar '+a.out:''}</div>
-              ${a.lat?`<div style="font-size:9px;color:var(--hi);font-family:monospace">📍${a.lat}, ${a.lng}</div>`:''}
+              <div style="font-size:10px;color:var(--mu)">Masuk ${masuk} ${keluar?'· Keluar '+keluar:''}</div>
+              ${a.keterangan?`<div style="font-size:9px;color:var(--hi)">${a.keterangan}</div>`:''}
             </div>
-            <span class="bdg ${bcMap[a.st]||''}">${a.st}</span>
+            <span class="bdg ${bcMap[a.status]||''}">${a.status}</span>
           </div>`;
         }).join('')}
     </div>`;
+  })
+  .catch(()=>{
+    wrap.innerHTML='<div style="text-align:center;padding:40px;color:var(--rs)"><div style="font-size:32px">⚠️</div><div>Gagal memuat laporan</div></div>';
+  });
 }
 
 // ════════════════════════════════════

@@ -34,24 +34,21 @@ Route::middleware('auth.custom')->group(function () {
 // ADMIN ONLY
 // ==========================================
 Route::middleware('auth.custom:admin')->group(function () {
-// Kelola Absensi
-Route::get('/absensi',         [AbsensiController::class, 'index']);
-Route::post('/absensi',        [AbsensiController::class, 'store']);
-Route::get('/absensi/{id}',    [AbsensiController::class, 'show']);
-Route::put('/absensi/{id}',    [AbsensiController::class, 'update']);
-Route::delete('/absensi/{id}', [AbsensiController::class, 'destroy']);
+    Route::get('/absensi',         [AbsensiController::class, 'index']);
+    Route::post('/absensi',        [AbsensiController::class, 'store']);
+    Route::get('/absensi/{id}',    [AbsensiController::class, 'show']);
+    Route::put('/absensi/{id}',    [AbsensiController::class, 'update']);
+    Route::delete('/absensi/{id}', [AbsensiController::class, 'destroy']);
 
-    // Kelola SPPD
     Route::get('/sppd',                 [SppdController::class, 'index']);
     Route::post('/sppd',                [SppdController::class, 'store']);
     Route::put('/sppd/{id}/verifikasi', [SppdController::class, 'verifikasi']);
     Route::delete('/sppd/{id}',         [SppdController::class, 'destroy']);
 
-    // Laporan
     Route::get('/laporan/bulanan',       [LaporanController::class, 'bulanan']);
     Route::get('/laporan/rekap-pegawai', [LaporanController::class, 'rekapPegawai']);
 
-    // Pegawai
+
     Route::get('/pegawai',         [PegawaiController::class, 'index']);
     Route::post('/pegawai',        [PegawaiController::class, 'store']);
     Route::put('/pegawai/{id}',    [PegawaiController::class, 'update']);

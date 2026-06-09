@@ -173,27 +173,19 @@ class AbsensiController extends Controller
     }
 
     // GET /api/absensi/riwayat — Riwayat absensi milik user
-    public function riwayat(Request $request)
-    {
-        $authUser = $request->attributes->get('auth_user');
-        $limit    = min((int)($request->limit ?? 30), 100);
-        $offset   = (int)($request->offset ?? 0);
+public function riwayat(Request $request)
+{
+    $authUser = $request->attributes->get('auth_user');
+    $limit    = $request->get('limit', 30);
 
-        $query = DB::table('absensi')
-            ->join('users', 'users.id', '=', 'absensi.user_id')
-            ->where('absensi.user_id', $authUser->user_id)
-            ->select('absensi.*', 'users.nama')
-            ->orderBy('absensi.tanggal', 'desc');
+    $data = DB::table('absensi')
+        ->where('user_id', $authUser->user_id)
+        ->orderBy('tanggal', 'desc')
+        ->limit($limit)
+        ->get();
 
-        if ($request->status && in_array($request->status, ['Hadir', 'Izin', 'Alpha', 'SPPD'])) {
-            $query->where('absensi.status', $request->status);
-        }
-
-        $data = $query->offset($offset)->limit($limit)->get();
-
-        return response()->json(['data' => $data]);
-    }
-
+    return response()->json(['data' => $data]);
+}
     // GET /api/absensi/laporan — Laporan bulanan user
     public function laporan(Request $request)
     {

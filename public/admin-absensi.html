@@ -247,22 +247,90 @@ tbody tr:hover{background:#f5f8f4}
 .peg-name{font-family:'Fraunces',serif;font-size:18px;font-weight:700;color:#fff}
 .peg-role{font-size:11px;color:rgba(255,255,255,.55);margin-top:2px}
 
-/* RESPONSIVE */
+/* ─── SIDEBAR OVERLAY ─── */
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:299;backdrop-filter:blur(2px)}
+.sb-overlay.on{display:block}
+
+/* ─── HAMBURGER ─── */
+.mob-toggle{display:none;width:38px;height:38px;border-radius:9px;border:1.5px solid var(--cd);background:none;cursor:pointer;align-items:center;justify-content:center;flex-direction:column;gap:5px;flex-shrink:0}
+.mob-toggle span{display:block;width:16px;height:2px;background:var(--ink);border-radius:2px;transition:all .2s}
+
+/* ─── SCROLLBAR ─── */
+.content::-webkit-scrollbar{width:5px}
+.content::-webkit-scrollbar-track{background:transparent}
+.content::-webkit-scrollbar-thumb{background:var(--cd);border-radius:10px}
+
+/* ─── HOVER ENHANCEMENTS ─── */
+.card{transition:box-shadow .18s}
+.btn:active{transform:scale(.97)}
+.av{transition:all .2s}
+.av:hover{transform:scale(1.05);box-shadow:0 4px 12px rgba(26,58,42,.2)}
+.nb:empty{display:none}
+.sec-h{flex-wrap:wrap;gap:8px}
+.mf{flex-wrap:wrap}
+.tw{overflow-x:auto}
+table{min-width:500px}
+
+/* ─── RESPONSIVE ─── */
 @media(max-width:1300px){.sc-grid{grid-template-columns:repeat(3,1fr)}.ls-grid{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:1100px){.two-col,.three-col,.two-col-7{grid-template-columns:1fr}.sc-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:900px){
   .sb{transform:translateX(-100%)}.sb.open{transform:translateX(0)}
-  .main{margin-left:0}.mob-show{display:flex !important}
+  .main{margin-left:0}.mob-toggle{display:flex}
   .sc-grid,.ls-grid{grid-template-columns:1fr 1fr}
   .dh-stats{grid-template-columns:1fr 1fr}
   .qa-grid{grid-template-columns:1fr 1fr}
+  .topbar{padding:0 14px;height:54px}
+  .tb-bc{display:none}
+  .content{padding:16px 14px}
 }
-@media(max-width:600px){.sc-grid,.ls-grid,.qa-grid{grid-template-columns:1fr}.dh-stats{grid-template-columns:1fr 1fr}.content{padding:14px}}
+@media(max-width:700px){
+  .two-col,.three-col,.two-col-7{grid-template-columns:1fr}
+  .fr{grid-template-columns:1fr}
+}
+@media(max-width:600px){
+  .sc-grid,.qa-grid{grid-template-columns:1fr 1fr}
+  .ls-grid{grid-template-columns:repeat(2,1fr)}
+  .dh-stats{grid-template-columns:1fr 1fr}
+  .content{padding:12px}
+  .dh-greet{font-size:16px}
+  .dh-day{font-size:28px}
+  .dash-hero{padding:16px}
+  .mbox{border-radius:20px 20px 14px 14px}
+  .mo{padding:16px 10px;align-items:flex-end}
+  .tw2{top:auto;bottom:20px;right:12px;left:12px}
+  .toast{max-width:100%}
+  .fb{flex-direction:column;align-items:stretch}
+  .sw{min-width:unset;width:100%}
+  .sppd-pending-card{flex-wrap:wrap}
+}
+@media(max-width:400px){
+  .sc-grid{grid-template-columns:1fr}
+  .sc .sn{font-size:22px}
+}
 .mob-show{display:none}
+
+/* NOTIF DROPDOWN */
+.notif-wrap{position:relative}
+.notif-drop{position:absolute;top:44px;right:0;width:320px;background:#fff;border-radius:14px;box-shadow:var(--s4);border:1px solid var(--cd);z-index:500;overflow:hidden;display:none;animation:mUp .2s ease}
+.notif-drop.on{display:block}
+.notif-hd{padding:14px 16px;border-bottom:1px solid var(--cd);display:flex;align-items:center;justify-content:space-between}
+.notif-hd-t{font-family:'Fraunces',serif;font-size:14px;font-weight:700}
+.notif-item{display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid var(--cd);transition:background .1s;cursor:default}
+.notif-item:last-child{border-bottom:none}
+.notif-item:hover{background:var(--cr)}
+.notif-av{width:34px;height:34px;border-radius:9px;background:var(--gd);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--gl);flex-shrink:0}
+.notif-name{font-size:12px;font-weight:600;color:var(--ink)}
+.notif-info{font-size:10px;color:var(--mu);margin-top:2px}
+.notif-empty{padding:28px 16px;text-align:center;color:var(--mu);font-size:12px}
+
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
+
+<!-- SIDEBAR OVERLAY -->
+<div class="sb-overlay" id="sb-overlay" onclick="closeSb()"></div>
 
 <!-- SIDEBAR -->
 <aside class="sb" id="sb">
@@ -285,15 +353,15 @@ tbody tr:hover{background:#f5f8f4}
     <button class="ni on" onclick="nav('dashboard',this)"><div class="ni-ic">📊</div><span class="ni-lbl">Dashboard</span></button>
     <div class="sb-sec">Data Absensi</div>
     <button class="ni" onclick="nav('absensi',this)"><div class="ni-ic">📋</div><span class="ni-lbl">Kelola Absensi</span></button>
-    <button class="ni" onclick="nav('sppd',this)"><div class="ni-ic">✈️</div><span class="ni-lbl">Kelola SPPD</span><span class="nb" id="sppd-nb">2</span></button>
+    <button class="ni" onclick="nav('sppd',this)"><div class="ni-ic">✈️</div><span class="ni-lbl">Kelola SPPD</span><span class="nb" id="sppd-nb"></span></button>
     <div class="sb-sec">Laporan</div>
     <button class="ni" onclick="nav('laporan',this)"><div class="ni-ic">📈</div><span class="ni-lbl">Laporan Bulanan</span></button>
     <button class="ni" onclick="nav('rekap',this)"><div class="ni-ic">📑</div><span class="ni-lbl">Rekap Pegawai</span></button>
     <div class="sb-sec">Master Data</div>
-    <button class="ni" onclick="nav('pegawai',this)"><div class="ni-ic">👥</div><span class="ni-lbl">Data Pegawai</span><span class="nb green" id="peg-nb">5</span></button>
+    <button class="ni" onclick="nav('pegawai',this)"><div class="ni-ic">👥</div><span class="ni-lbl">Data Pegawai</span><span class="nb green" id="peg-nb"></span></button>
     <div class="sb-sec">Pengaturan</div>
     <button class="ni" onclick="nav('pengaturan',this)"><div class="ni-ic">⚙️</div><span class="ni-lbl">Pengaturan Sistem</span></button>
-    <button class="ni" onclick="nav('password',this)"><div class="ni-ic">🔒</div><span class="ni-lbl">Ubah Kata Sandi</span></button>
+    <button class="ni" onclick="nav('password',this)"><div class="ni-ic">👤</div><span class="ni-lbl">Profil & Sandi</span></button>
   </nav>
   <div class="sb-foot">
     <div class="sb-clock"><div class="sb-time" id="sb-time">–</div><div class="sb-date" id="sb-date">–</div></div>
@@ -305,16 +373,26 @@ tbody tr:hover{background:#f5f8f4}
 <div class="main">
   <header class="topbar">
     <div class="tb-l">
-      <button class="ico-btn mob-show" onclick="toggleSb()" style="display:none">☰</button>
+      <button class="mob-toggle" onclick="toggleSb()" id="mob-toggle">
+        <span></span><span></span><span></span>
+      </button>
       <div>
         <div class="tb-bc"><span>Admin</span><span>›</span><span id="bc">Dashboard</span></div>
         <div class="tb-pg" id="pg-title">Dashboard</div>
       </div>
     </div>
-    <div class="tb-r">
-      <button class="ico-btn" onclick="showToast('🔄 Data diperbarui','inf')">🔄</button>
-      <button class="ico-btn" onclick="nav('sppd',document.querySelectorAll('.ni')[2])"><span>🔔</span><span class="dot" id="notif-dot"></span></button>
-<div class="av" id="top-av" onclick="nav('pengaturan',document.querySelectorAll('.ni')[6])">AS</div>    </div>
+  <div class="notif-wrap">
+  <button class="ico-btn" title="Notifikasi" onclick="toggleNotif()" id="notif-btn">
+    <span>🔔</span><span class="dot" id="notif-dot" style="display:none"></span>
+  </button>
+  <div class="notif-drop" id="notif-drop">
+    <div class="notif-hd">
+      <div class="notif-hd-t">🔔 Absensi Hari Ini</div>
+      <span id="notif-count" style="font-size:10px;color:var(--mu)"></span>
+    </div>
+    <div id="notif-list"><div class="notif-empty">⏳ Memuat...</div></div>
+  </div>
+</div>
   </header>
   <div class="content" id="ca"></div>
 </div>
@@ -377,7 +455,7 @@ tbody tr:hover{background:#f5f8f4}
       <div class="fr">
         <div class="fg">
           <label class="fl">Role</label>
-          <select class="fc" id="mpeg-role" style="cursor:pointer"><option value="pegawai">Pegawai</option><option value="admin">Admin</option></select>
+          <select class="fc" id="mpeg-role" style="cursor:pointer"><option value="user">User (Pegawai)</option><option value="admin">Admin</option></select>
         </div>
         <div class="fg"><label class="fl">Password <span class="req" id="pr">*</span></label><input class="fc" type="password" id="mpeg-pass" placeholder="Min. 8 karakter"></div>
       </div>
@@ -415,8 +493,8 @@ tbody tr:hover{background:#f5f8f4}
     </div>
     <div class="mf">
       <button class="btn btn-s" onclick="cm('m-sppd')">Tutup</button>
-      <button class="btn btn-d" onclick="verifSPPD('rejected')">✕ Tolak</button>
-      <button class="btn btn-ok" onclick="verifSPPD('approved')">✓ Setujui</button>
+      <button class="btn btn-d" onclick="verifSPPD('ditolak')">✕ Tolak</button>
+      <button class="btn btn-ok" onclick="verifSPPD('disetujui')">✓ Setujui</button>
     </div>
   </div>
 </div>
@@ -444,14 +522,14 @@ tbody tr:hover{background:#f5f8f4}
       <button class="mc" onclick="cm('m-set')">✕</button>
     </div>
     <div class="mb">
-      <div class="fg"><label class="fl">Nama Desa</label><input class="fc" type="text" id="set-desa" value="Desa Sukamaju"></div>
-      <div class="fg"><label class="fl">Nama Kecamatan</label><input class="fc" type="text" id="set-kec" value="Kecamatan Cikaret"></div>
-      <div class="fg"><label class="fl">Jam Masuk (Toleransi)</label><input class="fc" type="time" id="set-jam" value="08:00"></div>
+      <div class="fg"><label class="fl">Nama Desa</label><input class="fc" type="text" id="set-desa" value="Desa Mekarsari"></div>
+      <div class="fg"><label class="fl">Nama Kecamatan</label><input class="fc" type="text" id="set-kec" value="Kecamatan Cileungsi"></div>
+      <div class="fg"><label class="fl">Jam Masuk</label><input class="fc" type="time" id="set-jam" value="08:00"></div>
       <div class="fr">
-        <div class="fg"><label class="fl">Radius GPS (meter)</label><input class="fc" type="number" id="set-radius" value="200"></div>
+        <div class="fg"><label class="fl">Radius GPS (meter)</label><input class="fc" type="number" id="set-radius" value="100"></div>
         <div class="fg"><label class="fl">Sesi Login (jam)</label><input class="fc" type="number" id="set-sesi" value="8"></div>
       </div>
-      <div class="fg" style="margin-bottom:0"><label class="fl">Kepala Desa</label><input class="fc" type="text" id="set-kades" value="Ahmad Sulaiman"></div>
+      <div class="fg" style="margin-bottom:0"><label class="fl">Kepala Desa</label><input class="fc" type="text" id="set-kades" value="Hj. Nasih"></div>
     </div>
     <div class="mf">
       <button class="btn btn-s" onclick="cm('m-set')">Batal</button>
@@ -469,7 +547,7 @@ tbody tr:hover{background:#f5f8f4}
   const currentUser = JSON.parse(localStorage.getItem('current_user'));
   if (!currentUser) {
     window.location.href = 'login.html';
-  } else if (currentUser.role !== 'admin' && currentUser.role !== 'operator') {
+  } else if (currentUser.role !== 'admin') {
     window.location.href = 'absensi.html';
   }
 })();
@@ -601,7 +679,7 @@ setTimeout(()=>{
     ca.style.transition='opacity .22s,transform .22s';
   },70);
   updateBadges();
-  if(window.innerWidth<900) document.getElementById('sb').classList.remove('open');
+  if(window.innerWidth<900) closeSb();
 }
 
 // ════════════════════════════════════════════════════
@@ -840,20 +918,28 @@ function pgAbs(){
     </div>
     <div class="tw">
       <table>
-        <thead><tr><th>Pegawai</th><th>Tanggal</th><th>Masuk</th><th>Keluar</th><th>Status</th><th>Keterangan</th><th>Aksi</th></tr></thead>
+        <thead><tr><th>Pegawai</th><th>Foto</th><th>Tanggal</th><th>Masuk</th><th>Keluar</th><th>Status</th><th>Keterangan</th><th>Aksi</th></tr></thead>
         <tbody>
           ${data.length===0
-            ? `<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--mu)"><div style="font-size:32px;margin-bottom:8px">📭</div>Tidak ada data absensi</td></tr>`
+            ? `<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--mu)"><div style="font-size:32px;margin-bottom:8px">📭</div>Tidak ada data absensi</td></tr>`
             : data.map(a => {
                 const ini = a.nama.split(' ').map(n=>n[0]).slice(0,2).join('');
                 const bc  = a.status==='Hadir'?'bh':a.status==='Izin'?'bi':a.status==='SPPD'?'bs':'ba';
                 const d   = new Date(a.tanggal);
                 const tgl = d.toLocaleDateString('id-ID',{weekday:'short',day:'numeric',month:'short'});
+                const fotoUrl = a.foto_path ? `http://127.0.0.1:8000/${a.foto_path}` : null;
                 return `<tr>
                   <td><div style="display:flex;align-items:center;gap:8px">
                     <div class="av-sm">${ini}</div>
                     <div><div class="tn">${a.nama}</div><div class="tm">${a.jabatan}</div></div>
                   </div></td>
+                  <td>${fotoUrl
+                    ? `<img src="${fotoUrl}" onclick="lihatFoto('${fotoUrl}','${a.nama}')"
+                         style="width:40px;height:40px;border-radius:9px;object-fit:cover;cursor:zoom-in;border:2px solid var(--gp);transition:transform .15s"
+                         onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'"
+                         onerror="this.outerHTML='<div style=width:40px;height:40px;border-radius:9px;background:var(--cr);border:1.5px solid var(--cd);display:flex;align-items:center;justify-content:center;font-size:16px>📷</div>'">`
+                    : `<div style="width:40px;height:40px;border-radius:9px;background:var(--cr);border:1.5px dashed var(--cd);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--hi)">–</div>`
+                  }</td>
                   <td style="font-weight:500;white-space:nowrap;font-size:12px">${tgl}</td>
                   <td>${a.jam_masuk||'–'}</td>
                   <td>${a.jam_keluar||'–'}</td>
@@ -1511,45 +1597,50 @@ function openAddPeg(){
   document.getElementById('mpeg-nama').value='';
   document.getElementById('mpeg-jab').value='';
   document.getElementById('mpeg-hp').value='';
-  document.getElementById('mpeg-role').value='pegawai';
+  document.getElementById('mpeg-role').value='user';
   document.getElementById('mpeg-pass').value='';
   document.getElementById('pr').style.display='inline';
   om('m-peg');
 }
 function openEditPeg(id){
-  const u=DB.users().find(x=>x.id===id);if(!u) return;
-  document.getElementById('mpeg-id').value=id;
-  document.getElementById('mpeg-t').textContent='Edit Data Pegawai';
-  document.getElementById('mpeg-nik').value=u.nik;
-  document.getElementById('mpeg-nama').value=u.nama;
-  document.getElementById('mpeg-jab').value=u.jabatan;
-  document.getElementById('mpeg-hp').value=u.hp||'';
-  document.getElementById('mpeg-role').value=u.role;
-  document.getElementById('mpeg-pass').value='';
-  document.getElementById('pr').style.display='none';
-  om('m-peg');
+  apiFetch('/pegawai').then(res=>{
+    const users = res?.data ?? [];
+    const u = users.find(x=>x.id===id);
+    if(!u) return;
+    document.getElementById('mpeg-id').value=id;
+    document.getElementById('mpeg-t').textContent='Edit Data Pegawai';
+    document.getElementById('mpeg-nik').value=u.nik;
+    document.getElementById('mpeg-nama').value=u.nama;
+    document.getElementById('mpeg-jab').value=u.jabatan||'';
+    document.getElementById('mpeg-hp').value=u.hp||'';
+    document.getElementById('mpeg-role').value=u.role;
+    document.getElementById('mpeg-pass').value='';
+    document.getElementById('pr').style.display='none';
+    om('m-peg');
+  });
 }
 function savePeg(){
-  const id=document.getElementById('mpeg-id').value;
-  const nik=document.getElementById('mpeg-nik').value.trim();
-  const nama=document.getElementById('mpeg-nama').value.trim();
-  const jab=document.getElementById('mpeg-jab').value.trim();
-  const hp=document.getElementById('mpeg-hp').value.trim();
-  const role=document.getElementById('mpeg-role').value;
-  const pass=document.getElementById('mpeg-pass').value;
+  const id   = document.getElementById('mpeg-id').value;
+  const nik  = document.getElementById('mpeg-nik').value.trim();
+  const nama = document.getElementById('mpeg-nama').value.trim();
+  const jab  = document.getElementById('mpeg-jab').value.trim();
+  const hp   = document.getElementById('mpeg-hp').value.trim();
+  const role = document.getElementById('mpeg-role').value;
+  const pass = document.getElementById('mpeg-pass').value;
   if(!nik||!nama){showToast('NIK dan nama wajib diisi','err');return;}
   if(!id&&!pass){showToast('Password wajib diisi untuk pegawai baru','err');return;}
-  const users=DB.users();
-  if(id){
-    const i=users.findIndex(u=>u.id===parseInt(id));
-    if(i>-1){const upd={...users[i],nik,nama,jabatan:jab,hp,role};if(pass)upd.pass=pass;users[i]=upd;}
-    showToast('Data pegawai diubah ✓');
-  }else{
-    if(users.find(u=>u.nik===nik)){showToast('NIK sudah terdaftar','err');return;}
-    users.push({id:Date.now(),nik,nama,jabatan:jab,hp,role,pass,aktif:true,joinDate:new Date().toISOString().split('T')[0]});
-    showToast('Pegawai baru ditambahkan ✓');
-  }
-  DB.saveU(users);cm('m-peg');nav(page,document.querySelector('.ni.on'));updateBadges();
+
+  const body = JSON.stringify({nik,nama,jabatan:jab,hp,role,aktif:1,...(pass?{password:pass}:{})});
+  const req = id
+    ? apiFetch(`/pegawai/${id}`,{method:'PUT',body:JSON.stringify({nama,jabatan:jab,role,aktif:1,...(pass?{password:pass}:{})})})
+    : apiFetch('/pegawai',{method:'POST',body});
+
+  req.then(res=>{
+    if(res?.message||res?.id){
+      showToast(id?'Data pegawai diubah ✓':'Pegawai baru ditambahkan ✓');
+      cm('m-peg');pgPeg();
+    }else{showToast(res?.error||'Gagal menyimpan','err');}
+  }).catch(()=>showToast('Gagal terhubung ke server','err'));
 }
 function togglePeg(id, aktif){
   const newAktif = aktif==1 ? 0 : 1;
@@ -1689,13 +1780,25 @@ function saveSettingPage(){
   setTimeout(()=>pgSet(), 500);
 }
 function savePw(){
-  const o=document.getElementById('pw-old')?.value,n=document.getElementById('pw-new')?.value,c=document.getElementById('pw-conf')?.value;
+  const o=document.getElementById('pw-old')?.value;
+  const n=document.getElementById('pw-new')?.value;
+  const c=document.getElementById('pw-conf')?.value;
   if(!o){showToast('Masukkan sandi lama','err');return;}
   if(!n||n.length<8){showToast('Sandi baru minimal 8 karakter','err');return;}
   if(n!==c){showToast('Konfirmasi sandi tidak cocok','err');return;}
-  showToast('Sandi berhasil diubah 🔒');
-  ['pw-old','pw-new','pw-conf'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
-  checkPw();
+
+  apiFetch('/change-password',{
+    method:'POST',
+    body:JSON.stringify({current_password:o,new_password:n,new_password_confirmation:c})
+  }).then(res=>{
+    if(res?.message){
+      showToast('✅ Sandi berhasil diubah!');
+      ['pw-old','pw-new','pw-conf'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+      checkPw();
+    }else{
+      showToast(res?.error||res?.message||'Gagal mengubah sandi','err');
+    }
+  }).catch(()=>showToast('Gagal terhubung ke server','err'));
 }
 
 // EXPORT
@@ -1870,8 +1973,72 @@ if(periode==='hari'){
   }).catch(()=>showToast('Gagal export data','err'));
 }
 
+// NOTIFIKASI ABSENSI
+function toggleNotif(){
+  const drop = document.getElementById('notif-drop');
+  drop.classList.toggle('on');
+  if(drop.classList.contains('on')) loadNotif();
+}
+function loadNotif(){
+  const list = document.getElementById('notif-list');
+  const today = new Date().toISOString().split('T')[0];
+  const [y,m] = today.split('-');
+  apiFetch(`/absensi?bulan=${m}&tahun=${y}`).then(res=>{
+    const data = (res?.data??[]).filter(a=>a.tanggal===today);
+    document.getElementById('notif-count').textContent = `${data.length} absensi`;
+    if(data.length===0){
+      list.innerHTML=`<div class="notif-empty">📭 Belum ada absensi hari ini</div>`;
+      return;
+    }
+    list.innerHTML = data.slice(0,8).map(a=>{
+      const ini = a.nama.split(' ').map(n=>n[0]).slice(0,2).join('');
+      const bc  = a.status==='Hadir'?'#22c55e':a.status==='Izin'?'var(--am)':a.status==='SPPD'?'var(--bl)':'var(--rs)';
+      const jam = a.jam_masuk ? a.jam_masuk.substring(0,5) : '–';
+      return`<div class="notif-item">
+        <div class="notif-av">${ini}</div>
+        <div style="flex:1">
+          <div class="notif-name">${a.nama}</div>
+          <div class="notif-info">${a.jabatan} · ${jam}</div>
+        </div>
+        <span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;background:${bc}22;color:${bc}">${a.status}</span>
+      </div>`;
+    }).join('');
+  });
+}
+// Tutup notif saat klik di luar
+document.addEventListener('click',e=>{
+  const wrap = document.querySelector('.notif-wrap');
+  if(wrap && !wrap.contains(e.target)){
+    document.getElementById('notif-drop')?.classList.remove('on');
+  }
+});
+
 // TOAST
 let toastCnt=0;
+// LIHAT FOTO ABSENSI
+function lihatFoto(url, nama){
+  const existing = document.getElementById('modal-foto');
+  if(existing) existing.remove();
+  const m = document.createElement('div');
+  m.id = 'modal-foto';
+  m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:800;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px)';
+  m.innerHTML = `
+    <div style="position:relative;max-width:400px;width:100%;animation:mUp .25s ease">
+      <button onclick="document.getElementById('modal-foto').remove()"
+        style="position:absolute;top:-14px;right:-14px;width:36px;height:36px;border-radius:50%;background:#fff;border:none;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.3);z-index:1">✕</button>
+      <div style="background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.5)">
+        <img src="${url}" style="width:100%;display:block;max-height:480px;object-fit:cover"
+          onerror="this.src='';this.parentElement.innerHTML='<div style=padding:40px;text-align:center;font-size:40px>📷</div>'">
+        <div style="padding:14px 16px">
+          <div style="font-family:Fraunces,serif;font-size:15px;font-weight:700;color:var(--ink)">📸 ${nama}</div>
+          <div style="font-size:11px;color:var(--mu);margin-top:2px">Foto selfie absensi</div>
+        </div>
+      </div>
+    </div>`;
+  m.addEventListener('click', e=>{ if(e.target===m) m.remove(); });
+  document.body.appendChild(m);
+}
+
 function showToast(msg,type=''){
   const w=document.getElementById('tw2');
   const t=document.createElement('div');
@@ -1880,9 +2047,15 @@ function showToast(msg,type=''){
   setTimeout(()=>{t.classList.remove('on');setTimeout(()=>t.remove(),300)},2800);
 }
 
-// RESPONSIVE
-function checkMob(){document.getElementById('menu-toggle')?.style&&(document.getElementById('menu-toggle').style.display=window.innerWidth<900?'flex':'none');}
-window.addEventListener('resize',checkMob);checkMob();
+// RESPONSIVE & SIDEBAR
+function toggleSb(){
+  document.getElementById('sb').classList.toggle('open');
+  document.getElementById('sb-overlay').classList.toggle('on');
+}
+function closeSb(){
+  document.getElementById('sb').classList.remove('open');
+  document.getElementById('sb-overlay').classList.remove('on');
+}
 
 // INIT
 (function() {
