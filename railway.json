@@ -1,5 +1,5 @@
 {
-  "build": {
-    "builder": "nixpacks"
-  }
+  "builder": "nixpacks",
+  "buildCommand": "composer install --no-dev && php artisan migrate --force",
+  "startCommand": "php artisan serve --host=0.0.0.0"
 }
