@@ -1,5 +1,9 @@
 {
-  "builder": "nixpacks",
-  "buildCommand": "composer install --no-dev && php artisan migrate --force",
-  "startCommand": "php artisan serve --host=0.0.0.0"
+  "build": {
+    "builder": "heroku.buildpacks",
+    "buildpacks": [
+      "heroku/php",
+      "heroku/nodejs"
+    ]
+  }
 }

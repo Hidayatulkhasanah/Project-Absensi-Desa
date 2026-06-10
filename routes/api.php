@@ -45,9 +45,13 @@ Route::middleware('auth.custom:admin')->group(function () {
     Route::put('/sppd/{id}/verifikasi', [SppdController::class, 'verifikasi']);
     Route::delete('/sppd/{id}',         [SppdController::class, 'destroy']);
 
+    // Laporan — View (JSON)
     Route::get('/laporan/bulanan',       [LaporanController::class, 'bulanan']);
     Route::get('/laporan/rekap-pegawai', [LaporanController::class, 'rekapPegawai']);
 
+    // Laporan — Export (File Excel)
+    Route::get('/laporan/export-bulanan',       [LaporanController::class, 'exportBulanan']);
+    Route::get('/laporan/export-rekap-pegawai', [LaporanController::class, 'exportRekapPegawai']);
 
     Route::get('/pegawai',         [PegawaiController::class, 'index']);
     Route::post('/pegawai',        [PegawaiController::class, 'store']);
