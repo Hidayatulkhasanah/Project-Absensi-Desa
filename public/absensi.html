@@ -587,9 +587,16 @@ async function apiCall(path, opts={}){
 // ════════════════════════════════════
 window.addEventListener('load', () => {
   const u = JSON.parse(localStorage.getItem('current_user'));
+  const overlay = document.getElementById('setup-overlay');
+  
   if (u) {
     currentUser = u;
+    // Hide setup overlay
+    if (overlay) overlay.style.display = 'none';
     startApp();
+  } else {
+    // Show setup overlay jika belum ada user
+    if (overlay) overlay.style.display = 'flex';
   }
 });
 
@@ -600,7 +607,8 @@ function saveSetup() {
   if (!nama || !nik || !jabatan) { showToast('Lengkapi semua data!','err'); return; }
   currentUser = { nama, nik, jabatan, joinDate: new Date().toISOString().split('T')[0] };
   localStorage.setItem('current_user', JSON.stringify(currentUser));
-  document.getElementById('setup-overlay').style.display = 'none';
+  const overlay = document.getElementById('setup-overlay');
+  if (overlay) overlay.style.display = 'none';
   startApp();
   showToast('✅ Selamat datang, '+nama+'!','ok');
 }
