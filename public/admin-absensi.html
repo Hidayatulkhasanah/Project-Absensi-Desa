@@ -25,7 +25,6 @@
 html,body{height:100%}
 body{font-family:'DM Sans',sans-serif;background:var(--cr);color:var(--ink);display:flex;overflow:hidden}
 
-
 /* ─── SIDEBAR ─── */
 .sb{width:var(--sb);background:var(--gd);display:flex;flex-direction:column;height:100vh;position:fixed;top:0;left:0;z-index:300;transition:transform .3s cubic-bezier(.22,1,.36,1);overflow:hidden}
 .sb::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;background:rgba(116,198,157,.06);pointer-events:none}
@@ -543,69 +542,32 @@ table{min-width:500px}
 <div class="tw2" id="tw2"></div>
 
 <script>
-// ── AUTO-REDIRECT & AUTH CHECK ──
+// ── AUTH CHECK & TOKEN VERIFICATION ──
 (function() {
+  const token = localStorage.getItem('auth_token');
   const currentUser = JSON.parse(localStorage.getItem('current_user'));
-  if (!currentUser) {
-    window.location.href = 'login.html';
-  } else if (currentUser.role !== 'admin') {
-    window.location.href = 'absensi.html';
+  
+  if (!token || !currentUser) {
+    window.location.href = '/';
+    return;
   }
+  
+  // Verifikasi token masih valid
+  fetch('/api/profile', {
+    headers: { 'Authorization': `Bearer ${token}` }
+  })
+  .then(res => {
+    if (!res.ok) throw new Error('Unauthorized');
+    return res.json();
+  })
+  .catch(() => {
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('current_user');
+    window.location.href = '/';
+  });
 })();
 
-// ════════════════════════════════════════════════════
-//  DATABASE SIMULASI – localStorage
-// ════════════════════════════════════════════════════
-const DB={
-  users(){
-    return JSON.parse(localStorage.getItem('v2_users')||JSON.stringify([
-      {id:1,nik:'0001',nama:'Ahmad Sulaiman',jabatan:'Kepala Desa',role:'admin',hp:'081234567890',aktif:true,pass:'admin123',joinDate:'2020-01-01'},
-      {id:2,nik:'1234',nama:'Budi Santoso',jabatan:'Sekretaris Desa',role:'pegawai',hp:'082345678901',aktif:true,pass:'pegawai123',joinDate:'2021-03-15'},
-      {id:3,nik:'5678',nama:'Siti Rahayu',jabatan:'Kaur Keuangan',role:'pegawai',hp:'083456789012',aktif:true,pass:'pegawai123',joinDate:'2021-07-01'},
-      {id:4,nik:'9101',nama:'Rudi Hermawan',jabatan:'Kaur Umum',role:'pegawai',hp:'084567890123',aktif:true,pass:'pegawai123',joinDate:'2022-01-10'},
-      {id:5,nik:'1121',nama:'Dewi Lestari',jabatan:'Staf Desa',role:'pegawai',hp:'085678901234',aktif:false,pass:'pegawai123',joinDate:'2022-06-01'},
-    ]));
-  },
-  saveU(u){localStorage.setItem('v2_users',JSON.stringify(u))},
-  absensi(){
-    return JSON.parse(localStorage.getItem('v2_abs')||JSON.stringify([
-      {id:1,uid:2,tgl:'2026-06-02',in:'07:58',out:'16:05',st:'Hadir',ket:''},
-      {id:2,uid:3,tgl:'2026-06-02',in:'08:10',out:'16:00',st:'Hadir',ket:''},
-      {id:3,uid:4,tgl:'2026-06-02',in:'',out:'',st:'Alpha',ket:'Tidak ada keterangan'},
-      {id:4,uid:2,tgl:'2026-06-01',in:'07:55',out:'15:58',st:'Hadir',ket:''},
-      {id:5,uid:3,tgl:'2026-06-01',in:'',out:'',st:'Izin',ket:'Sakit'},
-      {id:6,uid:4,tgl:'2026-06-01',in:'08:02',out:'16:10',st:'Hadir',ket:''},
-      {id:7,uid:2,tgl:'2026-05-31',in:'',out:'',st:'SPPD',ket:'Rapat Kecamatan'},
-      {id:8,uid:3,tgl:'2026-05-31',in:'07:49',out:'15:55',st:'Hadir',ket:''},
-      {id:9,uid:4,tgl:'2026-05-31',in:'08:05',out:'16:02',st:'Hadir',ket:''},
-      {id:10,uid:2,tgl:'2026-05-30',in:'07:52',out:'16:08',st:'Hadir',ket:''},
-      {id:11,uid:3,tgl:'2026-05-30',in:'',out:'',st:'Alpha',ket:''},
-      {id:12,uid:4,tgl:'2026-05-30',in:'07:58',out:'15:50',st:'Hadir',ket:''},
-    ]));
-  },
-  saveA(a){localStorage.setItem('v2_abs',JSON.stringify(a))},
-  sppd(){
-    return JSON.parse(localStorage.getItem('v2_sppd')||JSON.stringify([
-      {id:1,uid:2,nomor:'090/SPPD/V/2026',tujuan:'Kec. Cikaret',kep:'Rapat Dana Desa',tgl1:'2026-05-30',tgl2:'2026-05-31',file:'SPPD_Budi_Mei2026.pdf',st:'approved',cat:'',created:'2026-05-29'},
-      {id:2,uid:3,nomor:'091/SPPD/V/2026',tujuan:'Kab. Bogor',kep:'Pelatihan BUMDes',tgl1:'2026-05-15',tgl2:'2026-05-16',file:'SPPD_Siti_Pelatihan.pdf',st:'pending',cat:'',created:'2026-05-14'},
-      {id:3,uid:4,nomor:'094/SPPD/VI/2026',tujuan:'Kec. Sukaraja',kep:'Musrenbang',tgl1:'2026-06-05',tgl2:'2026-06-05',file:'SPPD_Rudi_Jun2026.pdf',st:'pending',cat:'',created:'2026-06-01'},
-    ]));
-  },
-  saveS(s){localStorage.setItem('v2_sppd',JSON.stringify(s))},
-setting(){
-  return JSON.parse(localStorage.getItem('v2_set')||JSON.stringify({
-    desa      : 'Desa Mekarsari',
-    kec       : 'Kecamatan Cileungsi',
-    kades     : 'Hj. Nasih',
-    jamMasuk  : '08:00',
-    jamPulang : '17:00',
-    radius    : 100,
-    lat       : '-6.408900',
-    lng       : '107.012300',
-    sesi      : 8,
-  }));
-},
-};
+// Semua data sekarang dari API backend, tidak perlu simulasi localStorage
 
 // ════════════════════════════════════════════════════
 //  STATE
@@ -628,7 +590,7 @@ function apiHeaders(){
 }
 async function apiFetch(path, opts={}){
   const res = await fetch(API + path, { headers: apiHeaders(), ...opts });
-  if(res.status === 401){ localStorage.clear(); window.location.href='login.html'; return null; }
+  if(res.status === 401){ localStorage.clear(); window.location.href='/'; return null; }
   return res.json();
 }
 
@@ -1716,7 +1678,7 @@ function confOk(){
       localStorage.clear();
       cm('m-conf');
       showToast('Anda telah keluar','inf');
-      setTimeout(()=>{ window.location.href='login.html'; },1000);
+      setTimeout(()=>{ window.location.href='/'; },1000);
     });
     return;
   }

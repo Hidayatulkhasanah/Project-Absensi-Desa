@@ -525,14 +525,35 @@ body{display:flex;align-items:flex-start;justify-content:center;min-height:100vh
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-// ── AUTO-REDIRECT & AUTH CHECK ──
+// ── AUTH CHECK & TOKEN VERIFICATION ──
 (function() {
+  const token = localStorage.getItem('auth_token');
   const currentUser = JSON.parse(localStorage.getItem('current_user'));
-  if (!currentUser) {
-    window.location.href = 'login.html';
-  } else if (currentUser.role === 'admin' || currentUser.role === 'operator') {
-    window.location.href = 'admin-absensi.html';
+  
+  if (!token || !currentUser) {
+    window.location.href = '/';
+    return;
   }
+  
+  // Jika admin/operator, redirect ke dashboard
+  if (currentUser.role === 'admin' || currentUser.role === 'operator') {
+    window.location.href = '/dashboard';
+    return;
+  }
+  
+  // Verifikasi token masih valid
+  fetch('/api/profile', {
+    headers: { 'Authorization': `Bearer ${token}` }
+  })
+  .then(res => {
+    if (!res.ok) throw new Error('Unauthorized');
+    return res.json();
+  })
+  .catch(() => {
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('current_user');
+    window.location.href = '/';
+  });
 })();
 
 // ════════════════════════════════════
@@ -548,25 +569,27 @@ const DAYS  = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
 const MONS  = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 const MONS_S= ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'];
 
-const DB = {
-  getAbsensi()   { return JSON.parse(localStorage.getItem('sapd_abs') || '[]'); },
-  saveAbsensi(a) { localStorage.setItem('sapd_abs', JSON.stringify(a)); },
-  getSppd()      { return JSON.parse(localStorage.getItem('sapd_sppd') || '[]'); },
-  saveSppd(s)    { localStorage.setItem('sapd_sppd', JSON.stringify(s)); },
-  getUser()      { return JSON.parse(localStorage.getItem('current_user') || 'null'); },
-  saveUser(u)    { localStorage.setItem('current_user', JSON.stringify(u)); },
-};
+// ════════════════════════════════════
+//  API HELPER
+// ════════════════════════════════════
+function apiHeaders(){
+  const token = localStorage.getItem('auth_token');
+  return { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json', 'Content-Type': 'application/json' };
+}
+async function apiCall(path, opts={}){
+  const res = await fetch('/api' + path, { headers: apiHeaders(), ...opts });
+  if(res.status === 401){ localStorage.clear(); window.location.href='/'; return null; }
+  return res.json();
+}
 
 // ════════════════════════════════════
 //  INIT
 // ════════════════════════════════════
 window.addEventListener('load', () => {
-  const u = DB.getUser();
+  const u = JSON.parse(localStorage.getItem('current_user'));
   if (u) {
     currentUser = u;
     startApp();
-  } else {
-    document.getElementById('setup-overlay').style.display = 'flex';
   }
 });
 
@@ -576,7 +599,7 @@ function saveSetup() {
   const jabatan = document.getElementById('setup-jabatan').value.trim();
   if (!nama || !nik || !jabatan) { showToast('Lengkapi semua data!','err'); return; }
   currentUser = { nama, nik, jabatan, joinDate: new Date().toISOString().split('T')[0] };
-  DB.saveUser(currentUser);
+  localStorage.setItem('current_user', JSON.stringify(currentUser));
   document.getElementById('setup-overlay').style.display = 'none';
   startApp();
   showToast('✅ Selamat datang, '+nama+'!','ok');
@@ -1222,8 +1245,10 @@ function goPage(pageId) {
 // ════════════════════════════════════
 function doLogoutApp() {
   if(!confirm('Yakin ingin keluar?')) return;
-  localStorage.removeItem('current_user');
-  window.location.href = 'login.html';
+  apiCall('/logout', {method:'POST'}).finally(()=>{
+    localStorage.clear();
+    window.location.href = '/';
+  });
 }
 
 // ════════════════════════════════════
