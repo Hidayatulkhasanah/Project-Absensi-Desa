@@ -620,7 +620,7 @@ let fRekap={uid:'',q:'',sort:''};
 // ════════════════════════════════════════════════════
 //  API CONFIG
 // ════════════════════════════════════════════════════
-const API = '/api';
+const API = 'http://127.0.0.1:8000/api';
 function apiHeaders(){
   const token = localStorage.getItem('auth_token');
   return { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json', 'Content-Type': 'application/json' };
@@ -927,7 +927,7 @@ function pgAbs(){
                 const bc  = a.status==='Hadir'?'bh':a.status==='Izin'?'bi':a.status==='SPPD'?'bs':'ba';
                 const d   = new Date(a.tanggal);
                 const tgl = d.toLocaleDateString('id-ID',{weekday:'short',day:'numeric',month:'short'});
-                const fotoUrl = a.foto_path ? `/${a.foto_path}` : null;
+                const fotoUrl = a.foto_path ? `http://127.0.0.1:8000/${a.foto_path}` : null;
                 return `<tr>
                   <td><div style="display:flex;align-items:center;gap:8px">
                     <div class="av-sm">${ini}</div>

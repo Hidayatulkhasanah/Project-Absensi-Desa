@@ -1009,7 +1009,7 @@ function loadRiwayat() {
       const tgl  = DAYS[d.getDay()]+', '+d.getDate()+' '+MONS_S[d.getMonth()]+' '+d.getFullYear();
       const masuk  = a.jam_masuk  ? a.jam_masuk.substring(0,5)  : '';
       const keluar = a.jam_keluar ? a.jam_keluar.substring(0,5) : '';
-      const fotoUrl = a.foto_path ? `/${a.foto_path}` : null;
+      const fotoUrl = a.foto_path ? `http://127.0.0.1:8000/${a.foto_path}` : null;
       const fotoHtml = fotoUrl ? `<img src="${fotoUrl}" class="rw-foto" onclick="showFotoUrl('${fotoUrl}')" alt="Foto" onerror="this.style.display='none'">` : '';
      const timeInfo = masuk || keluar
         ? `<div class="rw-time">${masuk?'<span style="color:var(--gm);font-weight:600">▲ '+masuk+'</span>':''} ${keluar?'<span style="color:var(--rs);font-weight:600"> ▼ '+keluar+'</span>':''}</div>`
