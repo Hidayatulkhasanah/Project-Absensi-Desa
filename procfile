@@ -1,2 +1,2 @@
-release: php artisan migrate --force --seed
-web: php artisan serve --host=0.0.0.0 --port=$PORT
+release: php artisan migrate --force --seed || true
+web: php -S 0.0.0.0:8000 -t public
