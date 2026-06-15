@@ -891,7 +891,6 @@ function pgAbs(){
                 const d   = new Date(a.tanggal);
                 const tgl = d.toLocaleDateString('id-ID',{weekday:'short',day:'numeric',month:'short'});
                 const fotoUrl = a.foto_path ? `/${a.foto_path}` : null;
-                const suratSakit = a.surat_sakit_path ? `/storage/surat-sakit/${a.surat_sakit_path}` : null;
                 return `<tr>
                   <td><div style="display:flex;align-items:center;gap:8px">
                     <div class="av-sm">${ini}</div>
@@ -902,8 +901,6 @@ function pgAbs(){
                          style="width:40px;height:40px;border-radius:9px;object-fit:cover;cursor:zoom-in;border:2px solid var(--gp);transition:transform .15s"
                          onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'"
                          onerror="this.outerHTML='<div style=width:40px;height:40px;border-radius:9px;background:var(--cr);border:1.5px solid var(--cd);display:flex;align-items:center;justify-content:center;font-size:16px>📷</div>'">`
-                    : suratSakit
-                    ? `<a href="${suratSakit}" target="_blank" style="display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:9px;background:var(--blp);color:var(--bld);text-decoration:none;font-size:18px" title="Lihat Surat Sakit">📄</a>`
                     : `<div style="width:40px;height:40px;border-radius:9px;background:var(--cr);border:1.5px dashed var(--cd);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--hi)">–</div>`
                   }</td>
                   <td style="font-weight:500;white-space:nowrap;font-size:12px">${tgl}</td>

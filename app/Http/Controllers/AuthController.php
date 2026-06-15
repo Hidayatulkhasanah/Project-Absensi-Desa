@@ -24,7 +24,7 @@ class AuthController extends Controller
             return response()->json(['error' => 'NIK atau password salah.'], 401);
         }
 
-        // DB::table('sessions')->where('user_id', $user->id)->delete(); // Dinonaktifkan agar admin bisa test login di HP tanpa terlogout
+        DB::table('sessions')->where('user_id', $user->id)->delete();
 
         $token = Str::random(64);
         DB::table('sessions')->insert([

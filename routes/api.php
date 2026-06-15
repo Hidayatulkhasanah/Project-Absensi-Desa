@@ -11,15 +11,6 @@ use App\Http\Controllers\PegawaiController;
 Route::prefix('api')->group(function () {
 
     // ==========================================
-    // TESTING ROUTES (tanpa auth) — HAPUS SETELAH TEST!
-    // ==========================================
-    Route::post('/absensi/checkin-test',  [AbsensiController::class, 'checkin']);
-    Route::post('/absensi/checkout-test', [AbsensiController::class, 'checkout']);
-    Route::get('/absensi/today-test',     [AbsensiController::class, 'today']);
-    Route::get('/absensi/riwayat-test',   [AbsensiController::class, 'riwayat']);
-    Route::get('/absensi/laporan-test',   [AbsensiController::class, 'laporan']);
-
-    // ==========================================
     // PUBLIC — Tidak perlu token
     // ==========================================
     Route::post('/login', [AuthController::class, 'login']);

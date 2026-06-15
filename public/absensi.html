@@ -80,7 +80,7 @@ body{display:flex;align-items:flex-start;justify-content:center;min-height:100vh
 .prog-wrap{background:var(--cd);border-radius:6px;height:7px;overflow:hidden;margin-bottom:8px;}
 .prog-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--gm),var(--gf));transition:width .7s cubic-bezier(.22,1,.36,1);}
 .kehadiran-stats{display:flex;gap:14px;font-size:11px;font-weight:600;}
-.k-h{color:var(--gm);}.k-s{color:var(--bl);}.k-i{color:var(--amd);}.k-a{color:var(--bld);}
+.k-h{color:var(--gm);}.k-s{color:var(--bl);}.k-i{color:var(--amd);}.k-a{color:var(--rs);}
 
 /* ── SECTION TITLE ── */
 .sec-title{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:var(--ink);margin-bottom:14px;}
@@ -173,7 +173,7 @@ body{display:flex;align-items:flex-start;justify-content:center;min-height:100vh
 .bdg{display:inline-flex;align-items:center;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap;}
 .bdg-h{background:var(--gp);color:var(--gd);}
 .bdg-i{background:var(--amp);color:var(--amd);}
-.bdg-sk{background:var(--blp);color:var(--bld);}
+.bdg-a{background:var(--rsp);color:var(--rsd);}
 .bdg-s{background:var(--blp);color:#1a4a96;}
 
 /* ── LAPORAN ── */
@@ -288,7 +288,7 @@ body{display:flex;align-items:flex-start;justify-content:center;min-height:100vh
           <span class="k-h">✓ <span id="kh-h">0</span> Hadir</span>
           <span class="k-s">→ <span id="kh-s">0</span> SPPD</span>
           <span class="k-i">- <span id="kh-i">0</span> Izin</span>
-          <span class="k-a">🤒 <span id="kh-sk">0</span> Sakit</span>
+          <span class="k-a">✗ <span id="kh-a">0</span> Alpha</span>
         </div>
       </div>
       <!-- Menu -->
@@ -415,27 +415,13 @@ body{display:flex;align-items:flex-start;justify-content:center;min-height:100vh
             <div style="font-size:20px;margin-bottom:4px">🤒</div>
             <div style="font-size:12px;font-weight:700;color:var(--mu)">Sakit</div>
           </div>
-        </div>
-        <input type="hidden" id="inp-status" value="Hadir">
-        
-        <!-- Section Surat Sakit (muncul ketika status = Sakit) -->
-        <div id="surat-sakit-section" style="display:none;background:#fff9e6;border:1px solid #f0d066;border-radius:12px;padding:12px;margin-bottom:12px;">
-          <div style="font-size:11px;font-weight:700;color:#e67e22;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">⚠️ Wajib Lampirkan Surat Sakit</div>
-          <div style="font-size:12px;color:#666;margin-bottom:10px">Pilih file surat keterangan sakit dari dokter atau faskes (PDF, JPG, PNG, DOC, DOCX • Max 10MB)</div>
-          
-          <div id="upload-box" style="border:2px dashed #d4a574;border-radius:8px;padding:16px;text-align:center;background:#fff;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='#e67e22';this.style.background='#fffaf5'" onmouseout="this.style.borderColor='#d4a574';this.style.background='#fff'">
-            <input type="file" id="surat-sakit-input" name="surat_sakit" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" style="display:none">
-            <div style="font-size:24px;margin-bottom:6px">📄</div>
-            <div style="font-size:12px;font-weight:600;color:#333;margin-bottom:2px">Klik untuk upload atau drag & drop</div>
-            <div style="font-size:11px;color:#999">PDF, JPG, PNG, DOC, DOCX • Max 10MB</div>
-            <div id="file-info" style="display:none;margin-top:10px;padding:8px;background:#f0fdf4;border-radius:6px;font-size:12px;color:#27ae60">
-              <span style="margin-right:8px">✓</span>
-              <span id="file-name"></span>
-              <span id="file-remove" style="float:right;cursor:pointer;font-weight:600;color:#e74c3c">×</span>
-            </div>
+          <div onclick="pilihStatus('Alpha')" id="st-Alpha"
+            style="padding:12px;border-radius:12px;border:2px solid var(--cd);background:#fff;cursor:pointer;text-align:center;transition:all .18s">
+            <div style="font-size:20px;margin-bottom:4px">❌</div>
+            <div style="font-size:12px;font-weight:700;color:var(--mu)">Alpha</div>
           </div>
         </div>
-        
+        <input type="hidden" id="inp-status" value="Hadir">
         <label class="form-lbl" style="margin-top:4px">Keterangan (opsional)</label>
         <input class="form-inp" type="text" id="inp-ket" placeholder="Misal: hadir tepat waktu...">
       </div>
@@ -452,8 +438,8 @@ body{display:flex;align-items:flex-start;justify-content:center;min-height:100vh
         <div style="font-size:11px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">⚠️ Aturan Absensi</div>
         <div style="font-size:12px;margin-bottom:5px;display:flex;gap:7px;align-items:center"><span>📍</span><span>Harus dalam radius <strong>100m</strong> dari kantor desa</span></div>
         <div style="font-size:12px;margin-bottom:5px;display:flex;gap:7px;align-items:center"><span>⏰</span><span>Jam kerja <strong>08:00 – 17:00</strong> · Lewat 08:00 = Terlambat</span></div>
-        <div style="font-size:12px;margin-bottom:5px;display:flex;gap:7px;align-items:center"><span>📸</span><span>Foto selfie wajib diambil saat check-in status Hadir</span></div>
-        <div style="font-size:12px;display:flex;gap:7px;align-items:center"><span>🤒</span><span>Status Sakit <strong>wajib</strong> lampirkan surat keterangan sakit</span></div>
+        <div style="font-size:12px;margin-bottom:5px;display:flex;gap:7px;align-items:center"><span>📸</span><span>Foto selfie wajib diambil saat check-in</span></div>
+        <div style="font-size:12px;display:flex;gap:7px;align-items:center"><span>🚫</span><span>Tidak absen = otomatis <strong style="color:var(--rs)">Alpha</strong></span></div>
       </div>
     </div>
   </div>
@@ -836,9 +822,10 @@ function updateAbsensiStatus() {
 //  PILIH STATUS
 // ════════════════════════════════════
 const STATUS_CONFIG = {
-  'Hadir': { border:'var(--gf)', bg:'var(--gp)', color:'var(--gd)', needFoto:true,  needGPS:true,  needSuratSakit:false },
-  'Izin':  { border:'var(--am)', bg:'var(--amp)', color:'var(--amd)', needFoto:false, needGPS:false, needSuratSakit:false },
-  'Sakit': { border:'var(--bl)', bg:'var(--blp)', color:'var(--bld)', needFoto:false, needGPS:false, needSuratSakit:true  },
+  'Hadir': { border:'var(--gf)', bg:'var(--gp)', color:'var(--gd)', needFoto:true,  needGPS:true  },
+  'Izin':  { border:'var(--am)', bg:'var(--amp)', color:'var(--amd)', needFoto:false, needGPS:false },
+  'Sakit': { border:'var(--bl)', bg:'var(--blp)', color:'var(--bld)', needFoto:false, needGPS:false },
+  'Alpha': { border:'var(--rs)', bg:'var(--rsp)', color:'var(--rsd)', needFoto:false, needGPS:false },
 };
 
 function pilihStatus(st) {
@@ -864,30 +851,14 @@ function pilihStatus(st) {
   const gpsC = document.querySelector('.gps-card');
   if(camS) camS.style.display = cfg?.needFoto ? 'block' : 'none';
 
-  // Tampilkan/sembunyikan section surat sakit
-  const suratSection = document.getElementById('surat-sakit-section');
-  const suratInput = document.getElementById('surat-sakit-input');
-  if(suratSection) {
-    if(cfg?.needSuratSakit) {
-      suratSection.style.display = 'block';
-      suratInput.required = true;
-    } else {
-      suratSection.style.display = 'none';
-      suratInput.required = false;
-      // Reset file input
-      suratInput.value = '';
-      const fileInfo = document.getElementById('file-info');
-      if(fileInfo) fileInfo.style.display = 'none';
-    }
-  }
-
   // Update placeholder keterangan
   const ketInput = document.getElementById('inp-ket');
   if(ketInput) {
     const ph = {
       'Hadir': 'Misal: hadir tepat waktu...',
       'Izin':  'Misal: keperluan keluarga...',
-      'Sakit': 'Misal: demam, flu...'
+      'Sakit': 'Misal: demam, flu...',
+      'Alpha': 'Alasan tidak hadir...'
     };
     ketInput.placeholder = ph[st] || '';
   }
@@ -900,15 +871,6 @@ function doCheckin() {
   // Validasi foto hanya jika status Hadir
   if (cfg.needFoto && !capturedPhoto) { showToast('📸 Ambil foto selfie dulu!','err'); return; }
   if (cfg.needGPS  && !gpsData)       { showToast('📍 GPS belum aktif!','err'); getGPS(); return; }
-  
-  // Validasi surat sakit hanya jika status Sakit
-  if (cfg.needSuratSakit) {
-    const fileInput = document.getElementById('surat-sakit-input');
-    if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
-      showToast('🤒 Surat sakit wajib dilampirkan!','err');
-      return;
-    }
-  }
 
   const n     = new Date();
   const jam   = n.getHours();
@@ -939,22 +901,16 @@ function doCheckin() {
   const btn = document.getElementById('btn-absen-main');
   if(btn){ btn.disabled=true; btn.textContent='⏳ Menyimpan...'; }
 
-  // Jika ada surat sakit, gunakan FormData untuk upload file
-  const fileInput = document.getElementById('surat-sakit-input');
-  const formData = new FormData();
-  formData.append('status', selectedStatus);
-  formData.append('latitude', gpsData ? parseFloat(gpsData.lat) : null);
-  formData.append('longitude', gpsData ? parseFloat(gpsData.lng) : null);
-  formData.append('keterangan', ket);
-  if (capturedPhoto) formData.append('foto_base64', capturedPhoto);
-  if (fileInput && fileInput.files.length > 0) {
-    formData.append('surat_sakit', fileInput.files[0]);
-  }
-
   fetch('/api/absensi/checkin', {
     method: 'POST',
-    headers: { 'Authorization':'Bearer '+token, 'Accept':'application/json' },
-    body: formData
+    headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+token, 'Accept':'application/json' },
+    body: JSON.stringify({
+      status: selectedStatus,
+      latitude:  gpsData ? parseFloat(gpsData.lat) : null,
+      longitude: gpsData ? parseFloat(gpsData.lng) : null,
+      keterangan: ket,
+      foto_base64: capturedPhoto || null
+    })
   })
   .then(r => r.json())
   .then(data => {
@@ -965,7 +921,8 @@ function doCheckin() {
     const msgMap = {
       'Hadir': ketTambahan ? '⚠️ Check-in berhasil tapi TERLAMBAT! Jam '+time : '✅ Check-in berhasil! Jam '+time,
       'Izin':  '📝 Izin berhasil dicatat',
-      'Sakit': '🤒 Sakit berhasil dicatat + surat sakit tersimpan',
+      'Sakit': '🤒 Sakit berhasil dicatat',
+      'Alpha': '❌ Alpha berhasil dicatat',
     };
     showToast(msgMap[selectedStatus] || '✅ Absensi berhasil!', ketTambahan ? 'err' : 'ok');
     updateAbsensiStatus();
@@ -1043,8 +1000,8 @@ function updateKehadiranMini() {
     const H   = parseInt(s.hadir)||0;
     const S   = parseInt(s.sppd)||0;
     const I   = parseInt(s.izin)||0;
-    const SK  = parseInt(s.sakit)||0;
-    const T   = H+S+I+SK||1;
+    const A   = parseInt(s.alpha)||0;
+    const T   = H+S+I+A||1;
     const pct = Math.round(((H+S)/T)*100);
     const e   = id => document.getElementById(id);
     if(e('kh-pct'))  { e('kh-pct').textContent=pct+'%'; e('kh-pct').style.color=pct>=80?'var(--gm)':pct>=60?'var(--amd)':'var(--rs)'; }
@@ -1052,7 +1009,7 @@ function updateKehadiranMini() {
     if(e('kh-h'))    e('kh-h').textContent=H;
     if(e('kh-s'))    e('kh-s').textContent=S;
     if(e('kh-i'))    e('kh-i').textContent=I;
-    if(e('kh-sk'))   e('kh-sk').textContent=SK;
+    if(e('kh-a'))    e('kh-a').textContent=A;
   })
   .catch(()=>{});
 }
@@ -1076,21 +1033,16 @@ function loadRiwayat() {
       wrap.innerHTML='<div style="text-align:center;padding:40px;color:var(--mu)"><div style="font-size:40px;margin-bottom:10px">📭</div><div style="font-weight:600">Belum ada riwayat</div></div>';
       return;
     }
-    const bcMap={Hadir:'bdg-h',Izin:'bdg-i',Sakit:'bdg-sk',SPPD:'bdg-s'};
-    const icBg ={Hadir:'var(--gp)',Izin:'var(--amp)',Sakit:'var(--blp)',SPPD:'var(--blp)'};
-    const icEm ={Hadir:'✅',Izin:'📝',Sakit:'🤒',SPPD:'✈️'};
+    const bcMap={Hadir:'bdg-h',Izin:'bdg-i',Alpha:'bdg-a',SPPD:'bdg-s'};
+    const icBg ={Hadir:'var(--gp)',Izin:'var(--amp)',Alpha:'var(--rsp)',SPPD:'var(--blp)'};
+    const icEm ={Hadir:'✅',Izin:'📝',Alpha:'❌',SPPD:'✈️'};
     wrap.innerHTML = abs.map(a => {
       const d    = new Date(a.tanggal);
       const tgl  = DAYS[d.getDay()]+', '+d.getDate()+' '+MONS_S[d.getMonth()]+' '+d.getFullYear();
       const masuk  = a.jam_masuk  ? a.jam_masuk.substring(0,5)  : '';
       const keluar = a.jam_keluar ? a.jam_keluar.substring(0,5) : '';
       const fotoUrl = a.foto_path ? `/${a.foto_path}` : null;
-      const suratSakit = a.surat_sakit_path ? `/storage/surat-sakit/${a.surat_sakit_path}` : null;
-      const fotoHtml = fotoUrl 
-        ? `<img src="${fotoUrl}" class="rw-foto" onclick="showFotoUrl('${fotoUrl}')" alt="Foto" onerror="this.style.display='none'">` 
-        : suratSakit 
-        ? `<a href="${suratSakit}" target="_blank" class="rw-foto" style="display:flex;align-items:center;justify-content:center;background:var(--blp);color:var(--bld);text-decoration:none;font-size:24px" title="Lihat Surat Sakit">📄</a>` 
-        : '';
+      const fotoHtml = fotoUrl ? `<img src="${fotoUrl}" class="rw-foto" onclick="showFotoUrl('${fotoUrl}')" alt="Foto" onerror="this.style.display='none'">` : '';
      const timeInfo = masuk || keluar
         ? `<div class="rw-time">${masuk?'<span style="color:var(--gm);font-weight:600">▲ '+masuk+'</span>':''} ${keluar?'<span style="color:var(--rs);font-weight:600"> ▼ '+keluar+'</span>':''}</div>`
         : `<div class="rw-time" style="color:var(--mu);font-style:italic">Tidak ada jam</div>`;
@@ -1143,8 +1095,8 @@ function loadLaporan() {
     const s   = data.summary;
     const det = data.detail ?? [];
     const H=parseInt(s?.hadir)||0, S=parseInt(s?.sppd)||0;
-    const I=parseInt(s?.izin)||0,  SK=parseInt(s?.sakit)||0;
-    const T=H+S+I+SK||1, pct=Math.round(((H+S)/T)*100);
+    const I=parseInt(s?.izin)||0,  A=parseInt(s?.alpha)||0;
+    const T=H+S+I+A||1, pct=Math.round(((H+S)/T)*100);
     const c = pct>=80?'var(--gm)':pct>=60?'var(--amd)':'var(--rs)';
     wrap.innerHTML = `
     <div style="font-size:12px;color:var(--mu);margin-bottom:14px">${MONS[n.getMonth()]} ${n.getFullYear()}</div>
@@ -1152,7 +1104,7 @@ function loadLaporan() {
       <div class="lap-stat" style="border-top:3px solid var(--gm)"><div class="lap-num" style="color:var(--gm)">${H}</div><div class="lap-lbl">Hadir</div></div>
       <div class="lap-stat" style="border-top:3px solid var(--bl)"><div class="lap-num" style="color:var(--bl)">${S}</div><div class="lap-lbl">SPPD</div></div>
       <div class="lap-stat" style="border-top:3px solid var(--am)"><div class="lap-num" style="color:var(--amd)">${I}</div><div class="lap-lbl">Izin</div></div>
-      <div class="lap-stat" style="border-top:3px solid var(--bl)"><div class="lap-num" style="color:var(--bld)">${SK}</div><div class="lap-lbl">Sakit</div></div>
+      <div class="lap-stat" style="border-top:3px solid var(--rs)"><div class="lap-num" style="color:var(--rs)">${A}</div><div class="lap-lbl">Alpha</div></div>
     </div>
     <div style="background:#fff;border-radius:14px;padding:16px;box-shadow:0 1px 6px rgba(26,58,42,.07);margin-bottom:14px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
@@ -1167,7 +1119,7 @@ function loadLaporan() {
       ${det.length===0?'<div style="text-align:center;color:var(--mu);padding:16px">Belum ada data</div>':
         det.map(a=>{
           const d=new Date(a.tanggal);
-          const bcMap={Hadir:'bdg-h',Izin:'bdg-i',Sakit:'bdg-sk',SPPD:'bdg-s'};
+          const bcMap={Hadir:'bdg-h',Izin:'bdg-i',Alpha:'bdg-a',SPPD:'bdg-s'};
           const masuk  = a.jam_masuk  ? a.jam_masuk.substring(0,5)  : '–';
           const keluar = a.jam_keluar ? a.jam_keluar.substring(0,5) : '';
           return`<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--cd)">
@@ -1280,86 +1232,6 @@ function loadSppdList() {
       <div style="font-size:11px;color:var(--mu);margin-top:1px">${s.kep} · ${s.tgl1} s.d. ${s.tgl2}</div>
     </div>`).join('');
 }
-
-// ════════════════════════════════════
-//  UPLOAD SURAT SAKIT
-// ════════════════════════════════════
-(function() {
-  const uploadBox = document.getElementById('upload-box');
-  const fileInput = document.getElementById('surat-sakit-input');
-  const fileInfo = document.getElementById('file-info');
-  const fileName = document.getElementById('file-name');
-  const fileRemove = document.getElementById('file-remove');
-
-  if (!uploadBox || !fileInput) return;
-
-  // Click to upload
-  uploadBox.addEventListener('click', () => fileInput.click());
-
-  // Drag & drop
-  uploadBox.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    uploadBox.style.borderColor = '#e67e22';
-    uploadBox.style.background = '#fffaf5';
-  });
-
-  uploadBox.addEventListener('dragleave', () => {
-    uploadBox.style.borderColor = '#d4a574';
-    uploadBox.style.background = '#fff';
-  });
-
-  uploadBox.addEventListener('drop', (e) => {
-    e.preventDefault();
-    uploadBox.style.borderColor = '#d4a574';
-    uploadBox.style.background = '#fff';
-    if (e.dataTransfer.files.length > 0) {
-      fileInput.files = e.dataTransfer.files;
-      handleFileSelect();
-    }
-  });
-
-  // File selected
-  fileInput.addEventListener('change', handleFileSelect);
-
-  function handleFileSelect() {
-    const file = fileInput.files[0];
-    if (!file) return;
-
-    const maxSize = 10 * 1024 * 1024; // 10MB
-    if (file.size > maxSize) {
-      showToast('❌ Ukuran file terlalu besar (max 10MB)', 'error');
-      fileInput.value = '';
-      fileInfo.style.display = 'none';
-      return;
-    }
-
-    const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 
-                         'application/msword', 
-                         'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-    if (!allowedTypes.includes(file.type)) {
-      showToast('❌ Tipe file tidak didukung', 'error');
-      fileInput.value = '';
-      fileInfo.style.display = 'none';
-      return;
-    }
-
-    fileName.textContent = file.name;
-    fileInfo.style.display = 'flex';
-    uploadBox.style.borderColor = '#27ae60';
-    uploadBox.style.background = '#f0fdf4';
-  }
-
-  // Remove file
-  if (fileRemove) {
-    fileRemove.addEventListener('click', (e) => {
-      e.stopPropagation();
-      fileInput.value = '';
-      fileInfo.style.display = 'none';
-      uploadBox.style.borderColor = '#d4a574';
-      uploadBox.style.background = '#fff';
-    });
-  }
-})();
 
 // ════════════════════════════════════
 //  NAVIGASI
