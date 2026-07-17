@@ -2,54 +2,126 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\UserRole;
+use App\Exports\LaporanBulananExport;
+use App\Exports\RekapPegawaiExport;
+use App\Models\Absensi;
+use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 class LaporanController extends Controller
 {
+    /**
+     * Paginate an already-computed in-memory collection. bulananData/rekapData
+     * are small aggregate results (one row per active pegawai), so slicing in
+     * PHP is simpler and just as cheap as a second DB round trip would be.
+     */
+    private function paginateCollection(Collection $items, Request $request): LengthAwarePaginator
+    {
+        $perPage = $request->integer('per_page', 15);
+        $page = $request->integer('page', 1);
+
+        return new LengthAwarePaginator(
+            $items->forPage($page, $perPage)->values(),
+            $items->count(),
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+    }
+
+    /**
+     * Aggregate hadir/izin/alpha/cuti counts for active non-admin pegawai in one
+     * GROUP BY query instead of one query per pegawai (was N+1: 1 + count(users)).
+     */
+    private function pegawaiAbsensiStats(?int $bulan = null, ?int $tahun = null)
+    {
+        $users = User::where('aktif', 1)
+            ->where('role', '!=', UserRole::Admin->value)
+            ->select('id', 'nik', 'nama', 'jabatan', 'role')
+            ->get();
+
+        $statsQuery = Absensi::query()
+            ->whereIn('user_id', $users->pluck('id'))
+            ->selectRaw("
+                user_id,
+                COUNT(*) as total,
+                SUM(status = 'hadir') as hadir,
+                SUM(status = 'izin') as izin,
+                SUM(status = 'alpha') as alpha,
+                SUM(status = 'cuti') as cuti
+            ")
+            ->groupBy('user_id');
+
+        if ($bulan !== null && $tahun !== null) {
+            $statsQuery->whereMonth('tanggal', $bulan)->whereYear('tanggal', $tahun);
+        }
+
+        $stats = $statsQuery->get()->keyBy('user_id');
+
+        return [$users, $stats];
+    }
+
+    private function bulananData(int $bulan, int $tahun)
+    {
+        [$users, $stats] = $this->pegawaiAbsensiStats($bulan, $tahun);
+
+        return $users->map(function ($user) use ($stats) {
+            $absensi = $stats->get($user->id);
+            $total = $absensi->total ?? 0;
+            $hadir = $absensi->hadir ?? 0;
+            $persentase = $total > 0 ? round(($hadir / $total) * 100, 2) : 0;
+
+            return [
+                'user_id'    => $user->id,
+                'nik'        => $user->nik,
+                'nama'       => $user->nama,
+                'jabatan'    => $user->jabatan,
+                'hadir'      => $hadir,
+                'izin'       => $absensi->izin ?? 0,
+                'alpha'      => $absensi->alpha ?? 0,
+                'cuti'       => $absensi->cuti ?? 0,
+                'persentase' => $persentase,
+            ];
+        });
+    }
+
+    private function rekapData()
+    {
+        [$users, $stats] = $this->pegawaiAbsensiStats();
+
+        return $users->map(function ($user) use ($stats) {
+            $total = $stats->get($user->id);
+            return [
+                'nik'     => $user->nik,
+                'nama'    => $user->nama,
+                'jabatan' => $user->jabatan,
+                'hadir'   => $total->hadir ?? 0,
+                'izin'    => $total->izin ?? 0,
+                'alpha'   => $total->alpha ?? 0,
+                'cuti'    => $total->cuti ?? 0,
+            ];
+        });
+    }
+
+    // ?paginate=1 returns Laravel's paginator shape for the Laporan Bulanan
+    // table; the Excel export relies on the full unpaginated list.
     public function bulanan(Request $request) {
         $request->validate([
             'bulan' => 'required|integer|min:1|max:12',
             'tahun' => 'required|integer|min:2020',
         ]);
 
-        $data = DB::table('users')
-            ->where('aktif', 1)
-            ->where('role', '!=', 'admin')
-            ->get()
-            ->map(function ($user) use ($request) {
-                $absensi = DB::table('absensi')
-                    ->where('user_id', $user->id)
-                    ->whereMonth('tanggal', $request->bulan)
-                    ->whereYear('tanggal', $request->tahun)
-                    ->selectRaw("
-                        COUNT(*) as total,
-                        SUM(status = 'hadir') as hadir,
-                        SUM(status = 'izin') as izin,
-                        SUM(status = 'alpha') as alpha,
-                        SUM(status = 'cuti') as cuti
-                    ")
-                    ->first();
+        $data = $this->bulananData((int) $request->bulan, (int) $request->tahun);
 
-                $persentase = $absensi->total > 0
-                    ? round(($absensi->hadir / $absensi->total) * 100, 2)
-                    : 0;
-
-                return [
-                    'user_id'    => $user->id,
-                    'nik'        => $user->nik,
-                    'nama'       => $user->nama,
-                    'jabatan'    => $user->jabatan,
-                    'hadir'      => $absensi->hadir ?? 0,
-                    'izin'       => $absensi->izin ?? 0,
-                    'alpha'      => $absensi->alpha ?? 0,
-                    'cuti'       => $absensi->cuti ?? 0,
-                    'persentase' => $persentase,
-                ];
-            });
+        if ($request->boolean('paginate')) {
+            return response()->json(array_merge(
+                ['bulan' => $request->bulan, 'tahun' => $request->tahun],
+                $this->paginateCollection($data, $request)->toArray(),
+            ));
+        }
 
         return response()->json([
             'bulan' => $request->bulan,
@@ -58,196 +130,30 @@ class LaporanController extends Controller
         ]);
     }
 
+    // ?paginate=1 returns Laravel's paginator shape for the Rekap Pegawai
+    // table; pgRekap's client-side search/sort and exportRekapExcel() rely
+    // on the full unpaginated list, so pagination stays strictly opt-in.
     public function rekapPegawai(Request $request) {
-        $data = DB::table('users')
-            ->where('aktif', 1)
-            ->where('role', '!=', 'admin')
-            ->select('id', 'nik', 'nama', 'jabatan', 'role')
-            ->get()
-            ->map(function ($user) {
-                $total = DB::table('absensi')
-                    ->where('user_id', $user->id)
-                    ->selectRaw("
-                        SUM(status = 'hadir') as hadir,
-                        SUM(status = 'izin') as izin,
-                        SUM(status = 'alpha') as alpha,
-                        SUM(status = 'cuti') as cuti
-                    ")
-                    ->first();
+        $data = $this->rekapData();
 
-                return [
-                    'nik'     => $user->nik,
-                    'nama'    => $user->nama,
-                    'jabatan' => $user->jabatan,
-                    'hadir'   => $total->hadir ?? 0,
-                    'izin'    => $total->izin ?? 0,
-                    'alpha'   => $total->alpha ?? 0,
-                    'cuti'    => $total->cuti ?? 0,
-                ];
-            });
+        if ($request->boolean('paginate')) {
+            return response()->json($this->paginateCollection($data, $request));
+        }
 
         return response()->json($data);
     }
 
     // ========== EXPORT EXCEL ==========
-    public function exportBulanan(Request $request) {
+    public function exportBulanan(Request $request, LaporanBulananExport $export) {
         $request->validate([
             'bulan' => 'required|integer|min:1|max:12',
             'tahun' => 'required|integer|min:2020',
         ]);
 
-        $data = DB::table('users')
-            ->where('aktif', 1)
-            ->where('role', '!=', 'admin')
-            ->get()
-            ->map(function ($user) use ($request) {
-                $absensi = DB::table('absensi')
-                    ->where('user_id', $user->id)
-                    ->whereMonth('tanggal', $request->bulan)
-                    ->whereYear('tanggal', $request->tahun)
-                    ->selectRaw("
-                        COUNT(*) as total,
-                        SUM(status = 'hadir') as hadir,
-                        SUM(status = 'izin') as izin,
-                        SUM(status = 'alpha') as alpha,
-                        SUM(status = 'cuti') as cuti
-                    ")
-                    ->first();
-
-                $persentase = $absensi->total > 0
-                    ? round(($absensi->hadir / $absensi->total) * 100, 2)
-                    : 0;
-
-                return [
-                    'nik'        => $user->nik,
-                    'nama'       => $user->nama,
-                    'jabatan'    => $user->jabatan,
-                    'hadir'      => $absensi->hadir ?? 0,
-                    'izin'       => $absensi->izin ?? 0,
-                    'alpha'      => $absensi->alpha ?? 0,
-                    'cuti'       => $absensi->cuti ?? 0,
-                    'persentase' => $persentase,
-                ];
-            });
-
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-
-        $bulanName = [
-            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
-            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
-        ];
-        
-        $sheet->setCellValue('A1', 'LAPORAN ABSENSI ' . strtoupper($bulanName[$request->bulan]) . ' ' . $request->tahun);
-        $sheet->mergeCells('A1:I1');
-        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
-        $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-        $headers = ['No', 'NIK', 'Nama', 'Jabatan', 'Hadir', 'Izin', 'Alpha', 'Cuti', 'Persentase'];
-        $col = 'A';
-        foreach ($headers as $header) {
-            $sheet->setCellValue($col . '3', $header);
-            $sheet->getStyle($col . '3')->getFont()->setBold(true);
-            $sheet->getStyle($col . '3')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFD3D3D3');
-            $col++;
-        }
-
-        $row = 4;
-        $no = 1;
-        foreach ($data as $item) {
-            $sheet->setCellValue('A' . $row, $no++);
-            $sheet->setCellValue('B' . $row, $item['nik']);
-            $sheet->setCellValue('C' . $row, $item['nama']);
-            $sheet->setCellValue('D' . $row, $item['jabatan']);
-            $sheet->setCellValue('E' . $row, $item['hadir']);
-            $sheet->setCellValue('F' . $row, $item['izin']);
-            $sheet->setCellValue('G' . $row, $item['alpha']);
-            $sheet->setCellValue('H' . $row, $item['cuti']);
-            $sheet->setCellValue('I' . $row, $item['persentase'] . '%');
-            $row++;
-        }
-
-        foreach (range('A', 'I') as $col) {
-            $sheet->getColumnDimension($col)->setAutoSize(true);
-        }
-
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="Laporan_Absensi_' . $request->bulan . '_' . $request->tahun . '.xlsx"');
-        
-        $writer = new Xlsx($spreadsheet);
-        $writer->save('php://output');
-        exit;
+        return $export($this->bulananData((int) $request->bulan, (int) $request->tahun), (int) $request->bulan, (int) $request->tahun);
     }
 
-    public function exportRekapPegawai() {
-        $data = DB::table('users')
-            ->where('aktif', 1)
-            ->where('role', '!=', 'admin')
-            ->select('nik', 'nama', 'jabatan')
-            ->get()
-            ->map(function ($user) {
-                $total = DB::table('absensi')
-                    ->where('user_id', $user->id)
-                    ->selectRaw("
-                        SUM(status = 'hadir') as hadir,
-                        SUM(status = 'izin') as izin,
-                        SUM(status = 'alpha') as alpha,
-                        SUM(status = 'cuti') as cuti
-                    ")
-                    ->first();
-
-                return [
-                    'nik'     => $user->nik,
-                    'nama'    => $user->nama,
-                    'jabatan' => $user->jabatan,
-                    'hadir'   => $total->hadir ?? 0,
-                    'izin'    => $total->izin ?? 0,
-                    'alpha'   => $total->alpha ?? 0,
-                    'cuti'    => $total->cuti ?? 0,
-                ];
-            });
-
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-
-        $sheet->setCellValue('A1', 'REKAP ABSENSI PEGAWAI DESA MEKARSARI');
-        $sheet->mergeCells('A1:H1');
-        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
-        $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-        $headers = ['No', 'NIK', 'Nama', 'Jabatan', 'Hadir', 'Izin', 'Alpha', 'Cuti'];
-        $col = 'A';
-        foreach ($headers as $header) {
-            $sheet->setCellValue($col . '3', $header);
-            $sheet->getStyle($col . '3')->getFont()->setBold(true);
-            $sheet->getStyle($col . '3')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFD3D3D3');
-            $col++;
-        }
-
-        $row = 4;
-        $no = 1;
-        foreach ($data as $item) {
-            $sheet->setCellValue('A' . $row, $no++);
-            $sheet->setCellValue('B' . $row, $item['nik']);
-            $sheet->setCellValue('C' . $row, $item['nama']);
-            $sheet->setCellValue('D' . $row, $item['jabatan']);
-            $sheet->setCellValue('E' . $row, $item['hadir']);
-            $sheet->setCellValue('F' . $row, $item['izin']);
-            $sheet->setCellValue('G' . $row, $item['alpha']);
-            $sheet->setCellValue('H' . $row, $item['cuti']);
-            $row++;
-        }
-
-        foreach (range('A', 'H') as $col) {
-            $sheet->getColumnDimension($col)->setAutoSize(true);
-        }
-
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="Rekap_Pegawai_' . date('Y-m-d') . '.xlsx"');
-        
-        $writer = new Xlsx($spreadsheet);
-        $writer->save('php://output');
-        exit;
+    public function exportRekapPegawai(RekapPegawaiExport $export) {
+        return $export($this->rekapData());
     }
 }

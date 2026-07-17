@@ -2,32 +2,68 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AbsensiStatus;
+use App\Exports\AbsensiExport;
+use App\Models\Absensi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class AbsensiController extends Controller
 {
-    // GET /api/absensi — Semua absensi (admin)
+    // GET /api/absensi/export?dari=Y-m-d&sampai=Y-m-d&label=... (admin)
+    // Server-side detailed attendance-log xlsx for a date range.
+    public function export(Request $request, AbsensiExport $export)
+    {
+        $validated = $request->validate([
+            'dari'   => 'required|date',
+            'sampai' => 'required|date|after_or_equal:dari',
+            'label'  => 'nullable|string|max:100',
+        ]);
+
+        // Raw query builder (not Eloquent) so cells receive plain strings, not
+        // enum/Carbon cast objects that PhpSpreadsheet can't serialize.
+        $rows = DB::table('absensi')
+            ->join('users', 'users.id', '=', 'absensi.user_id')
+            ->select('absensi.*', 'users.nama', 'users.jabatan', 'users.nik')
+            ->whereBetween('absensi.tanggal', [$validated['dari'], $validated['sampai']])
+            ->orderBy('absensi.tanggal')
+            ->orderBy('users.nama')
+            ->get();
+
+        $label = $validated['label'] ?? ($validated['dari'] . ' s.d. ' . $validated['sampai']);
+        $filename = 'Absensi_' . str_replace('-', '', $validated['dari']) . '_' . str_replace('-', '', $validated['sampai']) . '.xlsx';
+
+        return $export($rows, $label, $filename);
+    }
+
+    // GET /api/absensi — Semua absensi (admin).
+    // ?paginate=1 returns Laravel's paginator shape for the Kelola Absensi table;
+    // other callers (export, notifications, badges) rely on the full unpaginated
+    // list, so pagination stays strictly opt-in.
     public function index(Request $request)
     {
         $bulan = $request->bulan ?? now()->month;
         $tahun = $request->tahun ?? now()->year;
 
-        $absensi = DB::table('absensi')
+        $query = Absensi::query()
             ->join('users', 'users.id', '=', 'absensi.user_id')
             ->select('absensi.*', 'users.nama', 'users.jabatan', 'users.nik')
             ->whereMonth('absensi.tanggal', $bulan)
             ->whereYear('absensi.tanggal', $tahun)
-            ->orderBy('absensi.tanggal', 'desc')
-            ->get();
+            ->orderByDesc('absensi.tanggal');
 
-        return response()->json(['data' => $absensi]);
+        if ($request->boolean('paginate')) {
+            return response()->json($query->paginate($request->integer('per_page', 15))->withQueryString());
+        }
+
+        return response()->json(['data' => $query->get()]);
     }
 
     // GET /api/absensi/{id} — Detail absensi by id (admin)
     public function show(int $id)
     {
-        $data = DB::table('absensi')
+        $data = Absensi::query()
             ->join('users', 'users.id', '=', 'absensi.user_id')
             ->select('absensi.*', 'users.nama', 'users.jabatan', 'users.nik')
             ->where('absensi.id', $id)
@@ -42,12 +78,10 @@ class AbsensiController extends Controller
         $request->validate([
             'user_id' => 'required|integer',
             'tanggal' => 'required|date',
-            'status'  => 'required|in:Hadir,Izin,Alpha,SPPD',
+            'status'  => ['required', Rule::in(AbsensiStatus::adminFormValues())],
         ]);
 
-        // Cek duplikat
-        $exists = DB::table('absensi')
-            ->where('user_id', $request->user_id)
+        $exists = Absensi::where('user_id', $request->user_id)
             ->where('tanggal', $request->tanggal)
             ->exists();
 
@@ -57,15 +91,13 @@ class AbsensiController extends Controller
             ], 409);
         }
 
-        DB::table('absensi')->insert([
+        Absensi::create([
             'user_id'    => $request->user_id,
             'tanggal'    => $request->tanggal,
             'jam_masuk'  => $request->jam_masuk ?: null,
             'jam_keluar' => $request->jam_keluar ?: null,
             'status'     => $request->status,
             'keterangan' => $request->keterangan,
-            'created_at' => now(),
-            'updated_at' => now(),
         ]);
 
         return response()->json(['message' => 'Absensi berhasil ditambahkan.'], 201);
@@ -74,13 +106,11 @@ class AbsensiController extends Controller
     // POST /api/absensi/checkin — Absen masuk (user)
     public function checkin(Request $request)
     {
-        $authUser = $request->attributes->get('auth_user');
-        $userId   = $authUser->user_id;
+        $authUser = $request->user();
+        $userId   = $authUser->id;
         $today    = now()->toDateString();
 
-        // Cek sudah absen hari ini
-        $exists = DB::table('absensi')
-            ->where('user_id', $userId)
+        $exists = Absensi::where('user_id', $userId)
             ->where('tanggal', $today)
             ->exists();
 
@@ -91,14 +121,14 @@ class AbsensiController extends Controller
         }
 
         $request->validate([
-            'status'    => 'required|in:Hadir,Izin,SPPD',
+            'status'    => ['required', Rule::in(AbsensiStatus::checkinValues())],
             'latitude'  => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
         ]);
 
         // Upload foto base64 jika ada
         $fotoPath = null;
-        if ($request->status === 'Hadir' && $request->foto_base64) {
+        if ($request->status === AbsensiStatus::Hadir->value && $request->foto_base64) {
             $fotoData = base64_decode(
                 preg_replace('#^data:image/\w+;base64,#', '', $request->foto_base64)
             );
@@ -108,7 +138,7 @@ class AbsensiController extends Controller
             file_put_contents(public_path($fotoPath), $fotoData);
         }
 
-        DB::table('absensi')->insert([
+        Absensi::create([
             'user_id'    => $userId,
             'tanggal'    => $today,
             'jam_masuk'  => now()->toTimeString(),
@@ -117,8 +147,6 @@ class AbsensiController extends Controller
             'longitude'  => $request->longitude,
             'foto_path'  => $fotoPath,
             'keterangan' => $request->keterangan,
-            'created_at' => now(),
-            'updated_at' => now(),
         ]);
 
         return response()->json([
@@ -134,17 +162,13 @@ class AbsensiController extends Controller
     // POST /api/absensi/checkout — Absen pulang (user)
     public function checkout(Request $request)
     {
-        $authUser = $request->attributes->get('auth_user');
+        $authUser = $request->user();
         $today    = now()->toDateString();
 
-        $updated = DB::table('absensi')
-            ->where('user_id', $authUser->user_id)
+        $updated = Absensi::where('user_id', $authUser->id)
             ->where('tanggal', $today)
             ->whereNull('jam_keluar')
-            ->update([
-                'jam_keluar' => now()->toTimeString(),
-                'updated_at' => now(),
-            ]);
+            ->update(['jam_keluar' => now()->toTimeString()]);
 
         if (!$updated) {
             return response()->json([
@@ -161,11 +185,10 @@ class AbsensiController extends Controller
     // GET /api/absensi/today — Cek absensi hari ini (user)
     public function today(Request $request)
     {
-        $authUser = $request->attributes->get('auth_user');
+        $authUser = $request->user();
         $today    = now()->toDateString();
 
-        $data = DB::table('absensi')
-            ->where('user_id', $authUser->user_id)
+        $data = Absensi::where('user_id', $authUser->id)
             ->where('tanggal', $today)
             ->first();
 
@@ -173,28 +196,27 @@ class AbsensiController extends Controller
     }
 
     // GET /api/absensi/riwayat — Riwayat absensi milik user
-public function riwayat(Request $request)
-{
-    $authUser = $request->attributes->get('auth_user');
-    $limit    = $request->get('limit', 30);
+    public function riwayat(Request $request)
+    {
+        $authUser = $request->user();
+        $limit    = $request->get('limit', 30);
 
-    $data = DB::table('absensi')
-        ->where('user_id', $authUser->user_id)
-        ->orderBy('tanggal', 'desc')
-        ->limit($limit)
-        ->get();
+        $data = Absensi::where('user_id', $authUser->id)
+            ->orderByDesc('tanggal')
+            ->limit($limit)
+            ->get();
 
-    return response()->json(['data' => $data]);
-}
+        return response()->json(['data' => $data]);
+    }
+
     // GET /api/absensi/laporan — Laporan bulanan user
     public function laporan(Request $request)
     {
-        $authUser = $request->attributes->get('auth_user');
+        $authUser = $request->user();
         $bulan    = $request->bulan ?? now()->month;
         $tahun    = $request->tahun ?? now()->year;
 
-        $summary = DB::table('absensi')
-            ->where('user_id', $authUser->user_id)
+        $summary = Absensi::where('user_id', $authUser->id)
             ->whereMonth('tanggal', $bulan)
             ->whereYear('tanggal', $tahun)
             ->selectRaw("
@@ -206,11 +228,10 @@ public function riwayat(Request $request)
             ")
             ->first();
 
-        $detail = DB::table('absensi')
-            ->where('user_id', $authUser->user_id)
+        $detail = Absensi::where('user_id', $authUser->id)
             ->whereMonth('tanggal', $bulan)
             ->whereYear('tanggal', $tahun)
-            ->orderBy('tanggal', 'desc')
+            ->orderByDesc('tanggal')
             ->get();
 
         return response()->json([
@@ -223,19 +244,18 @@ public function riwayat(Request $request)
     public function update(Request $request, int $id)
     {
         $request->validate([
-            'status'     => 'required|in:Hadir,Izin,Alpha,SPPD',
+            'status'     => ['required', Rule::in(AbsensiStatus::adminFormValues())],
             'jam_masuk'  => 'nullable|date_format:H:i',
             'jam_keluar' => 'nullable|date_format:H:i',
         ]);
 
-        DB::table('absensi')->where('id', $id)->update([
+        Absensi::where('id', $id)->update([
             'user_id'    => $request->user_id,
             'tanggal'    => $request->tanggal,
             'status'     => $request->status,
             'jam_masuk'  => $request->jam_masuk ?: null,
             'jam_keluar' => $request->jam_keluar ?: null,
             'keterangan' => $request->keterangan,
-            'updated_at' => now(),
         ]);
 
         return response()->json(['message' => 'Absensi berhasil diupdate.']);
@@ -244,7 +264,7 @@ public function riwayat(Request $request)
     // DELETE /api/absensi/{id} — Hapus absensi (admin)
     public function destroy(int $id)
     {
-        DB::table('absensi')->where('id', $id)->delete();
+        Absensi::where('id', $id)->delete();
         return response()->json(['message' => 'Absensi berhasil dihapus.']);
     }
 }

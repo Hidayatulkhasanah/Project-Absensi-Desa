@@ -2,18 +2,12 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return file_get_contents(public_path('login.html'));
-});
+Route::view('/', 'login');
 
-Route::get('/dashboard', function () {
-    return file_get_contents(public_path('admin-absensi.html'));
-});
+Route::view('/dashboard', 'admin-absensi');
+Route::view('/admin-absensi', 'admin-absensi');
 
-Route::get('/admin-absensi', function () {
-    return file_get_contents(public_path('admin-absensi.html'));
-});
+Route::view('/absensi', 'absensi');
 
-Route::get('/absensi', function () {
-    return file_get_contents(public_path('absensi.html'));
-});
+Route::view('/sppd', 'sppd.index')->name('sppd.index');
+Route::view('/sppd/{id}', 'sppd.show')->name('sppd.show');

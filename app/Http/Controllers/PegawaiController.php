@@ -2,22 +2,29 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\UserRole;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use App\Models\User;
 
 class PegawaiController extends Controller
 {
     // GET /api/pegawai
-    public function index()
+    // ?paginate=1 returns Laravel's paginator shape for the Data Pegawai table;
+    // other callers (dropdowns, badges, settings counts) rely on the full
+    // unpaginated list, so pagination stays strictly opt-in.
+    public function index(Request $request)
     {
-        $pegawai = User::where('aktif', 1)
+        $query = User::where('aktif', 1)
             ->select('id', 'nik', 'nama', 'jabatan', 'role', 'aktif')
-            ->orderBy('nama')
-            ->get();
+            ->orderBy('nama');
 
-        return response()->json(['data' => $pegawai]);
+        if ($request->boolean('paginate')) {
+            return response()->json($query->paginate($request->integer('per_page', 15))->withQueryString());
+        }
+
+        return response()->json(['data' => $query->get()]);
     }
 
     // POST /api/pegawai
@@ -28,7 +35,7 @@ class PegawaiController extends Controller
             'nama'     => 'required',
             'password' => 'required|min:6',
             'jabatan'  => 'nullable',
-            'role'     => 'required|in:admin,user',
+            'role'     => ['required', Rule::in(UserRole::pegawaiFormValues())],
         ]);
 
         $user = User::create([
@@ -52,23 +59,22 @@ class PegawaiController extends Controller
         $request->validate([
             'nama'    => 'required',
             'jabatan' => 'nullable',
-            'role'    => 'required|in:admin,user',
+            'role'    => ['required', Rule::in(UserRole::pegawaiFormValues())],
             'aktif'   => 'required|in:0,1',
         ]);
 
         $data = [
-            'nama'       => $request->nama,
-            'jabatan'    => $request->jabatan,
-            'role'       => $request->role,
-            'aktif'      => $request->aktif,
-            'updated_at' => now(),
+            'nama'    => $request->nama,
+            'jabatan' => $request->jabatan,
+            'role'    => $request->role,
+            'aktif'   => $request->aktif,
         ];
 
         if ($request->password) {
             $data['password'] = Hash::make($request->password);
         }
 
-        DB::table('users')->where('id', $id)->update($data);
+        User::where('id', $id)->update($data);
 
         return response()->json(['message' => 'Pegawai berhasil diupdate.']);
     }
@@ -76,10 +82,7 @@ class PegawaiController extends Controller
     // DELETE /api/pegawai/{id} — nonaktifkan
     public function destroy(int $id)
     {
-        DB::table('users')->where('id', $id)->update([
-            'aktif'      => 0,
-            'updated_at' => now(),
-        ]);
+        User::where('id', $id)->update(['aktif' => 0]);
         return response()->json(['message' => 'Pegawai berhasil dinonaktifkan.']);
     }
 }

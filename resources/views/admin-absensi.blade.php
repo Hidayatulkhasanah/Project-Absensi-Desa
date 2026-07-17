@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Admin Panel – Absensi Desa</title>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 <style>
 :root{
   --gd:#1a3a2a;--gm:#2d6a4f;--gf:#40916c;--gl:#74c69d;--gp:#d8f3dc;--gpp:#edf9f0;
@@ -30,7 +31,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cr);color:var(--ink);disp
 .sb::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;background:rgba(116,198,157,.06);pointer-events:none}
 .sb-head{padding:22px 18px 16px;border-bottom:1px solid rgba(255,255,255,.07);flex-shrink:0}
 .sb-brand{display:flex;align-items:center;gap:11px;margin-bottom:14px}
-.sb-ico{width:42px;height:42px;background:rgba(116,198,157,.14);border:1.5px solid rgba(116,198,157,.28);border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.sb-ico{width:42px;height:42px;background:transparent;border:none;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--gl);flex-shrink:0}
 .sb-bname{font-family:'Fraunces',serif;font-size:16px;font-weight:700;color:#fff;letter-spacing:-.3px;line-height:1.1}
 .sb-bsub{font-size:9px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;margin-top:1px}
 .sb-user{display:flex;align-items:center;gap:9px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:11px;padding:9px 12px}
@@ -48,7 +49,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cr);color:var(--ink);disp
 .ni.on{background:rgba(116,198,157,.14);color:#fff}
 .ni.on::before{content:'';position:absolute;left:0;top:20%;height:60%;width:3px;background:var(--gl);border-radius:0 3px 3px 0}
 .ni-ic{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;transition:background .15s}
-.ni.on .ni-ic{background:rgba(116,198,157,.18)}
+.ni.on .ni-ic{background:rgba(116, 198, 157, 0)}
 .ni-lbl{flex:1;white-space:nowrap}
 .nb{margin-left:auto;background:var(--rs);color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:9px;min-width:18px;text-align:center;line-height:1.5}
 .nb.green{background:var(--gf)}
@@ -86,7 +87,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cr);color:var(--ink);disp
 .btn-xl{background:linear-gradient(135deg,#217346,#1e8a50);color:#fff;box-shadow:0 3px 10px rgba(33,115,70,.25)}.btn-xl:hover{transform:translateY(-1px);box-shadow:0 5px 16px rgba(33,115,70,.35)}
 .btn-sm{padding:5px 10px;font-size:11px}
 .badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
-.bh{background:var(--gp);color:var(--gd)}.bi{background:var(--amp);color:var(--amd)}.ba{background:var(--rsp);color:var(--rsd)}.bs{background:var(--blp);color:var(--bld)}
+.badge.bh{background:var(--gp);color:var(--gd)}.badge.bi{background:var(--amp);color:var(--amd)}.badge.ba{background:var(--rsp);color:var(--rsd)}.badge.bs{background:var(--blp);color:var(--bld)}
 .bp{background:#fff3cd;color:#856404}.bap{background:var(--gp);color:var(--gd)}.brj{background:var(--rsp);color:var(--rsd)}
 .br-a{background:var(--rsp);color:var(--rsd)}.br-p{background:var(--pup);color:var(--pu)}
 
@@ -94,15 +95,15 @@ body{font-family:'DM Sans',sans-serif;background:var(--cr);color:var(--ink);disp
 .sc-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:20px}
 .sc{background:var(--wh);border-radius:var(--r);padding:18px;box-shadow:var(--s1);cursor:pointer;transition:transform .18s,box-shadow .18s;position:relative;overflow:hidden;border-top:3px solid var(--ac,var(--gm))}
 .sc:hover{transform:translateY(-2px);box-shadow:var(--s2)}
-.sc .si{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:12px}
+.sc .si{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:12px}
 .sc .sn{font-family:'Fraunces',serif;font-size:28px;font-weight:700;line-height:1;color:var(--ink)}
 .sc .sl{font-size:11px;color:var(--mu);margin-top:4px;font-weight:500}
 .sc .sd{font-size:10px;font-weight:600;margin-top:6px}
-.sc.cg{--ac:var(--gm)}.sc.cg .si{background:var(--gp)}.sc.cg .sd{color:var(--gf)}
-.sc.cr2{--ac:var(--rs)}.sc.cr2 .si{background:var(--rsp)}.sc.cr2 .sd{color:var(--rs)}
-.sc.cb{--ac:var(--bl)}.sc.cb .si{background:var(--blp)}.sc.cb .sd{color:var(--bl)}
-.sc.ca{--ac:var(--am)}.sc.ca .si{background:var(--amp)}.sc.ca .sd{color:var(--amd)}
-.sc.cp{--ac:var(--pu)}.sc.cp .si{background:var(--pup)}.sc.cp .sd{color:var(--pu)}
+.sc.cg{--ac:var(--gm)}.sc.cg .si{background:transparent;color:var(--gf)}.sc.cg .sd{color:var(--gf)}
+.sc.cr2{--ac:var(--rs)}.sc.cr2 .si{background:transparent;color:var(--rsd)}.sc.cr2 .sd{color:var(--rs)}
+.sc.cb{--ac:var(--bl)}.sc.cb .si{background:transparent;color:var(--bl)}.sc.cb .sd{color:var(--bl)}
+.sc.ca{--ac:var(--am)}.sc.ca .si{background:transparent;color:var(--amd)}.sc.ca .sd{color:var(--amd)}
+.sc.cp{--ac:var(--pu)}.sc.cp .si{background:transparent;color:var(--pu)}.sc.cp .sd{color:var(--pu)}
 
 /* ─── PROGRESS BAR ─── */
 .pb-wrap{background:var(--cd);border-radius:6px;height:7px;overflow:hidden}
@@ -129,7 +130,8 @@ tbody tr:hover{background:#f5f8f4}
 .pag-info{font-size:11px;color:var(--mu)}
 .pag-btns{display:flex;gap:3px}
 .pb2{width:28px;height:28px;border-radius:7px;border:1.5px solid var(--cd);background:none;cursor:pointer;font-size:11px;font-weight:600;color:var(--mu);transition:all .12s;display:flex;align-items:center;justify-content:center}
-.pb2.on,.pb2:hover{background:var(--gd);color:#fff;border-color:var(--gd)}
+.pb2:hover{background:var(--gp);color:var(--gd);border-color:var(--gf)}
+.pb2.on{background:var(--gm);color:#fff;border-color:var(--gm)}
 
 /* ─── FILTER BAR ─── */
 .fb{background:var(--wh);border-radius:var(--r);padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;gap:10px;box-shadow:var(--s1);flex-wrap:wrap}
@@ -325,7 +327,6 @@ table{min-width:500px}
 .notif-empty{padding:28px 16px;text-align:center;color:var(--mu);font-size:12px}
 
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -336,7 +337,7 @@ table{min-width:500px}
 <aside class="sb" id="sb">
   <div class="sb-head">
     <div class="sb-brand">
-      <div class="sb-ico">🏛️</div>
+      <div class="sb-ico"><i class="bi bi-bank2"></i></div>
       <div><div class="sb-bname">Absensi Desa</div><div class="sb-bsub">Panel Administrator</div></div>
     </div>
     <div class="sb-user">
@@ -350,22 +351,22 @@ table{min-width:500px}
   </div>
   <nav class="sb-nav">
     <div class="sb-sec">Utama</div>
-    <button class="ni on" onclick="nav('dashboard',this)"><div class="ni-ic">📊</div><span class="ni-lbl">Dashboard</span></button>
+    <button class="ni on" onclick="nav('dashboard',this)"><div class="ni-ic"><i class="bi bi-bar-chart-fill"></i></div><span class="ni-lbl">Dashboard</span></button>
     <div class="sb-sec">Data Absensi</div>
-    <button class="ni" onclick="nav('absensi',this)"><div class="ni-ic">📋</div><span class="ni-lbl">Kelola Absensi</span></button>
-    <button class="ni" onclick="nav('sppd',this)"><div class="ni-ic">✈️</div><span class="ni-lbl">Kelola SPPD</span><span class="nb" id="sppd-nb"></span></button>
+    <button class="ni" onclick="nav('absensi',this)"><div class="ni-ic"><i class="bi bi-clipboard-check-fill"></i></div><span class="ni-lbl">Kelola Absensi</span></button>
+    <button class="ni" onclick="nav('sppd',this)"><div class="ni-ic"><i class="bi bi-airplane-fill"></i></div><span class="ni-lbl">Kelola SPPD</span><span class="nb" id="sppd-nb"></span></button>
     <div class="sb-sec">Laporan</div>
-    <button class="ni" onclick="nav('laporan',this)"><div class="ni-ic">📈</div><span class="ni-lbl">Laporan Bulanan</span></button>
-    <button class="ni" onclick="nav('rekap',this)"><div class="ni-ic">📑</div><span class="ni-lbl">Rekap Pegawai</span></button>
+    <button class="ni" onclick="nav('laporan',this)"><div class="ni-ic"><i class="bi bi-graph-up-arrow"></i></div><span class="ni-lbl">Laporan Bulanan</span></button>
+    <button class="ni" onclick="nav('rekap',this)"><div class="ni-ic"><i class="bi bi-journal-text"></i></div><span class="ni-lbl">Rekap Pegawai</span></button>
     <div class="sb-sec">Master Data</div>
-    <button class="ni" onclick="nav('pegawai',this)"><div class="ni-ic">👥</div><span class="ni-lbl">Data Pegawai</span><span class="nb green" id="peg-nb"></span></button>
+    <button class="ni" onclick="nav('pegawai',this)"><div class="ni-ic"><i class="bi bi-people-fill"></i></div><span class="ni-lbl">Data Pegawai</span><span class="nb green" id="peg-nb"></span></button>
     <div class="sb-sec">Pengaturan</div>
-    <button class="ni" onclick="nav('pengaturan',this)"><div class="ni-ic">⚙️</div><span class="ni-lbl">Pengaturan Sistem</span></button>
-    <button class="ni" onclick="nav('password',this)"><div class="ni-ic">👤</div><span class="ni-lbl">Profil & Sandi</span></button>
+    <button class="ni" onclick="nav('pengaturan',this)"><div class="ni-ic"><i class="bi bi-gear-fill"></i></div><span class="ni-lbl">Pengaturan Sistem</span></button>
+    <button class="ni" onclick="nav('password',this)"><div class="ni-ic"><i class="bi bi-person-fill"></i></div><span class="ni-lbl">Profil & Sandi</span></button>
   </nav>
   <div class="sb-foot">
     <div class="sb-clock"><div class="sb-time" id="sb-time">–</div><div class="sb-date" id="sb-date">–</div></div>
-    <button class="lo-btn" onclick="showConf('logout')">🚪 Keluar dari Sistem</button>
+    <button class="lo-btn" onclick="showConf('logout')"><i class="bi bi-box-arrow-right"></i> Keluar dari Sistem</button>
   </div>
 </aside>
 
@@ -383,14 +384,14 @@ table{min-width:500px}
     </div>
   <div class="notif-wrap">
   <button class="ico-btn" title="Notifikasi" onclick="toggleNotif()" id="notif-btn">
-    <span>🔔</span><span class="dot" id="notif-dot" style="display:none"></span>
+    <span><i class="bi bi-bell-fill"></i></span><span class="dot" id="notif-dot" style="display:none"></span>
   </button>
   <div class="notif-drop" id="notif-drop">
     <div class="notif-hd">
-      <div class="notif-hd-t">🔔 Absensi Hari Ini</div>
+      <div class="notif-hd-t"><i class="bi bi-bell-fill"></i> Absensi Hari Ini</div>
       <span id="notif-count" style="font-size:10px;color:var(--mu)"></span>
     </div>
-    <div id="notif-list"><div class="notif-empty">⏳ Memuat...</div></div>
+    <div id="notif-list"><div class="notif-empty"><i class="bi bi-hourglass-split"></i> Memuat...</div></div>
   </div>
 </div>
   </header>
@@ -402,7 +403,7 @@ table{min-width:500px}
   <div class="mbox">
     <div class="mh">
       <div><div class="mt2" id="mabs-t">Tambah Data Absensi</div><div class="ms2">Kelola kehadiran pegawai</div></div>
-      <button class="mc" onclick="cm('m-abs')">✕</button>
+      <button class="mc" onclick="cm('m-abs')"><i class="bi bi-x-lg"></i></button>
     </div>
     <div class="mb">
       <input type="hidden" id="mabs-id">
@@ -430,7 +431,7 @@ table{min-width:500px}
     </div>
     <div class="mf">
       <button class="btn btn-s" onclick="cm('m-abs')">Batal</button>
-      <button class="btn btn-p" onclick="saveAbs()">💾 Simpan</button>
+      <button class="btn btn-p" onclick="saveAbs()"><i class="bi bi-floppy-fill"></i> Simpan</button>
     </div>
   </div>
 </div>
@@ -440,7 +441,7 @@ table{min-width:500px}
   <div class="mbox">
     <div class="mh">
       <div><div class="mt2" id="mpeg-t">Tambah Pegawai</div><div class="ms2">Data perangkat desa</div></div>
-      <button class="mc" onclick="cm('m-peg')">✕</button>
+      <button class="mc" onclick="cm('m-peg')"><i class="bi bi-x-lg"></i></button>
     </div>
     <div class="mb">
       <input type="hidden" id="mpeg-id">
@@ -462,7 +463,7 @@ table{min-width:500px}
     </div>
     <div class="mf">
       <button class="btn btn-s" onclick="cm('m-peg')">Batal</button>
-      <button class="btn btn-p" onclick="savePeg()">💾 Simpan</button>
+      <button class="btn btn-p" onclick="savePeg()"><i class="bi bi-floppy-fill"></i> Simpan</button>
     </div>
   </div>
 </div>
@@ -472,11 +473,11 @@ table{min-width:500px}
   <div class="mbox">
     <div class="mh">
       <div><div class="mt2">Detail & Verifikasi SPPD</div><div class="ms2" id="msppd-stat-lbl">Periksa dokumen perjalanan dinas</div></div>
-      <button class="mc" onclick="cm('m-sppd')">✕</button>
+      <button class="mc" onclick="cm('m-sppd')"><i class="bi bi-x-lg"></i></button>
     </div>
     <div class="mb">
       <div style="background:var(--blp);border:1.5px solid rgba(37,99,192,.18);border-radius:11px;padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px">
-        <span style="font-size:24px">📎</span>
+        <span style="font-size:24px"><i class="bi bi-paperclip"></i></span>
         <div><div style="font-size:13px;font-weight:600;color:var(--bld)" id="sv-file">–</div><div style="font-size:10px;color:var(--mu)">Surat Perintah Perjalanan Dinas</div></div>
       </div>
       <div class="fr">
@@ -493,7 +494,7 @@ table{min-width:500px}
     </div>
     <div class="mf">
       <button class="btn btn-s" onclick="cm('m-sppd')">Tutup</button>
-      <button class="btn btn-d" onclick="verifSPPD('ditolak')">✕ Tolak</button>
+      <button class="btn btn-d" onclick="verifSPPD('ditolak')"><i class="bi bi-x-lg"></i> Tolak</button>
       <button class="btn btn-ok" onclick="verifSPPD('disetujui')">✓ Setujui</button>
     </div>
   </div>
@@ -503,7 +504,7 @@ table{min-width:500px}
 <div class="mo" id="m-conf">
   <div class="mbox" style="max-width:380px">
     <div class="mb" style="text-align:center;padding-top:24px">
-      <div class="conf-ic d" id="ci">🗑️</div>
+      <div class="conf-ic d" id="ci"><i class="bi bi-trash-fill"></i></div>
       <div class="mt2" id="ct" style="text-align:center">Hapus Data?</div>
       <p style="font-size:12px;color:var(--mu);margin-top:7px" id="cm2">Data yang dihapus tidak dapat dikembalikan.</p>
     </div>
@@ -519,7 +520,7 @@ table{min-width:500px}
   <div class="mbox" style="max-width:460px">
     <div class="mh">
       <div><div class="mt2">Pengaturan Sistem</div><div class="ms2">Konfigurasi aplikasi Absensi Desa</div></div>
-      <button class="mc" onclick="cm('m-set')">✕</button>
+      <button class="mc" onclick="cm('m-set')"><i class="bi bi-x-lg"></i></button>
     </div>
     <div class="mb">
       <div class="fg"><label class="fl">Nama Desa</label><input class="fc" type="text" id="set-desa" value="Desa Mekarsari"></div>
@@ -533,7 +534,7 @@ table{min-width:500px}
     </div>
     <div class="mf">
       <button class="btn btn-s" onclick="cm('m-set')">Batal</button>
-      <button class="btn btn-p" onclick="saveSetting()">💾 Simpan Pengaturan</button>
+      <button class="btn btn-p" onclick="saveSetting()"><i class="bi bi-floppy-fill"></i> Simpan Pengaturan</button>
     </div>
   </div>
 </div>
@@ -575,10 +576,56 @@ table{min-width:500px}
 const _n = new Date();
 const _bulanDefault = `${_n.getFullYear()}-${String(_n.getMonth()+1).padStart(2,'0')}`;
 let page='dashboard',confAct=null,curSppd=null;
-let fAbs={bulan:_bulanDefault,search:'',st:''};
-let fPeg={q:''};
-let fSppd={st:''};
-let fRekap={uid:'',q:'',sort:''};
+let fAbs={bulan:_bulanDefault,search:'',st:'',page:1};
+let fPeg={q:'',page:1};
+let fSppd={st:'',page:1};
+let fRekap={uid:'',q:'',sort:'',page:1};
+let fLap={page:1};
+const PAGE_SIZE=15;
+
+// Shared pagination control + page-slicing for the datalist tables. Search/sort
+// filtering happens client-side already, so pagination slices the filtered
+// result rather than round-tripping to the server (keeps search working across
+// the whole filtered set, not just one page of it).
+function paginate(items,page){
+  const totalPages=Math.max(1,Math.ceil(items.length/PAGE_SIZE));
+  page=Math.min(Math.max(1,page),totalPages);
+  const from=items.length===0?0:(page-1)*PAGE_SIZE+1;
+  const to=Math.min(page*PAGE_SIZE,items.length);
+  return {pageItems:items.slice((page-1)*PAGE_SIZE,page*PAGE_SIZE),page,totalPages,from,to,total:items.length};
+}
+function paginationHtml(pg,gotoFn){
+  if(pg.total===0) return '';
+  let btns='';
+  const maxBtns=5;
+  let start=Math.max(1,pg.page-Math.floor(maxBtns/2));
+  let end=Math.min(pg.totalPages,start+maxBtns-1);
+  start=Math.max(1,end-maxBtns+1);
+  btns+=`<button class="pb2" onclick="${gotoFn}(${pg.page-1})">‹</button>`;
+  for(let p=start;p<=end;p++) btns+=`<button class="pb2 ${p===pg.page?'on':''}" onclick="${gotoFn}(${p})">${p}</button>`;
+  btns+=`<button class="pb2" onclick="${gotoFn}(${pg.page+1})">›</button>`;
+  return `<div class="pag"><div class="pag-info">Menampilkan ${pg.from}-${pg.to} dari ${pg.total} data</div><div class="pag-btns">${btns}</div></div>`;
+}
+function gotoAbsPage(p){fAbs.page=p;pgAbs(true);}
+function gotoPegPage(p){fPeg.page=p;pgPeg(true);}
+function gotoSppdPage(p){fSppd.page=p;pgSppd(true);}
+function gotoRekapPage(p){fRekap.page=p;pgRekap(true);}
+function gotoLapPage(p){fLap.page=p;pgLap();}
+
+// Search inputs re-fetch from the API and re-render the whole page on every
+// call, so debounce them -- typing "annisa" shouldn't fire 6 requests, and
+// the search box shouldn't lose focus on every keystroke while the user is
+// still typing.
+function debounce(fn,delay=300){
+  let t;
+  return (...args)=>{ clearTimeout(t); t=setTimeout(()=>fn(...args),delay); };
+}
+let _absCache=null,_pegCache=null,_rekapCache=null,_sppdCache=null;
+const _typing={abs:false,peg:false,rekap:false};
+function _restoreFocus(id,k){ if(!_typing[k]) return; const el=document.getElementById(id); if(el){ el.focus(); const v=el.value||''; try{el.setSelectionRange(v.length,v.length);}catch(e){} } _typing[k]=false; }
+const debouncedPgAbs=debounce(()=>pgAbs(true));
+const debouncedPgPeg=debounce(()=>pgPeg(true));
+const debouncedPgRekap=debounce(()=>pgRekap(true));
 
 // ════════════════════════════════════════════════════
 //  API CONFIG
@@ -593,6 +640,49 @@ async function apiFetch(path, opts={}){
   if(res.status === 401){ localStorage.clear(); window.location.href='/'; return null; }
   return res.json();
 }
+
+// Authenticated file download: fetch the server-generated file with the Bearer
+// token, then save it via a temporary object URL. Used for Excel exports so
+// generation happens server-side (no client-side SheetJS / CDN dependency).
+async function downloadAuthed(url, fallbackName){
+  try {
+    const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('auth_token') } });
+    if(!res.ok){
+      if(res.status === 401){ localStorage.clear(); window.location.href='/'; return; }
+      showToast('<i class="bi bi-x-circle-fill"></i> Gagal mengunduh data','err');
+      return;
+    }
+    const blob = await res.blob();
+    let name = fallbackName;
+    const cd = res.headers.get('Content-Disposition');
+    if(cd){ const m = cd.match(/filename="?([^"]+)"?/); if(m) name = m[1]; }
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 1500);
+    showToast('<i class="bi bi-download"></i> Berhasil diunduh!');
+  } catch(e){
+    showToast('<i class="bi bi-x-circle-fill"></i> Gagal mengunduh data','err');
+  }
+}
+
+// ════════════════════════════════════════════════════
+//  LOCAL SETTINGS — Pengaturan Sistem has no backend
+//  table, so it's persisted client-side.
+// ════════════════════════════════════════════════════
+const DB = {
+  setting(){
+    const def = {
+      desa: 'Desa Mekarsari', kec: 'Kecamatan Cileungsi', kades: 'Hj. Nasih',
+      jamMasuk: '08:00', jamPulang: '17:00', radius: 100,
+      lat: '-6.408900', lng: '107.012300', sesi: 8,
+    };
+    try { return { ...def, ...JSON.parse(localStorage.getItem('sys_setting') || '{}') }; }
+    catch { return def; }
+  },
+  saveSetting(s){ localStorage.setItem('sys_setting', JSON.stringify(s)); },
+};
 
 // ════════════════════════════════════════════════════
 //  CLOCK
@@ -649,13 +739,17 @@ setTimeout(()=>{
 //  BADGE UPDATE
 // ════════════════════════════════════════════════════
 function updateBadges(){
-  const pending=DB.sppd().filter(s=>s.st==='pending').length;
-  const pnb=document.getElementById('sppd-nb');
-  if(pnb) pnb.textContent=pending;
-  const nd=document.getElementById('notif-dot');
-  if(nd) nd.style.display=pending>0?'block':'none';
-  const peg=document.getElementById('peg-nb');
-  if(peg) peg.textContent=DB.users().filter(u=>u.aktif).length;
+  apiFetch('/sppd').then(d=>{
+    const pending=(d?.data ?? []).filter(s=>s.status==='menunggu').length;
+    const pnb=document.getElementById('sppd-nb');
+    if(pnb) pnb.textContent=pending||'';
+    const nd=document.getElementById('notif-dot');
+    if(nd) nd.style.display=pending>0?'block':'none';
+  }).catch(()=>{});
+  apiFetch('/pegawai').then(d=>{
+    const peg=document.getElementById('peg-nb');
+    if(peg) peg.textContent=(d?.data ?? []).length||'';
+  }).catch(()=>{});
 }
 
 // ════════════════════════════════════════════════════
@@ -667,7 +761,7 @@ function pgDash(){
 
   ca.innerHTML = `
     <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:300px;gap:12px;color:var(--mu)">
-      <div style="font-size:36px;animation:spin 1s linear infinite">⏳</div>
+      <div style="font-size:36px;animation:spin 1s linear infinite"><i class="bi bi-hourglass-split"></i></div>
       <div style="font-weight:600">Memuat data dashboard...</div>
     </div>
     <style>@keyframes spin{to{transform:rotate(360deg)}}</style>`;
@@ -693,12 +787,12 @@ function pgDash(){
     <div class="dash-hero">
       <div class="dh-top">
         <div>
-          <div class="dh-greet">Selamat datang, ${currentUser.nama ?? 'Admin'} 👋</div>
+          <div class="dh-greet">Selamat datang, ${currentUser.nama ?? 'Admin'} <i class="bi bi-check-circle-fill"></i></div>
           <div class="dh-sub">${setting.desa} · ${setting.kec}</div>
           <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
-            <span style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.8);font-size:10px;font-weight:600;padding:4px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.15)">⏰ ${DAYS[n.getDay()]}</span>
-            <span style="background:rgba(116,198,157,.15);color:var(--gl);font-size:10px;font-weight:600;padding:4px 10px;border-radius:8px;border:1px solid rgba(116,198,157,.25)">✅ ${kehadiran}% hadir hari ini</span>
-            ${sppdPend > 0 ? `<span style="background:rgba(233,168,76,.15);color:#fcd34d;font-size:10px;font-weight:600;padding:4px 10px;border-radius:8px;border:1px solid rgba(233,168,76,.25)">⏳ ${sppdPend} SPPD menunggu</span>` : ''}
+            <span style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.8);font-size:10px;font-weight:600;padding:4px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.15)"><i class="bi bi-alarm-fill"></i> ${DAYS[n.getDay()]}</span>
+            <span style="background:rgba(116,198,157,.15);color:var(--gl);font-size:10px;font-weight:600;padding:4px 10px;border-radius:8px;border:1px solid rgba(116,198,157,.25)"><i class="bi bi-check-circle-fill"></i> ${kehadiran}% hadir hari ini</span>
+            ${sppdPend > 0 ? `<span style="background:rgba(233,168,76,.15);color:#fcd34d;font-size:10px;font-weight:600;padding:4px 10px;border-radius:8px;border:1px solid rgba(233,168,76,.25)"><i class="bi bi-hourglass-split"></i> ${sppdPend} SPPD menunggu</span>` : ''}
           </div>
         </div>
         <div class="dh-date">
@@ -716,27 +810,27 @@ function pgDash(){
 
     <div class="sc-grid">
       <div class="sc cg" onclick="nav('absensi',document.querySelectorAll('.ni')[1])">
-        <div class="si">✅</div><div class="sn">${hadir}</div>
+        <div class="si"><i class="bi bi-check-circle-fill"></i></div><div class="sn">${hadir}</div>
         <div class="sl">Hadir Hari Ini</div>
         <div class="sd">dari ${aktif} pegawai aktif</div>
       </div>
       <div class="sc cr2" onclick="nav('absensi',document.querySelectorAll('.ni')[1])">
-        <div class="si">❌</div><div class="sn">${alpha}</div>
+        <div class="si"><i class="bi bi-x-circle-fill"></i></div><div class="sn">${alpha}</div>
         <div class="sl">Alpha Hari Ini</div>
         <div class="sd">${alpha > 0 ? 'Perlu tindak lanjut' : 'Tidak ada alpha'}</div>
       </div>
       <div class="sc cb" onclick="nav('sppd',document.querySelectorAll('.ni')[2])">
-        <div class="si">✈️</div><div class="sn">${sppdPend}</div>
+        <div class="si"><i class="bi bi-airplane-fill"></i></div><div class="sn">${sppdPend}</div>
         <div class="sl">SPPD Menunggu</div>
         <div class="sd">${sppdPend > 0 ? 'Perlu verifikasi' : 'Semua terverifikasi'}</div>
       </div>
       <div class="sc ca">
-        <div class="si">📅</div><div class="sn">${pct}%</div>
+        <div class="si"><i class="bi bi-calendar-check-fill"></i></div><div class="sn">${pct}%</div>
         <div class="sl">Kehadiran Bulan Ini</div>
         <div class="sd">${mH} dari ${mT} hari kerja</div>
       </div>
       <div class="sc cp" onclick="nav('pegawai',document.querySelectorAll('.ni')[5])">
-        <div class="si">👥</div><div class="sn">${aktif}</div>
+        <div class="si"><i class="bi bi-people-fill"></i></div><div class="sn">${aktif}</div>
         <div class="sl">Pegawai Aktif</div>
         <div class="sd">–</div>
       </div>
@@ -745,15 +839,15 @@ function pgDash(){
     ${sppdList.length > 0 ? `
     <div style="margin-bottom:20px">
       <div class="sec-h">
-        <div class="sec-t">⏳ SPPD Menunggu Verifikasi</div>
+        <div class="sec-t"><i class="bi bi-hourglass-split"></i> SPPD Menunggu Verifikasi</div>
         <button class="btn btn-s btn-sm" onclick="nav('sppd',document.querySelectorAll('.ni')[2])">Lihat Semua →</button>
       </div>
       ${sppdList.map(s => `
         <div class="sppd-pending-card">
-          <span style="font-size:26px">✈️</span>
+          <span style="font-size:26px"><i class="bi bi-airplane-fill"></i></span>
           <div style="flex:1">
             <div style="font-weight:600;font-size:13px">${s.nama} – ${s.tujuan}</div>
-            <div style="font-size:11px;color:var(--mu);margin-top:2px">${s.nomor} · ${s.tgl_berangkat} s.d. ${s.tgl_kembali} · ${s.keperluan}</div>
+            <div style="font-size:11px;color:var(--mu);margin-top:2px">${s.nomor_sppd} · ${s.tanggal_berangkat} s.d. ${s.tanggal_kembali} · ${s.keperluan}</div>
           </div>
           <button class="btn btn-ok btn-sm" onclick="openVerif(${s.id})">✓ Verifikasi</button>
           <button class="btn btn-d btn-sm" onclick="openVerif(${s.id})">Periksa</button>
@@ -764,7 +858,7 @@ function pgDash(){
       <div class="card card-p">
         <div class="sec-h">
           <div><div class="sec-t">Rekap ${MONS[n.getMonth()]} ${n.getFullYear()}</div><div class="sec-sub">Distribusi kehadiran seluruh pegawai</div></div>
-          <button class="btn btn-xl btn-sm" onclick="exportExcel()">📥 Excel</button>
+          <button class="btn btn-xl btn-sm" onclick="exportExcel()"><i class="bi bi-download"></i> Excel</button>
         </div>
         <div>
           ${[['Hadir', mH, 'var(--gf)'], ['Izin', izin, 'var(--am)'], ['Alpha', alpha, 'var(--rs)']].map(([l,v,c]) => {
@@ -786,14 +880,14 @@ function pgDash(){
       </div>
       <div style="display:flex;flex-direction:column;gap:14px">
         <div class="card card-p">
-          <div class="sec-t" style="margin-bottom:12px">⚡ Aksi Cepat</div>
+          <div class="sec-t" style="margin-bottom:12px"><i class="bi bi-lightning-charge-fill"></i> Aksi Cepat</div>
           <div class="qa-grid">
-            <div class="qa" onclick="openAddAbs()"><div class="qa-ic">➕</div><div class="qa-lbl">Tambah Absensi</div></div>
-            <div class="qa" onclick="nav('sppd',document.querySelectorAll('.ni')[2])"><div class="qa-ic">✈️</div><div class="qa-lbl">Kelola SPPD</div></div>
-            <div class="qa" onclick="openAddPeg()"><div class="qa-ic">👤</div><div class="qa-lbl">Tambah Pegawai</div></div>
-            <div class="qa" onclick="exportExcel()"><div class="qa-ic">📥</div><div class="qa-lbl">Export Excel</div></div>
-            <div class="qa" onclick="nav('laporan',document.querySelectorAll('.ni')[3])"><div class="qa-ic">📈</div><div class="qa-lbl">Laporan</div></div>
-            <div class="qa" onclick="om('m-set')"><div class="qa-ic">⚙️</div><div class="qa-lbl">Pengaturan</div></div>
+            <div class="qa" onclick="openAddAbs()"><div class="qa-ic"><i class="bi bi-plus-lg"></i></div><div class="qa-lbl">Tambah Absensi</div></div>
+            <div class="qa" onclick="nav('sppd',document.querySelectorAll('.ni')[2])"><div class="qa-ic"><i class="bi bi-airplane-fill"></i></div><div class="qa-lbl">Kelola SPPD</div></div>
+            <div class="qa" onclick="openAddPeg()"><div class="qa-ic"><i class="bi bi-person-fill"></i></div><div class="qa-lbl">Tambah Pegawai</div></div>
+            <div class="qa" onclick="exportExcel()"><div class="qa-ic"><i class="bi bi-download"></i></div><div class="qa-lbl">Export Excel</div></div>
+            <div class="qa" onclick="nav('laporan',document.querySelectorAll('.ni')[3])"><div class="qa-ic"><i class="bi bi-graph-up-arrow"></i></div><div class="qa-lbl">Laporan</div></div>
+            <div class="qa" onclick="om('m-set')"><div class="qa-ic"><i class="bi bi-gear-fill"></i></div><div class="qa-lbl">Pengaturan</div></div>
           </div>
         </div>
       </div>
@@ -810,10 +904,10 @@ function pgDash(){
     console.error('Dashboard error:', err);
     ca.innerHTML = `
       <div style="text-align:center;padding:60px;color:var(--rs)">
-        <div style="font-size:36px;margin-bottom:10px">⚠️</div>
+        <div style="font-size:36px;margin-bottom:10px"><i class="bi bi-exclamation-triangle-fill"></i></div>
         <div style="font-weight:700;font-size:15px">Gagal memuat data</div>
         <div style="font-size:12px;color:var(--mu);margin-top:6px">${err.message}</div>
-        <button onclick="nav('dashboard',document.querySelector('.ni.on'))" style="margin-top:16px;padding:9px 22px;border-radius:9px;border:none;background:var(--gm);color:#fff;cursor:pointer;font-weight:600;font-size:13px">🔄 Coba Lagi</button>
+        <button onclick="nav('dashboard',document.querySelector('.ni.on'))" style="margin-top:16px;padding:9px 22px;border-radius:9px;border:none;background:var(--gm);color:#fff;cursor:pointer;font-weight:600;font-size:13px"><i class="bi bi-arrow-clockwise"></i> Coba Lagi</button>
       </div>`;
   });
 
@@ -824,18 +918,19 @@ function pgDash(){
 // ════════════════════════════════════════════════════
 //  ABSENSI PAGE — dari Laravel API
 // ════════════════════════════════════════════════════
-function pgAbs(){
+function pgAbs(fromFilter){
   const ca = document.getElementById('ca');
   const n = new Date();
   const bulanDefault = `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`;
   if(!fAbs.bulan) fAbs.bulan = bulanDefault;
 
-  ca.innerHTML = `<div style="text-align:center;padding:60px;color:var(--mu)"><div style="font-size:32px">⏳</div><div>Memuat data absensi...</div></div>`;
-
   const [tahun, bulan] = fAbs.bulan.split('-');
-
-  apiFetch(`/absensi?bulan=${bulan}&tahun=${tahun}`).then(res => {
+  const _key = `${bulan}-${tahun}`;
+  const _hit = fromFilter && _absCache && _absCache.key===_key;
+  if(!_hit) ca.innerHTML = `<div style="text-align:center;padding:60px;color:var(--mu)"><div style="font-size:32px"><i class="bi bi-hourglass-split"></i></div><div>Memuat data absensi...</div></div>`;
+  (_hit ? Promise.resolve(_absCache.res) : apiFetch(`/absensi?bulan=${bulan}&tahun=${tahun}`)).then(res => {
     if(!res) return;
+    if(!_hit) _absCache = {key:_key, res};
     let data = res.data ?? [];
 
     // Filter search
@@ -852,26 +947,29 @@ function pgAbs(){
     const I = data.filter(a=>a.status==='Izin').length;
     const A = data.filter(a=>a.status==='Alpha').length;
 
+    const pg = paginate(data, fAbs.page);
+    fAbs.page = pg.page;
+    data = pg.pageItems;
+
     ca.innerHTML = `
     <div class="sec-h">
-      <div><div class="sec-t">Kelola Absensi</div><div class="sec-sub">CRUD data kehadiran pegawai</div></div>
-      <button class="btn btn-p" onclick="openAddAbs()">➕ Tambah Data</button>
+      <button class="btn btn-p" onclick="openAddAbs()"><i class="bi bi-plus-lg"></i> Tambah Data</button>
     </div>
     <div class="fb">
-      <div class="sw"><span class="si2">🔍</span><input class="fi" type="text" placeholder="Cari nama, tanggal..." value="${fAbs.search}" oninput="fAbs.search=this.value;pgAbs()"></div>
-      <input class="fi" type="month" value="${fAbs.bulan}" onchange="fAbs.bulan=this.value;pgAbs()" style="min-width:150px">
-      <select class="fi" style="cursor:pointer" onchange="fAbs.st=this.value;pgAbs()">
+      <div class="sw"><span class="si2"><i class="bi bi-search"></i></span><input id="abs-search" class="fi" type="text" placeholder="Cari nama, tanggal..." value="${fAbs.search}" oninput="fAbs.search=this.value;fAbs.page=1;_typing.abs=true;debouncedPgAbs()"></div>
+      <input class="fi" type="month" value="${fAbs.bulan}" onchange="fAbs.bulan=this.value;fAbs.page=1;pgAbs(true)" style="min-width:150px">
+      <select class="fi" style="cursor:pointer" onchange="fAbs.st=this.value;fAbs.page=1;pgAbs(true)">
         <option value="" ${!fAbs.st?'selected':''}>Semua Status</option>
         <option value="Hadir" ${fAbs.st==='Hadir'?'selected':''}>Hadir</option>
         <option value="Izin" ${fAbs.st==='Izin'?'selected':''}>Izin</option>
         <option value="SPPD" ${fAbs.st==='SPPD'?'selected':''}>SPPD</option>
         <option value="Alpha" ${fAbs.st==='Alpha'?'selected':''}>Alpha</option>
       </select>
-      <button class="btn btn-xl" onclick="exportExcel()">📥 Export Excel</button>
-      <button class="btn btn-s btn-sm" onclick="fAbs={bulan:'${bulanDefault}',search:'',st:''};pgAbs()">↺ Reset</button>
+      <button class="btn btn-xl" onclick="exportExcel()"><i class="bi bi-download"></i> Export Excel</button>
+      <button class="btn btn-s btn-sm" onclick="fAbs={bulan:'${bulanDefault}',search:'',st:'',page:1};pgAbs()"><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
     </div>
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px">
-      ${[['✅','Hadir',H,'cg'],['✈️','SPPD',S,'cb'],['📝','Izin',I,'ca'],['❌','Alpha',A,'cr2']].map(([ic,lb,v,c])=>`
+      ${[['<i class="bi bi-check-circle-fill"></i>','Hadir',H,'cg'],['<i class="bi bi-airplane-fill"></i>','SPPD',S,'cb'],['<i class="bi bi-pencil-square"></i>','Izin',I,'ca'],['<i class="bi bi-x-circle-fill"></i>','Alpha',A,'cr2']].map(([ic,lb,v,c])=>`
       <div class="sc ${c}" style="padding:14px;cursor:default">
         <div style="display:flex;align-items:center;justify-content:space-between">
           <div><div class="sn" style="font-size:22px">${v}</div><div class="sl" style="margin-top:3px">${lb}</div></div>
@@ -884,7 +982,7 @@ function pgAbs(){
         <thead><tr><th>Pegawai</th><th>Foto</th><th>Tanggal</th><th>Masuk</th><th>Keluar</th><th>Status</th><th>Keterangan</th><th>Aksi</th></tr></thead>
         <tbody>
           ${data.length===0
-            ? `<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--mu)"><div style="font-size:32px;margin-bottom:8px">📭</div>Tidak ada data absensi</td></tr>`
+            ? `<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--mu)"><div style="font-size:32px;margin-bottom:8px"><i class="bi bi-inbox"></i></div>Tidak ada data absensi</td></tr>`
             : data.map(a => {
                 const ini = a.nama.split(' ').map(n=>n[0]).slice(0,2).join('');
                 const bc  = a.status==='Hadir'?'bh':a.status==='Izin'?'bi':a.status==='SPPD'?'bs':'ba';
@@ -900,7 +998,7 @@ function pgAbs(){
                     ? `<img src="${fotoUrl}" onclick="lihatFoto('${fotoUrl}','${a.nama}')"
                          style="width:40px;height:40px;border-radius:9px;object-fit:cover;cursor:zoom-in;border:2px solid var(--gp);transition:transform .15s"
                          onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'"
-                         onerror="this.outerHTML='<div style=width:40px;height:40px;border-radius:9px;background:var(--cr);border:1.5px solid var(--cd);display:flex;align-items:center;justify-content:center;font-size:16px>📷</div>'">`
+                         onerror="this.outerHTML='<div style=width:40px;height:40px;border-radius:9px;background:var(--cr);border:1.5px solid var(--cd);display:flex;align-items:center;justify-content:center;font-size:16px><i class="bi bi-camera-fill"></i></div>'">`
                     : `<div style="width:40px;height:40px;border-radius:9px;background:var(--cr);border:1.5px dashed var(--cd);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--hi)">–</div>`
                   }</td>
                   <td style="font-weight:500;white-space:nowrap;font-size:12px">${tgl}</td>
@@ -909,22 +1007,23 @@ function pgAbs(){
                   <td><span class="badge ${bc}">${a.status}</span></td>
                   <td style="font-size:11px;color:var(--mu);max-width:140px;overflow:hidden;text-overflow:ellipsis">${a.keterangan||'–'}</td>
                   <td><div class="ag">
-                    <button class="btn btn-s btn-sm" onclick="openEditAbs(${a.id})">✏️</button>
-                    <button class="btn btn-d btn-sm" onclick="showConf('abs',${a.id})">🗑️</button>
+                    <button class="btn btn-s btn-sm" onclick="openEditAbs(${a.id})"><i class="bi bi-pencil-fill"></i></button>
+                    <button class="btn btn-d btn-sm" onclick="showConf('abs',${a.id})"><i class="bi bi-trash-fill"></i></button>
                   </div></td>
                 </tr>`;
               }).join('')}
         </tbody>
       </table>
-      <div class="pag"><div class="pag-info">Total ${data.length} data</div></div>
+      ${paginationHtml(pg, 'gotoAbsPage')}
     </div>`;
+    _restoreFocus('abs-search','abs');
 
   }).catch(err => {
     ca.innerHTML = `<div style="text-align:center;padding:60px;color:var(--rs)">
-      <div style="font-size:32px">⚠️</div>
+      <div style="font-size:32px"><i class="bi bi-exclamation-triangle-fill"></i></div>
       <div style="font-weight:700">Gagal memuat data</div>
       <div style="font-size:12px;color:var(--mu);margin-top:6px">${err.message}</div>
-      <button onclick="pgAbs()" style="margin-top:14px;padding:8px 20px;border-radius:8px;border:none;background:var(--gm);color:#fff;cursor:pointer;font-weight:600">🔄 Coba Lagi</button>
+      <button onclick="pgAbs()" style="margin-top:14px;padding:8px 20px;border-radius:8px;border:none;background:var(--gm);color:#fff;cursor:pointer;font-weight:600"><i class="bi bi-arrow-clockwise"></i> Coba Lagi</button>
     </div>`;
   });
 
@@ -934,12 +1033,13 @@ function pgAbs(){
 // ════════════════════════════════════════════════════
 //  SPPD PAGE
 // ════════════════════════════════════════════════════
-function pgSppd(){
+function pgSppd(fromFilter){
   const ca = document.getElementById('ca');
-  ca.innerHTML = `<div style="text-align:center;padding:60px;color:var(--mu)"><div style="font-size:32px">⏳</div><div>Memuat data SPPD...</div></div>`;
-
-  apiFetch('/sppd').then(res => {
+  const _hit = fromFilter && _sppdCache;
+  if(!_hit) ca.innerHTML = `<div style="text-align:center;padding:60px;color:var(--mu)"><div style="font-size:32px"><i class="bi bi-hourglass-split"></i></div><div>Memuat data SPPD...</div></div>`;
+  (_hit ? Promise.resolve(_sppdCache) : apiFetch('/sppd')).then(res => {
     if(!res) return;
+    if(!_hit) _sppdCache = res;
     let list = Array.isArray(res) ? res : (res.data ?? []);
     if(fSppd.st) list = list.filter(s => s.status === fSppd.st);
 
@@ -947,22 +1047,25 @@ function pgSppd(){
     const AP = list.filter(s=>s.status==='disetujui').length;
     const RJ = list.filter(s=>s.status==='ditolak').length;
 
+    const pg = paginate(list, fSppd.page);
+    fSppd.page = pg.page;
+    list = pg.pageItems;
+
     ca.innerHTML = `
     <div class="sec-h">
-      <div><div class="sec-t">Kelola SPPD</div><div class="sec-sub">Verifikasi surat perjalanan dinas</div></div>
-      ${P>0?`<span class="badge bp" style="padding:7px 12px">⏳ ${P} menunggu verifikasi</span>`:''}
+      ${P>0?`<span class="badge bp" style="padding:7px 12px"><i class="bi bi-hourglass-split"></i> ${P} menunggu verifikasi</span>`:''}
     </div>
     <div class="fb">
-      <select class="fi" style="cursor:pointer" onchange="fSppd.st=this.value;pgSppd()">
+      <select class="fi" style="cursor:pointer" onchange="fSppd.st=this.value;fSppd.page=1;pgSppd(true)">
         <option value="" ${!fSppd.st?'selected':''}>Semua Status</option>
         <option value="menunggu"  ${fSppd.st==='menunggu'?'selected':''}>Menunggu</option>
         <option value="disetujui" ${fSppd.st==='disetujui'?'selected':''}>Disetujui</option>
         <option value="ditolak"   ${fSppd.st==='ditolak'?'selected':''}>Ditolak</option>
       </select>
-      <button class="btn btn-s btn-sm" onclick="fSppd.st='';pgSppd()">↺ Reset</button>
+      <button class="btn btn-s btn-sm" onclick="fSppd={st:'',page:1};pgSppd()"><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
     </div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px">
-      ${[['⏳','Menunggu',P,'ca'],['✅','Disetujui',AP,'cg'],['❌','Ditolak',RJ,'cr2']].map(([ic,lb,v,c])=>`
+      ${[['<i class="bi bi-hourglass-split"></i>','Menunggu',P,'ca'],['<i class="bi bi-check-circle-fill"></i>','Disetujui',AP,'cg'],['<i class="bi bi-x-circle-fill"></i>','Ditolak',RJ,'cr2']].map(([ic,lb,v,c])=>`
       <div class="sc ${c}" style="padding:14px;cursor:default">
         <div style="display:flex;align-items:center;justify-content:space-between">
           <div><div class="sn" style="font-size:22px">${v}</div><div class="sl" style="margin-top:3px">${lb}</div></div>
@@ -975,11 +1078,11 @@ function pgSppd(){
         <thead><tr><th>Pegawai</th><th>Nomor Surat</th><th>Tujuan</th><th>Keperluan</th><th>Periode</th><th>Status</th><th>Aksi</th></tr></thead>
         <tbody>
           ${list.length===0
-            ?`<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--mu)"><div style="font-size:32px;margin-bottom:8px">✈️</div>Tidak ada data SPPD</td></tr>`
+            ?`<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--mu)"><div style="font-size:32px;margin-bottom:8px"><i class="bi bi-airplane-fill"></i></div>Tidak ada data SPPD</td></tr>`
             :list.map(s=>{
               const ini = s.nama.split(' ').map(n=>n[0]).slice(0,2).join('');
               const sc  = s.status==='menunggu'?'bp':s.status==='disetujui'?'bap':'brj';
-              const sl  = s.status==='menunggu'?'⏳ Menunggu':s.status==='disetujui'?'✅ Disetujui':'❌ Ditolak';
+              const sl  = s.status==='menunggu'?'<i class="bi bi-hourglass-split"></i> Menunggu':s.status==='disetujui'?'<i class="bi bi-check-circle-fill"></i> Disetujui':'<i class="bi bi-x-circle-fill"></i> Ditolak';
               return`<tr>
                 <td><div style="display:flex;align-items:center;gap:8px">
                   <div class="av-sm">${ini}</div>
@@ -991,13 +1094,14 @@ function pgSppd(){
                 <td style="font-size:11px;white-space:nowrap">${s.tanggal_berangkat}<br><span style="color:var(--mu)">${s.tanggal_kembali}</span></td>
                 <td><span class="badge ${sc}">${sl}</span></td>
                 <td><div class="ag">
-                  <button class="btn btn-p btn-sm" onclick="openVerif(${s.id})">🔍 Periksa</button>
-                  <button class="btn btn-d btn-sm" onclick="showConf('sppd',${s.id})">🗑️</button>
+                  <button class="btn btn-p btn-sm" onclick="openVerif(${s.id})"><i class="bi bi-search"></i> Periksa</button>
+                  <button class="btn btn-d btn-sm" onclick="showConf('sppd',${s.id})"><i class="bi bi-trash-fill"></i></button>
                 </div></td>
               </tr>`;
             }).join('')}
         </tbody>
       </table>
+      ${paginationHtml(pg, 'gotoSppdPage')}
     </div>`;
 
     const nb = document.getElementById('sppd-nb');
@@ -1007,8 +1111,8 @@ function pgSppd(){
 
   }).catch(err=>{
     ca.innerHTML=`<div style="text-align:center;padding:60px;color:var(--rs)">
-      <div style="font-size:32px">⚠️</div><div>${err.message}</div>
-      <button onclick="pgSppd()" style="margin-top:14px;padding:8px 20px;border-radius:8px;border:none;background:var(--gm);color:#fff;cursor:pointer;font-weight:600">🔄 Coba Lagi</button>
+      <div style="font-size:32px"><i class="bi bi-exclamation-triangle-fill"></i></div><div>${err.message}</div>
+      <button onclick="pgSppd()" style="margin-top:14px;padding:8px 20px;border-radius:8px;border:none;background:var(--gm);color:#fff;cursor:pointer;font-weight:600"><i class="bi bi-arrow-clockwise"></i> Coba Lagi</button>
     </div>`;
   });
   return '';
@@ -1023,7 +1127,7 @@ function pgLap(){
   const bulan = n.getMonth()+1;
   const tahun = n.getFullYear();
 
-  ca.innerHTML = `<div style="text-align:center;padding:60px;color:var(--mu)"><div style="font-size:32px">⏳</div><div>Memuat laporan...</div></div>`;
+  ca.innerHTML = `<div style="text-align:center;padding:60px;color:var(--mu)"><div style="font-size:32px"><i class="bi bi-hourglass-split"></i></div><div>Memuat laporan...</div></div>`;
 
   apiFetch(`/laporan/bulanan?bulan=${bulan}&tahun=${tahun}`).then(res=>{
     if(!res) return;
@@ -1034,10 +1138,15 @@ function pgLap(){
     const T = H+I+A||1;
     const pct = Math.round((H/T)*100);
 
+    // Only the "Detail Per Pegawai" table is paginated -- the summary bar-chart
+    // list above it stays showing every pegawai at a glance.
+    const pg = paginate(data, fLap.page);
+    fLap.page = pg.page;
+    const pageData = pg.pageItems;
+
     ca.innerHTML = `
     <div class="sec-h">
-      <div><div class="sec-t">Laporan Bulanan</div><div class="sec-sub">Rekap kehadiran ${MONS[n.getMonth()]} ${tahun}</div></div>
-      <button class="btn btn-xl" onclick="exportExcel()">📥 Export Excel</button>
+      <button class="btn btn-xl" onclick="exportExcel()"><i class="bi bi-download"></i> Export Excel</button>
     </div>
     <div class="ls-grid">
       <div class="ls cg2"><div class="ln">${H}</div><div class="ll">Hadir</div></div>
@@ -1070,9 +1179,9 @@ function pgLap(){
       <table>
         <thead><tr><th>Pegawai</th><th>Jabatan</th><th>Hadir</th><th>Izin</th><th>Alpha</th><th>Persentase</th><th>Status</th></tr></thead>
         <tbody>
-          ${data.length===0
+          ${pageData.length===0
             ?`<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--mu)">Tidak ada data</td></tr>`
-            :data.map(u=>{
+            :pageData.map(u=>{
               const ini = u.nama.split(' ').map(n=>n[0]).slice(0,2).join('');
               const p   = parseInt(u.persentase)||0;
               const c   = p>=80?'var(--gf)':p>=60?'var(--am)':'var(--rs)';
@@ -1095,11 +1204,12 @@ function pgLap(){
             }).join('')}
         </tbody>
       </table>
+      ${paginationHtml(pg, 'gotoLapPage')}
     </div>`;
   }).catch(err=>{
     ca.innerHTML=`<div style="text-align:center;padding:60px;color:var(--rs)">
-      <div style="font-size:32px">⚠️</div><div>${err.message}</div>
-      <button onclick="pgLap()" style="margin-top:14px;padding:8px 20px;border-radius:8px;border:none;background:var(--gm);color:#fff;cursor:pointer;font-weight:600">🔄 Coba Lagi</button>
+      <div style="font-size:32px"><i class="bi bi-exclamation-triangle-fill"></i></div><div>${err.message}</div>
+      <button onclick="pgLap()" style="margin-top:14px;padding:8px 20px;border-radius:8px;border:none;background:var(--gm);color:#fff;cursor:pointer;font-weight:600"><i class="bi bi-arrow-clockwise"></i> Coba Lagi</button>
     </div>`;
   });
   return '';
@@ -1108,12 +1218,13 @@ function pgLap(){
 // ════════════════════════════════════════════════════
 //  REKAP PAGE
 // ════════════════════════════════════════════════════
-function pgRekap(){
+function pgRekap(fromFilter){
   const ca = document.getElementById('ca');
-  ca.innerHTML = `<div style="text-align:center;padding:60px;color:var(--mu)"><div style="font-size:32px">⏳</div><div>Memuat rekap...</div></div>`;
-
-  apiFetch('/laporan/rekap-pegawai').then(res=>{
+  const _hit = fromFilter && _rekapCache;
+  if(!_hit) ca.innerHTML = `<div style="text-align:center;padding:60px;color:var(--mu)"><div style="font-size:32px"><i class="bi bi-hourglass-split"></i></div><div>Memuat rekap...</div></div>`;
+  (_hit ? Promise.resolve(_rekapCache) : apiFetch('/laporan/rekap-pegawai')).then(res=>{
     if(!res) return;
+    if(!_hit) _rekapCache = res;
     let data = Array.isArray(res) ? res : (res.data ?? []);
 
     // Apply filter
@@ -1125,22 +1236,25 @@ function pgRekap(){
     else if(fRekap.sort==='alpha') data.sort((a,b)=>b.alpha-a.alpha);
     else if(fRekap.sort==='izin') data.sort((a,b)=>b.izin-a.izin);
 
+    const pg = paginate(data, fRekap.page);
+    fRekap.page = pg.page;
+    data = pg.pageItems;
+
     ca.innerHTML = `
     <div class="sec-h">
-      <div><div class="sec-t">Rekap Pegawai</div><div class="sec-sub">Rekap kehadiran keseluruhan</div></div>
-      <button class="btn btn-xl" onclick="exportRekapExcel()">📥 Export Excel</button>
+      <button class="btn btn-xl" onclick="exportRekapExcel()"><i class="bi bi-download"></i> Export Excel</button>
     </div>
     <div class="fb">
-      <div class="sw"><span class="si2">🔍</span>
-        <input class="fi" type="text" placeholder="Cari nama, NIK, jabatan..." value="${fRekap.q||''}" oninput="fRekap.q=this.value;pgRekap()">
+      <div class="sw"><span class="si2"><i class="bi bi-search"></i></span>
+        <input id="rekap-search" class="fi" type="text" placeholder="Cari nama, NIK, jabatan..." value="${fRekap.q||''}" oninput="fRekap.q=this.value;fRekap.page=1;_typing.rekap=true;debouncedPgRekap()">
       </div>
-      <select class="fi" style="cursor:pointer" onchange="fRekap.sort=this.value;pgRekap()">
+      <select class="fi" style="cursor:pointer" onchange="fRekap.sort=this.value;fRekap.page=1;pgRekap(true)">
         <option value="" ${!fRekap.sort?'selected':''}>Urutan Default</option>
         <option value="hadir"  ${fRekap.sort==='hadir'?'selected':''}>Terbanyak Hadir</option>
         <option value="alpha"  ${fRekap.sort==='alpha'?'selected':''}>Terbanyak Alpha</option>
         <option value="izin"   ${fRekap.sort==='izin'?'selected':''}>Terbanyak Izin</option>
       </select>
-      <button class="btn btn-s btn-sm" onclick="fRekap={uid:'',q:'',sort:''};pgRekap()">↺ Reset</button>
+      <button class="btn btn-s btn-sm" onclick="fRekap={uid:'',q:'',sort:'',page:1};pgRekap()"><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
     </div>
     <div class="tw">
       <table>
@@ -1157,7 +1271,7 @@ function pgRekap(){
         </thead>
         <tbody>
           ${data.length===0
-            ?`<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--mu)"><div style="font-size:32px;margin-bottom:8px">📭</div>Tidak ada data</td></tr>`
+            ?`<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--mu)"><div style="font-size:32px;margin-bottom:8px"><i class="bi bi-inbox"></i></div>Tidak ada data</td></tr>`
             :data.map(u=>{
               const ini   = u.nama.split(' ').map(n=>n[0]).slice(0,2).join('');
               const total = (parseInt(u.hadir)||0)+(parseInt(u.izin)||0)+(parseInt(u.alpha)||0);
@@ -1183,50 +1297,34 @@ function pgRekap(){
             }).join('')}
         </tbody>
       </table>
-      <div class="pag"><div class="pag-info">Total ${data.length} pegawai</div></div>
+      ${paginationHtml(pg, 'gotoRekapPage')}
     </div>`;
+    _restoreFocus('rekap-search','rekap');
 
   }).catch(err=>{
     ca.innerHTML=`<div style="text-align:center;padding:60px;color:var(--rs)">
-      <div style="font-size:32px">⚠️</div><div>${err.message}</div>
-      <button onclick="pgRekap()" style="margin-top:14px;padding:8px 20px;border-radius:8px;border:none;background:var(--gm);color:#fff;cursor:pointer;font-weight:600">🔄 Coba Lagi</button>
+      <div style="font-size:32px"><i class="bi bi-exclamation-triangle-fill"></i></div><div>${err.message}</div>
+      <button onclick="pgRekap()" style="margin-top:14px;padding:8px 20px;border-radius:8px;border:none;background:var(--gm);color:#fff;cursor:pointer;font-weight:600"><i class="bi bi-arrow-clockwise"></i> Coba Lagi</button>
     </div>`;
   });
   return '';
 }
 
 function exportRekapExcel(){
-  apiFetch('/laporan/rekap-pegawai').then(res=>{
-    if(!res) return;
-    const data = Array.isArray(res) ? res : (res.data ?? []);
-    const wb = XLSX.utils.book_new();
-    const wsData = [];
-    wsData.push(['REKAP KEHADIRAN PEGAWAI DESA MEKARSARI']);
-    wsData.push([`Dicetak: ${new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}`]);
-    wsData.push([]);
-    wsData.push(['No','Nama Pegawai','NIK','Jabatan','Total Hadir','Total Izin','Total Alpha','Total','Persentase']);
-    data.forEach((u,i)=>{
-      const total = (parseInt(u.hadir)||0)+(parseInt(u.izin)||0)+(parseInt(u.alpha)||0);
-      const pct   = total>0 ? Math.round(((parseInt(u.hadir)||0)/total)*100) : 0;
-      wsData.push([i+1, u.nama, u.nik, u.jabatan||'–', u.hadir, u.izin, u.alpha, total, `${pct}%`]);
-    });
-    const ws = XLSX.utils.aoa_to_sheet(wsData);
-    ws['!cols'] = [{wch:5},{wch:25},{wch:18},{wch:22},{wch:12},{wch:10},{wch:10},{wch:8},{wch:12}];
-    XLSX.utils.book_append_sheet(wb, ws, 'Rekap Pegawai');
-    XLSX.writeFile(wb, `Rekap_Pegawai_${new Date().toISOString().split('T')[0]}.xlsx`);
-    showToast('📥 Rekap berhasil diunduh!');
-  });
+  showToast('<i class="bi bi-hourglass-split"></i> Menyiapkan data...','inf');
+  downloadAuthed('/api/laporan/export-rekap-pegawai', `Rekap_Pegawai_${new Date().toISOString().split('T')[0]}.xlsx`);
 }
 
 // ════════════════════════════════════════════════════
 //  PEGAWAI PAGE
 // ════════════════════════════════════════════════════
-function pgPeg(){
+function pgPeg(fromFilter){
   const ca = document.getElementById('ca');
-  ca.innerHTML = `<div style="text-align:center;padding:60px;color:var(--mu)"><div style="font-size:32px">⏳</div><div>Memuat data pegawai...</div></div>`;
-
-  apiFetch('/pegawai').then(res=>{
+  const _hit = fromFilter && _pegCache;
+  if(!_hit) ca.innerHTML = `<div style="text-align:center;padding:60px;color:var(--mu)"><div style="font-size:32px"><i class="bi bi-hourglass-split"></i></div><div>Memuat data pegawai...</div></div>`;
+  (_hit ? Promise.resolve(_pegCache) : apiFetch('/pegawai')).then(res=>{
     if(!res) return;
+    if(!_hit) _pegCache = res;
     let users = res.data ?? [];
     if(fPeg.q){
       const q = fPeg.q.toLowerCase();
@@ -1235,22 +1333,25 @@ function pgPeg(){
     const aktif    = users.filter(u=>u.aktif==1).length;
     const nonaktif = users.filter(u=>u.aktif==0).length;
 
+    const pg = paginate(users, fPeg.page);
+    fPeg.page = pg.page;
+    users = pg.pageItems;
+
     ca.innerHTML = `
     <div class="sec-h">
-      <div><div class="sec-t">Data Pegawai</div><div class="sec-sub">Manajemen perangkat desa</div></div>
-      <button class="btn btn-p" onclick="openAddPeg()">➕ Tambah Pegawai</button>
+      <button class="btn btn-p" onclick="openAddPeg()"><i class="bi bi-plus-lg"></i> Tambah Pegawai</button>
     </div>
     <div class="fb">
-      <div class="sw"><span class="si2">🔍</span><input class="fi" type="text" placeholder="Cari nama, NIK, jabatan..." value="${fPeg.q}" oninput="fPeg.q=this.value;pgPeg()"></div>
+      <div class="sw"><span class="si2"><i class="bi bi-search"></i></span><input id="peg-search" class="fi" type="text" placeholder="Cari nama, NIK, jabatan..." value="${fPeg.q}" oninput="fPeg.q=this.value;fPeg.page=1;_typing.peg=true;debouncedPgPeg()"></div>
       <span class="badge bh" style="padding:7px 12px">${aktif} Aktif</span>
       <span class="badge ba" style="padding:7px 12px">${nonaktif} Nonaktif</span>
-<button class="btn btn-s btn-sm" onclick="fPeg.q='';pgPeg()">↺ Reset</button>    </div>
+<button class="btn btn-s btn-sm" onclick="fPeg={q:'',page:1};pgPeg()"><i class="bi bi-arrow-counterclockwise"></i> Reset</button>    </div>
     <div class="tw">
       <table>
         <thead><tr><th>Pegawai</th><th>NIK</th><th>Jabatan</th><th>Role</th><th>Status</th><th>Aksi</th></tr></thead>
         <tbody>
           ${users.length===0
-            ?`<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--mu)"><div style="font-size:32px;margin-bottom:8px">👥</div>Tidak ada data</td></tr>`
+            ?`<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--mu)"><div style="font-size:32px;margin-bottom:8px"><i class="bi bi-people-fill"></i></div>Tidak ada data</td></tr>`
             :users.map(u=>{
               const ini = u.nama.split(' ').map(n=>n[0]).slice(0,2).join('');
               return`<tr>
@@ -1263,23 +1364,24 @@ function pgPeg(){
                 <td><span class="badge ${u.role==='admin'?'br-p':'bs'}">${u.role}</span></td>
                 <td><span class="badge ${u.aktif==1?'bh':'ba'}">${u.aktif==1?'Aktif':'Nonaktif'}</span></td>
                 <td><div class="ag">
-                  <button class="btn btn-s btn-sm" onclick="openEditPeg(${u.id})">✏️ Edit</button>
-                  <button class="btn ${u.aktif==1?'btn-d':'btn-ok'} btn-sm" onclick="togglePeg(${u.id},${u.aktif})">${u.aktif==1?'🔴 Nonaktif':'🟢 Aktif'}</button>
+                  <button class="btn btn-s btn-sm" onclick="openEditPeg(${u.id})"><i class="bi bi-pencil-fill"></i> Edit</button>
+                  <button class="btn ${u.aktif==1?'btn-d':'btn-ok'} btn-sm" onclick="togglePeg(${u.id},${u.aktif})">${u.aktif==1?'<i class="bi bi-circle-fill"></i> Nonaktif':'<i class="bi bi-circle-fill"></i> Aktif'}</button>
                 </div></td>
               </tr>`;
             }).join('')}
         </tbody>
       </table>
-      <div class="pag"><div class="pag-info">Total ${users.length} pegawai</div></div>
+      ${paginationHtml(pg, 'gotoPegPage')}
     </div>`;
+    _restoreFocus('peg-search','peg');
 
     const peg = document.getElementById('peg-nb');
     if(peg) peg.textContent = aktif;
 
   }).catch(err=>{
     ca.innerHTML=`<div style="text-align:center;padding:60px;color:var(--rs)">
-      <div style="font-size:32px">⚠️</div><div>${err.message}</div>
-      <button onclick="pgPeg()" style="margin-top:14px;padding:8px 20px;border-radius:8px;border:none;background:var(--gm);color:#fff;cursor:pointer;font-weight:600">🔄 Coba Lagi</button>
+      <div style="font-size:32px"><i class="bi bi-exclamation-triangle-fill"></i></div><div>${err.message}</div>
+      <button onclick="pgPeg()" style="margin-top:14px;padding:8px 20px;border-radius:8px;border:none;background:var(--gm);color:#fff;cursor:pointer;font-weight:600"><i class="bi bi-arrow-clockwise"></i> Coba Lagi</button>
     </div>`;
   });
   return '';
@@ -1290,7 +1392,7 @@ function pgPeg(){
 // ════════════════════════════════════════════════════
 function pgSet(){
   const ca = document.getElementById('ca');
-  ca.innerHTML = `<div style="text-align:center;padding:60px;color:var(--mu)"><div style="font-size:32px">⏳</div><div>Memuat pengaturan...</div></div>`;
+  ca.innerHTML = `<div style="text-align:center;padding:60px;color:var(--mu)"><div style="font-size:32px"><i class="bi bi-hourglass-split"></i></div><div>Memuat pengaturan...</div></div>`;
 
   Promise.all([
     apiFetch('/dashboard'),
@@ -1303,16 +1405,16 @@ function pgSet(){
     const sppdPending = dash?.sppd_menunggu ?? 0;
 
     ca.innerHTML = `
-    <div class="sec-h"><div><div class="sec-t">Pengaturan Sistem</div><div class="sec-sub">Konfigurasi aplikasi Absensi Desa</div></div></div>
+    <div class="sec-h"><div><div class="sec-sub">Konfigurasi aplikasi Absensi Desa</div></div></div>
     <div class="two-col">
       <div class="card card-p">
-        <div class="sec-t" style="margin-bottom:16px">🏛️ Informasi Desa</div>
+        <div class="sec-t" style="margin-bottom:16px"><i class="bi bi-bank2"></i> Informasi Desa</div>
         <div class="fg"><label class="fl">Nama Desa</label><input class="fc" type="text" id="s-desa" value="${s.desa}"></div>
         <div class="fg"><label class="fl">Kecamatan</label><input class="fc" type="text" id="s-kec" value="${s.kec}"></div>
         <div class="fg" style="margin-bottom:0"><label class="fl">Kepala Desa</label><input class="fc" type="text" id="s-kades" value="${s.kades}"></div>
       </div>
       <div class="card card-p">
-        <div class="sec-t" style="margin-bottom:16px">⚙️ Konfigurasi Absensi</div>
+        <div class="sec-t" style="margin-bottom:16px"><i class="bi bi-gear-fill"></i> Konfigurasi Absensi</div>
         <div class="fg">
           <label class="fl">Jam Masuk</label>
           <input class="fc" type="time" id="s-jam" value="${s.jamMasuk||'08:00'}">
@@ -1324,7 +1426,7 @@ function pgSet(){
         <div class="fg">
           <label class="fl">Radius GPS (meter)</label>
           <input class="fc" type="number" id="s-rad" value="${s.radius||100}">
-          <div style="font-size:10px;color:var(--mu);margin-top:4px">📍 Jika diluar radius → otomatis Alpha</div>
+          <div style="font-size:10px;color:var(--mu);margin-top:4px"><i class="bi bi-geo-alt-fill"></i> Jika diluar radius → otomatis Alpha</div>
         </div>
         <div class="fg">
           <label class="fl">Latitude Kantor</label>
@@ -1334,7 +1436,7 @@ function pgSet(){
           <label class="fl">Longitude Kantor</label>
           <input class="fc" type="text" id="s-lng" placeholder="107.xxxxxxx" value="${s.lng||''}">
           <div style="font-size:10px;color:var(--mu);margin-top:4px">
-            <a href="https://maps.google.com" target="_blank" style="color:var(--bl)">🗺️ Buka Google Maps untuk cari koordinat</a>
+            <a href="https://maps.google.com" target="_blank" style="color:var(--bl)"><i class="bi bi-map-fill"></i> Buka Google Maps untuk cari koordinat</a>
           </div>
         </div>
       </div>
@@ -1342,24 +1444,24 @@ function pgSet(){
 
     <!-- Aturan Absensi -->
     <div class="card card-p" style="margin-bottom:14px">
-      <div class="sec-t" style="margin-bottom:14px">📋 Aturan Absensi</div>
+      <div class="sec-t" style="margin-bottom:14px"><i class="bi bi-clipboard-check-fill"></i> Aturan Absensi</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
         <div style="background:var(--rsp);border:1.5px solid rgba(224,92,92,.2);border-radius:10px;padding:12px">
-          <div style="font-size:12px;font-weight:700;color:var(--rsd);margin-bottom:6px">⏰ Keterlambatan</div>
+          <div style="font-size:12px;font-weight:700;color:var(--rsd);margin-bottom:6px"><i class="bi bi-alarm-fill"></i> Keterlambatan</div>
           <div style="font-size:11px;color:var(--mu)">Check-in setelah <strong>${s.jamMasuk||'08:00'}</strong> → Tercatat Terlambat</div>
           <div style="font-size:11px;color:var(--mu);margin-top:4px">Tidak check-in sama sekali → Otomatis <strong style="color:var(--rs)">Alpha</strong></div>
         </div>
         <div style="background:var(--rsp);border:1.5px solid rgba(224,92,92,.2);border-radius:10px;padding:12px">
-          <div style="font-size:12px;font-weight:700;color:var(--rsd);margin-bottom:6px">📍 Lokasi GPS</div>
+          <div style="font-size:12px;font-weight:700;color:var(--rsd);margin-bottom:6px"><i class="bi bi-geo-alt-fill"></i> Lokasi GPS</div>
           <div style="font-size:11px;color:var(--mu)">Diluar radius <strong>${s.radius||100}m</strong> dari kantor → Ditolak</div>
           <div style="font-size:11px;color:var(--mu);margin-top:4px">GPS tidak aktif → Tidak bisa absen</div>
         </div>
         <div style="background:var(--blp);border:1.5px solid rgba(37,99,192,.2);border-radius:10px;padding:12px">
-          <div style="font-size:12px;font-weight:700;color:var(--bld);margin-bottom:6px">🚪 Jam Pulang</div>
+          <div style="font-size:12px;font-weight:700;color:var(--bld);margin-bottom:6px"><i class="bi bi-box-arrow-right"></i> Jam Pulang</div>
           <div style="font-size:11px;color:var(--mu)">Checkout sebelum <strong>${s.jamPulang||'17:00'}</strong> → Tercatat Pulang Cepat</div>
         </div>
         <div style="background:var(--gp);border:1.5px solid rgba(64,145,108,.2);border-radius:10px;padding:12px">
-          <div style="font-size:12px;font-weight:700;color:var(--gd);margin-bottom:6px">📸 Foto Selfie</div>
+          <div style="font-size:12px;font-weight:700;color:var(--gd);margin-bottom:6px"><i class="bi bi-camera-fill"></i> Foto Selfie</div>
           <div style="font-size:11px;color:var(--mu)">Foto wajib saat check-in sebagai bukti kehadiran</div>
         </div>
       </div>
@@ -1367,15 +1469,15 @@ function pgSet(){
 
     <!-- Info Sistem -->
     <div class="card card-p" style="margin-bottom:14px">
-      <div class="sec-t" style="margin-bottom:16px">ℹ️ Info Sistem</div>
+      <div class="sec-t" style="margin-bottom:16px"><i class="bi bi-info-circle-fill"></i> Info Sistem</div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
         ${[
-          ['Total Pegawai', totalPeg, '👥'],
-          ['Pegawai Aktif', aktifPeg, '✅'],
-          ['Hadir Bulan Ini', totalAbs, '📋'],
-          ['SPPD Menunggu', sppdPending, '⏳'],
-          ['Radius GPS', (s.radius||100)+'m', '📍'],
-          ['Versi Aplikasi', '1.0.0', '🚀']
+          ['Total Pegawai', totalPeg, '<i class="bi bi-people-fill"></i>'],
+          ['Pegawai Aktif', aktifPeg, '<i class="bi bi-check-circle-fill"></i>'],
+          ['Hadir Bulan Ini', totalAbs, '<i class="bi bi-clipboard-check-fill"></i>'],
+          ['SPPD Menunggu', sppdPending, '<i class="bi bi-hourglass-split"></i>'],
+          ['Radius GPS', (s.radius||100)+'m', '<i class="bi bi-geo-alt-fill"></i>'],
+          ['Versi Aplikasi', '1.0.0', '<i class="bi bi-rocket-takeoff-fill"></i>']
         ].map(([l,v,ic])=>`
         <div style="background:var(--cr);border-radius:10px;padding:12px;border:1px solid var(--cd)">
           <div style="font-size:20px;margin-bottom:5px">${ic}</div>
@@ -1386,7 +1488,7 @@ function pgSet(){
     </div>
 
     <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <button class="btn btn-p" onclick="saveSettingPage()">💾 Simpan Pengaturan</button>
+      <button class="btn btn-p" onclick="saveSettingPage()"><i class="bi bi-floppy-fill"></i> Simpan Pengaturan</button>
     </div>`;
   });
   return '';
@@ -1405,7 +1507,7 @@ function saveSettingPage(){
     sesi      : 8,
   };
   DB.saveSetting(s);
-  showToast('✅ Pengaturan berhasil disimpan!');
+  showToast('<i class="bi bi-check-circle-fill"></i> Pengaturan berhasil disimpan!');
 
   // Refresh halaman pengaturan untuk update info aturan
   setTimeout(()=>pgSet(), 500);
@@ -1427,15 +1529,15 @@ function pgPass(){
           <div style="font-family:Fraunces,serif;font-size:22px;font-weight:700;color:#fff;letter-spacing:-.3px">${user.nama||'Admin'}</div>
           <div style="font-size:12px;color:rgba(255,255,255,.55);margin-top:3px">${user.jabatan||'Administrator'}</div>
           <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
-            <span style="background:rgba(116,198,157,.15);color:var(--gl);font-size:10px;font-weight:700;padding:3px 10px;border-radius:8px;border:1px solid rgba(116,198,157,.25);text-transform:uppercase">👑 ${user.role||'admin'}</span>
-            <span style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.6);font-size:10px;font-weight:600;padding:3px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.12)">🏛️ Desa Mekarsari</span>
+            <span style="background:rgba(116,198,157,.15);color:var(--gl);font-size:10px;font-weight:700;padding:3px 10px;border-radius:8px;border:1px solid rgba(116,198,157,.25);text-transform:uppercase"><i class="bi bi-award-fill"></i> ${user.role||'admin'}</span>
+            <span style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.6);font-size:10px;font-weight:600;padding:3px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.12)"><i class="bi bi-bank2"></i> Desa Mekarsari</span>
           </div>
         </div>
       </div>
     </div>
 
     <div class="card card-p" style="margin-bottom:14px">
-      <div style="font-family:Fraunces,serif;font-size:15px;font-weight:600;margin-bottom:14px">👤 Informasi Akun</div>
+      <div style="font-family:Fraunces,serif;font-size:15px;font-weight:600;margin-bottom:14px"><i class="bi bi-person-fill"></i> Informasi Akun</div>
       <div class="info-row"><div class="ir-label">Nama Lengkap</div><div class="ir-val">${user.nama||'–'}</div></div>
       <div class="info-row"><div class="ir-label">NIK</div><div class="ir-val" style="font-family:monospace">${user.nik||'–'}</div></div>
       <div class="info-row"><div class="ir-label">Jabatan</div><div class="ir-val">${user.jabatan||'–'}</div></div>
@@ -1444,7 +1546,7 @@ function pgPass(){
     </div>
 
     <div class="card card-p">
-      <div style="font-family:Fraunces,serif;font-size:15px;font-weight:600;margin-bottom:6px">🔒 Ubah Kata Sandi</div>
+      <div style="font-family:Fraunces,serif;font-size:15px;font-weight:600;margin-bottom:6px"><i class="bi bi-lock-fill"></i> Ubah Kata Sandi</div>
       <div style="font-size:12px;color:var(--mu);margin-bottom:16px">Pastikan sandi baru minimal 8 karakter dengan huruf kapital dan angka</div>
       <div class="fg"><label class="fl">Sandi Lama <span class="req">*</span></label><input class="fc" type="password" id="pw-old" placeholder="Masukkan sandi saat ini"></div>
       <div class="fg"><label class="fl">Sandi Baru <span class="req">*</span></label><input class="fc" type="password" id="pw-new" placeholder="Min. 8 karakter" oninput="checkPw()"></div>
@@ -1456,7 +1558,7 @@ function pgPass(){
       <div class="fg" style="margin-bottom:20px"><label class="fl">Konfirmasi Sandi Baru <span class="req">*</span></label><input class="fc" type="password" id="pw-conf" placeholder="Ulangi sandi baru"></div>
       <div style="display:flex;gap:9px">
         <button class="btn btn-s" onclick="nav('dashboard',document.querySelectorAll('.ni')[0])">← Kembali</button>
-        <button class="btn btn-p" onclick="savePw()" style="flex:1;justify-content:center">🔒 Simpan Sandi Baru</button>
+        <button class="btn btn-p" onclick="savePw()" style="flex:1;justify-content:center"><i class="bi bi-lock-fill"></i> Simpan Sandi Baru</button>
       </div>
     </div>
   </div>`;
@@ -1607,11 +1709,15 @@ function savePeg(){
 }
 function togglePeg(id, aktif){
   const newAktif = aktif==1 ? 0 : 1;
-  apiFetch(`/pegawai/${id}`, {
-    method: 'PUT',
-    body: JSON.stringify({aktif: newAktif, role: 'user', nama: '–', jabatan: '–'})
+  apiFetch('/pegawai').then(res=>{
+    const u = (res?.data ?? []).find(x=>x.id===id);
+    if(!u){showToast('Data pegawai tidak ditemukan','err');return;}
+    return apiFetch(`/pegawai/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({aktif: newAktif, role: u.role, nama: u.nama, jabatan: u.jabatan})
+    });
   }).then(()=>{
-    showToast(newAktif?'Pegawai diaktifkan 🟢':'Pegawai dinonaktifkan 🔴');
+    showToast(newAktif?'Pegawai diaktifkan <i class="bi bi-circle-fill"></i>':'Pegawai dinonaktifkan <i class="bi bi-circle-fill"></i>');
     pgPeg();
   });
 }
@@ -1632,7 +1738,7 @@ function openVerif(id){
     document.getElementById('sv-kep').textContent    = s.keperluan || '–';
     document.getElementById('sv-cat').value          = s.keterangan || '';
     const stLbl = document.getElementById('msppd-stat-lbl');
-    stLbl.textContent = s.status==='menunggu'?'⏳ Menunggu verifikasi':s.status==='disetujui'?'✅ Sudah disetujui':'❌ Sudah ditolak';
+    stLbl.innerHTML = s.status==='menunggu'?'<i class="bi bi-hourglass-split"></i> Menunggu verifikasi':s.status==='disetujui'?'<i class="bi bi-check-circle-fill"></i> Sudah disetujui':'<i class="bi bi-x-circle-fill"></i> Sudah ditolak';
     om('m-sppd');
   });
 }
@@ -1644,7 +1750,7 @@ function verifSPPD(st){
     body: JSON.stringify({ status: st, keterangan: ket })
   }).then(res=>{
     if(res?.message){
-      showToast(st==='disetujui'?'SPPD disetujui ✅':'SPPD ditolak ❌', st==='disetujui'?'':'wrn');
+      showToast(st==='disetujui'?'SPPD disetujui <i class="bi bi-check-circle-fill"></i>':'SPPD ditolak <i class="bi bi-x-circle-fill"></i>', st==='disetujui'?'':'wrn');
       cm('m-sppd');
       pgSppd();
       pgDash();
@@ -1657,7 +1763,7 @@ function verifSPPD(st){
 // CONFIRM
 function showConf(type,id){
   confAct={type,id};
-  const icon={'abs':'🗑️','sppd':'🗑️','logout':'🚪','reset':'🔄'}[type]||'🗑️';
+  const icon={'abs':'<i class="bi bi-trash-fill"></i>','sppd':'<i class="bi bi-trash-fill"></i>','logout':'<i class="bi bi-box-arrow-right"></i>','reset':'<i class="bi bi-arrow-clockwise"></i>'}[type]||'<i class="bi bi-trash-fill"></i>';
   const cls={'logout':'w','reset':'i'}[type]||'d';
   const title={'logout':'Keluar dari Sistem?','reset':'Reset Data Demo?','abs':'Hapus Data Absensi?','sppd':'Hapus Data SPPD?'}[type]||'Hapus Data?';
   const msg={'logout':'Sesi Anda akan diakhiri.','reset':'Semua data akan direset ke default.','abs':'Data absensi tidak dapat dikembalikan.','sppd':'Data SPPD tidak dapat dikembalikan.'}[type]||'Tindakan ini tidak dapat dikembalikan.';
@@ -1674,12 +1780,11 @@ function confOk(){
   const{type,id}=confAct;
 
   if(type==='logout'){
-    apiFetch('/logout',{method:'POST'}).finally(()=>{
-      localStorage.clear();
-      cm('m-conf');
-      showToast('Anda telah keluar','inf');
-      setTimeout(()=>{ window.location.href='/'; },1000);
-    });
+    // Best-effort token revocation in the background; log the user out instantly
+    // rather than waiting on the network so slow/failed requests don't stall it.
+    apiFetch('/logout',{method:'POST'}).catch(()=>{});
+    localStorage.clear();
+    window.location.href='/';
     return;
   }
 
@@ -1724,7 +1829,7 @@ function saveSetting(){
   };
   DB.saveSetting(s);
   cm('m-set');
-  showToast('✅ Pengaturan berhasil disimpan!');
+  showToast('<i class="bi bi-check-circle-fill"></i> Pengaturan berhasil disimpan!');
 }
 function saveSettingPage(){
   const s = {
@@ -1739,7 +1844,7 @@ function saveSettingPage(){
     sesi      : 8,
   };
   DB.saveSetting(s);
-  showToast('✅ Pengaturan berhasil disimpan!');
+  showToast('<i class="bi bi-check-circle-fill"></i> Pengaturan berhasil disimpan!');
   setTimeout(()=>pgSet(), 500);
 }
 function savePw(){
@@ -1755,7 +1860,7 @@ function savePw(){
     body:JSON.stringify({current_password:o,new_password:n,new_password_confirmation:c})
   }).then(res=>{
     if(res?.message){
-      showToast('✅ Sandi berhasil diubah!');
+      showToast('<i class="bi bi-check-circle-fill"></i> Sandi berhasil diubah!');
       ['pw-old','pw-new','pw-conf'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
       checkPw();
     }else{
@@ -1780,23 +1885,23 @@ function exportExcel(){
   modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:700;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)';
   modal.innerHTML = `
     <div style="background:#fff;border-radius:20px;padding:28px;width:400px;box-shadow:0 24px 64px rgba(0,0,0,.2)">
-      <div style="font-family:Fraunces,serif;font-size:18px;font-weight:700;margin-bottom:4px">📥 Export Rekap Absensi</div>
+      <div style="font-family:Fraunces,serif;font-size:18px;font-weight:700;margin-bottom:4px"><i class="bi bi-download"></i> Export Rekap Absensi</div>
       <div style="font-size:12px;color:var(--mu);margin-bottom:20px">Pilih periode yang ingin diexport</div>
 
       <!-- Pilihan cepat -->
       <div style="font-size:10px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px">Pilihan Cepat</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px">
         <button onclick="doExport('hari')" style="padding:12px;border-radius:10px;border:1.5px solid var(--cd);background:var(--cr);cursor:pointer;font-family:DM Sans,sans-serif;font-weight:600;font-size:12px">
-          <div style="font-size:20px;margin-bottom:4px">📅</div>Hari Ini
+          <div style="font-size:20px;margin-bottom:4px"><i class="bi bi-calendar-check-fill"></i></div>Hari Ini
         </button>
         <button onclick="doExport('3hari')" style="padding:12px;border-radius:10px;border:1.5px solid var(--cd);background:var(--cr);cursor:pointer;font-family:DM Sans,sans-serif;font-weight:600;font-size:12px">
-          <div style="font-size:20px;margin-bottom:4px">📆</div>3 Hari Terakhir
+          <div style="font-size:20px;margin-bottom:4px"><i class="bi bi-calendar3"></i></div>3 Hari Terakhir
         </button>
         <button onclick="doExport('minggu')" style="padding:12px;border-radius:10px;border:1.5px solid var(--cd);background:var(--cr);cursor:pointer;font-family:DM Sans,sans-serif;font-weight:600;font-size:12px">
-          <div style="font-size:20px;margin-bottom:4px">🗓️</div>7 Hari Terakhir
+          <div style="font-size:20px;margin-bottom:4px"><i class="bi bi-calendar-week"></i></div>7 Hari Terakhir
         </button>
         <button onclick="doExport('bulan')" style="padding:12px;border-radius:10px;border:1.5px solid var(--gf);background:var(--gp);cursor:pointer;font-family:DM Sans,sans-serif;font-weight:600;font-size:12px">
-          <div style="font-size:20px;margin-bottom:4px">📊</div>${namaBulan} ${tahun}
+          <div style="font-size:20px;margin-bottom:4px"><i class="bi bi-bar-chart-fill"></i></div>${namaBulan} ${tahun}
         </button>
       </div>
 
@@ -1813,7 +1918,7 @@ function exportExcel(){
         </div>
       </div>
       <button onclick="doExport('custom')" style="width:100%;padding:11px;border-radius:10px;border:none;background:var(--gd);color:#fff;cursor:pointer;font-family:DM Sans,sans-serif;font-weight:600;font-size:13px;margin-bottom:10px">
-        📥 Export Periode Custom
+        <i class="bi bi-download"></i> Export Periode Custom
       </button>
       <button onclick="document.getElementById('modal-export').remove()" style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--cd);background:none;cursor:pointer;font-family:DM Sans,sans-serif;font-weight:600;font-size:13px">
         Batal
@@ -1824,116 +1929,37 @@ function exportExcel(){
 }
 
 function doExport(periode){
-  document.getElementById('modal-export')?.remove();
   const n = new Date();
   const bulan = fAbs.bulan || `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`;
   const [tahun, bln] = bulan.split('-');
-  const namaBulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'][parseInt(bln)-1];
+  const MB = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  const namaBulan = MB[parseInt(bln)-1];
+  const pad = x => String(x).padStart(2,'0');
+  const fmt = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  const today = fmt(n);
 
-  showToast('⏳ Menyiapkan data...','inf');
+  let dari, sampai, label;
+  // Read custom inputs BEFORE removing the modal.
+  if(periode==='custom'){
+    dari   = document.getElementById('exp-dari')?.value;
+    sampai = document.getElementById('exp-sampai')?.value;
+    if(!dari||!sampai){ showToast('<i class="bi bi-exclamation-triangle-fill"></i> Pilih tanggal dari dan sampai','err'); return; }
+    if(dari>sampai){ showToast('<i class="bi bi-exclamation-triangle-fill"></i> Tanggal dari tidak boleh lebih besar dari sampai','err'); return; }
+    label = `${dari} s.d. ${sampai}`;
+  }
 
-  apiFetch(`/absensi?bulan=${bln}&tahun=${tahun}`).then(res=>{
-    if(!res) return;
-    let data = res.data ?? [];
+  document.getElementById('modal-export')?.remove();
 
-const today = n.toISOString().split('T')[0];
-let labelPeriode = {
-  'hari'  : `Harian - ${today}`,
-  '3hari' : `3 Hari Terakhir`,
-  'minggu': `7 Hari Terakhir`,
-  'bulan' : `${namaBulan} ${tahun}`,
-  'custom': ''
-}[periode];
+  if(periode==='hari'){ dari=sampai=today; label=`Harian - ${today}`; }
+  else if(periode==='3hari'){ const d=new Date(n); d.setDate(d.getDate()-2); dari=fmt(d); sampai=today; label='3 Hari Terakhir'; }
+  else if(periode==='minggu'){ const d=new Date(n); d.setDate(d.getDate()-6); dari=fmt(d); sampai=today; label='7 Hari Terakhir'; }
+  else if(periode==='bulan'){ const last=new Date(parseInt(tahun),parseInt(bln),0).getDate(); dari=`${tahun}-${pad(bln)}-01`; sampai=`${tahun}-${pad(bln)}-${pad(last)}`; label=`${namaBulan} ${tahun}`; }
 
-if(periode==='hari'){
-  data = data.filter(a=>a.tanggal===today);
-} else if(periode==='3hari'){
-  const d3 = new Date(n); d3.setDate(d3.getDate()-2);
-  data = data.filter(a=>a.tanggal>=d3.toISOString().split('T')[0] && a.tanggal<=today);
-} else if(periode==='minggu'){
-  const d7 = new Date(n); d7.setDate(d7.getDate()-6);
-  data = data.filter(a=>a.tanggal>=d7.toISOString().split('T')[0] && a.tanggal<=today);
-} else if(periode==='custom'){
-  const dari   = document.getElementById('exp-dari')?.value;
-  const sampai = document.getElementById('exp-sampai')?.value;
-  if(!dari||!sampai){showToast('Pilih tanggal dari dan sampai','err');return;}
-  if(dari>sampai){showToast('Tanggal dari tidak boleh lebih besar dari sampai','err');return;}
-  data = data.filter(a=>a.tanggal>=dari && a.tanggal<=sampai);
-  labelPeriode = `${dari} s.d. ${sampai}`;
-}
+  if(!dari||!sampai) return;
 
-    // Buat worksheet
-    const wb = XLSX.utils.book_new();
-    const wsData = [];
-
-    // Header info
-    wsData.push(['REKAP ABSENSI DESA MEKARSARI']);
-    wsData.push([`Periode: ${labelPeriode}`]);
-    wsData.push([`Dicetak: ${n.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}`]);
-    wsData.push([`Total Data: ${data.length} record`]);
-    wsData.push([]); // baris kosong
-
-    // Header tabel
-    wsData.push(['No','Nama Pegawai','Jabatan','Tanggal','Hari','Jam Masuk','Jam Keluar','Status','Keterangan']);
-
-    // Data rows
-    data.forEach((a,i)=>{
-      const d = new Date(a.tanggal);
-      const hari = HARI[d.getDay()];
-      let ket = a.keterangan||'';
-      if(a.status==='Hadir' && a.jam_masuk){
-        const [hh,mm] = a.jam_masuk.split(':').map(Number);
-        if(hh*60+mm > 8*60) ket = ket ? ket+' (Terlambat)' : 'Terlambat';
-      }
-      wsData.push([
-        i+1,
-        a.nama,
-        a.jabatan||'–',
-        a.tanggal,
-        hari,
-        a.jam_masuk||'–',
-        a.jam_keluar||'–',
-        a.status,
-        ket||'–'
-      ]);
-    });
-
-    // Ringkasan
-    wsData.push([]);
-    wsData.push(['RINGKASAN']);
-    wsData.push(['Total Hadir', H]);
-    wsData.push(['Total Izin', I]);
-    wsData.push(['Total Alpha', A]);
-    wsData.push(['Total SPPD', S]);
-    wsData.push(['Total Keseluruhan', data.length]);
-
-    const ws = XLSX.utils.aoa_to_sheet(wsData);
-
-    // Set lebar kolom
-    ws['!cols'] = [
-      {wch:5},  // No
-      {wch:25}, // Nama
-      {wch:22}, // Jabatan
-      {wch:13}, // Tanggal
-      {wch:10}, // Hari
-      {wch:12}, // Jam Masuk
-      {wch:12}, // Jam Keluar
-      {wch:10}, // Status
-      {wch:20}, // Keterangan
-    ];
-
-    XLSX.utils.book_append_sheet(wb, ws, `Absensi ${namaBulan}`);
-
-    const namaFile = {
-      'hari'  : `Absensi_Harian_${today}`,
-      '3hari' : `Absensi_3Hari_${today}`,
-      'minggu': `Absensi_Mingguan_${today}`,
-      'bulan' : `Absensi_${namaBulan}_${tahun}`
-    }[periode];
-
-    XLSX.writeFile(wb, `${namaFile}.xlsx`);
-    showToast(`📥 ${data.length} data berhasil diunduh!`);
-  }).catch(()=>showToast('Gagal export data','err'));
+  showToast('<i class="bi bi-hourglass-split"></i> Menyiapkan data...','inf');
+  const qs = new URLSearchParams({dari, sampai, label}).toString();
+  downloadAuthed(`/api/absensi/export?${qs}`, `Absensi_${dari}_${sampai}.xlsx`);
 }
 
 // NOTIFIKASI ABSENSI
@@ -1950,7 +1976,7 @@ function loadNotif(){
     const data = (res?.data??[]).filter(a=>a.tanggal===today);
     document.getElementById('notif-count').textContent = `${data.length} absensi`;
     if(data.length===0){
-      list.innerHTML=`<div class="notif-empty">📭 Belum ada absensi hari ini</div>`;
+      list.innerHTML=`<div class="notif-empty"><i class="bi bi-inbox"></i> Belum ada absensi hari ini</div>`;
       return;
     }
     list.innerHTML = data.slice(0,8).map(a=>{
@@ -1988,12 +2014,12 @@ function lihatFoto(url, nama){
   m.innerHTML = `
     <div style="position:relative;max-width:400px;width:100%;animation:mUp .25s ease">
       <button onclick="document.getElementById('modal-foto').remove()"
-        style="position:absolute;top:-14px;right:-14px;width:36px;height:36px;border-radius:50%;background:#fff;border:none;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.3);z-index:1">✕</button>
+        style="position:absolute;top:-14px;right:-14px;width:36px;height:36px;border-radius:50%;background:#fff;border:none;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.3);z-index:1"><i class="bi bi-x-lg"></i></button>
       <div style="background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.5)">
         <img src="${url}" style="width:100%;display:block;max-height:480px;object-fit:cover"
-          onerror="this.src='';this.parentElement.innerHTML='<div style=padding:40px;text-align:center;font-size:40px>📷</div>'">
+          onerror="this.src='';this.parentElement.innerHTML='<div style=padding:40px;text-align:center;font-size:40px><i class="bi bi-camera-fill"></i></div>'">
         <div style="padding:14px 16px">
-          <div style="font-family:Fraunces,serif;font-size:15px;font-weight:700;color:var(--ink)">📸 ${nama}</div>
+          <div style="font-family:Fraunces,serif;font-size:15px;font-weight:700;color:var(--ink)"><i class="bi bi-camera-fill"></i> ${nama}</div>
           <div style="font-size:11px;color:var(--mu);margin-top:2px">Foto selfie absensi</div>
         </div>
       </div>

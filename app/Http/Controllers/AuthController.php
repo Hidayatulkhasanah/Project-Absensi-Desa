@@ -3,9 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 use App\Models\User;
 
 class AuthController extends Controller
@@ -24,16 +22,10 @@ class AuthController extends Controller
             return response()->json(['error' => 'NIK atau password salah.'], 401);
         }
 
-        DB::table('sessions')->where('user_id', $user->id)->delete();
+        // One active session at a time, matching the previous custom-token behavior.
+        $user->tokens()->delete();
 
-        $token = Str::random(64);
-        DB::table('sessions')->insert([
-            'user_id'    => $user->id,
-            'token'      => $token,
-            'expired_at' => now()->addHours(8),
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        $token = $user->createToken('api-token', ['*'], now()->addHours(8))->plainTextToken;
 
         return response()->json([
             'message' => 'Login berhasil.',
@@ -48,12 +40,18 @@ class AuthController extends Controller
     }
 
     public function logout(Request $request) {
-        DB::table('sessions')->where('token', $request->bearerToken())->delete();
+        $request->user()->currentAccessToken()->delete();
         return response()->json(['message' => 'Logout berhasil.']);
     }
 
     public function profile(Request $request) {
-        return response()->json(['user' => $request->attributes->get('auth_user')]);
+        $user = $request->user();
+        return response()->json(['user' => [
+            'nik'     => $user->nik,
+            'nama'    => $user->nama,
+            'jabatan' => $user->jabatan,
+            'role'    => $user->role,
+        ]]);
     }
 
     public function changePassword(Request $request) {
@@ -62,12 +60,7 @@ class AuthController extends Controller
             'password_baru'  => 'required|min:6',
         ]);
 
-        $authUser = $request->attributes->get('auth_user');
-        $user = User::find($authUser->id);
-
-        if (!$user) {
-            return response()->json(['error' => 'User tidak ditemukan.'], 404);
-        }
+        $user = $request->user();
 
         if (!Hash::check($request->password_lama, $user->password)) {
             return response()->json(['error' => 'Password lama tidak sesuai.'], 400);

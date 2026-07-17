@@ -26,7 +26,7 @@ class UserSeeder extends Seeder
                 'nama'       => 'Dede Firdaus',
                 'password'   => Hash::make('dsmekarsari_01'),
                 'jabatan'    => 'Sekretaris Desa',
-                'role'       => 'admin',
+                'role'       => 'operator',
                 'aktif'      => 1,
                 'created_at' => now(),
                 'updated_at' => now(),

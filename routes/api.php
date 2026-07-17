@@ -1,5 +1,4 @@
 <?php
-
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
@@ -7,43 +6,40 @@ use App\Http\Controllers\AbsensiController;
 use App\Http\Controllers\SppdController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\PegawaiController;
-
 // PUBLIC — Tidak perlu token
 Route::post('/login', [AuthController::class, 'login']);
-
 // SEMUA USER YANG LOGIN (admin & user)
-Route::middleware('auth.custom')->group(function () {
+Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout',          [AuthController::class, 'logout']);
     Route::get('/profile',          [AuthController::class, 'profile']);
     Route::post('/change-password', [AuthController::class, 'changePassword']);
     Route::get('/dashboard',        [DashboardController::class, 'index']);
-
     // Absensi milik sendiri
     Route::post('/absensi/checkin',  [AbsensiController::class, 'checkin']);
     Route::post('/absensi/checkout', [AbsensiController::class, 'checkout']);
     Route::get('/absensi/today',     [AbsensiController::class, 'today']);
     Route::get('/absensi/riwayat',   [AbsensiController::class, 'riwayat']);
     Route::get('/absensi/laporan',   [AbsensiController::class, 'laporan']);
+    // SPPD — pegawai ajukan & kelola milik sendiri
+    Route::get('/sppd',         [SppdController::class, 'index']);
+    Route::post('/sppd',        [SppdController::class, 'store']);
+    Route::get('/sppd/{id}',    [SppdController::class, 'show']);
+    Route::put('/sppd/{id}',    [SppdController::class, 'update']);
+    Route::delete('/sppd/{id}', [SppdController::class, 'destroy']);
 });
-
 // ADMIN ONLY
-Route::middleware('auth.custom:admin')->group(function () {
+Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::get('/absensi',         [AbsensiController::class, 'index']);
+    Route::get('/absensi/export',  [AbsensiController::class, 'export']);
     Route::post('/absensi',        [AbsensiController::class, 'store']);
     Route::get('/absensi/{id}',    [AbsensiController::class, 'show']);
     Route::put('/absensi/{id}',    [AbsensiController::class, 'update']);
     Route::delete('/absensi/{id}', [AbsensiController::class, 'destroy']);
-
-    Route::get('/sppd',                 [SppdController::class, 'index']);
-    Route::post('/sppd',                [SppdController::class, 'store']);
     Route::put('/sppd/{id}/verifikasi', [SppdController::class, 'verifikasi']);
-    Route::delete('/sppd/{id}',         [SppdController::class, 'destroy']);
-
     Route::get('/laporan/bulanan',       [LaporanController::class, 'bulanan']);
     Route::get('/laporan/rekap-pegawai', [LaporanController::class, 'rekapPegawai']);
     Route::get('/laporan/export-bulanan',       [LaporanController::class, 'exportBulanan']);
     Route::get('/laporan/export-rekap-pegawai', [LaporanController::class, 'exportRekapPegawai']);
-
     Route::get('/pegawai',         [PegawaiController::class, 'index']);
     Route::post('/pegawai',        [PegawaiController::class, 'store']);
     Route::put('/pegawai/{id}',    [PegawaiController::class, 'update']);

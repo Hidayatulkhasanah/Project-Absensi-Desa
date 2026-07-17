@@ -2,60 +2,57 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AbsensiStatus;
+use App\Enums\SppdStatus;
+use App\Enums\UserRole;
+use App\Models\Absensi;
+use App\Models\Sppd;
+use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
     public function index(Request $request) {
         $today = now()->toDateString();
 
-        $totalHadir = DB::table('absensi')
-            ->where('tanggal', $today)
-            ->where('status', 'hadir')
+        $totalHadir = Absensi::where('tanggal', $today)
+            ->where('status', AbsensiStatus::Hadir->value)
             ->count();
 
-        $totalIzin = DB::table('absensi')
-            ->where('tanggal', $today)
-            ->where('status', 'izin')
+        $totalIzin = Absensi::where('tanggal', $today)
+            ->where('status', AbsensiStatus::Izin->value)
             ->count();
 
-        $totalAlpha = DB::table('absensi')
-            ->where('tanggal', $today)
-            ->where('status', 'alpha')
+        $totalAlpha = Absensi::where('tanggal', $today)
+            ->where('status', AbsensiStatus::Alpha->value)
             ->count();
 
         // Hanya hitung role 'user' (pegawai biasa)
-        $totalPegawai = DB::table('users')
-            ->where('aktif', 1)
-            ->where('role', 'user')
+        $totalPegawai = User::where('aktif', 1)
+            ->where('role', UserRole::User->value)
             ->count();
 
-        $sppdMenunggu = DB::table('sppd')
-            ->where('status', 'menunggu')
-            ->count();
+        $sppdMenunggu = Sppd::where('status', SppdStatus::Menunggu->value)->count();
 
-        $totalHariKerja = DB::table('absensi')
-            ->whereMonth('tanggal', now()->month)
+        $totalHariKerja = Absensi::whereMonth('tanggal', now()->month)
             ->whereYear('tanggal', now()->year)
             ->distinct('tanggal')
             ->count('tanggal');
 
-        $totalHadirBulan = DB::table('absensi')
-            ->whereMonth('tanggal', now()->month)
+        $totalHadirBulan = Absensi::whereMonth('tanggal', now()->month)
             ->whereYear('tanggal', now()->year)
-            ->where('status', 'hadir')
+            ->where('status', AbsensiStatus::Hadir->value)
             ->count();
 
         $persentase = ($totalHariKerja > 0 && $totalPegawai > 0)
             ? round(($totalHadirBulan / ($totalHariKerja * $totalPegawai)) * 100)
             : 0;
 
-        $sppdList = DB::table('sppd')
+        $sppdList = Sppd::query()
             ->join('users', 'users.id', '=', 'sppd.user_id')
-            ->where('sppd.status', 'menunggu')
+            ->where('sppd.status', SppdStatus::Menunggu->value)
             ->select('sppd.*', 'users.nama', 'users.jabatan')
-            ->orderBy('sppd.created_at', 'desc')
+            ->orderByDesc('sppd.created_at')
             ->limit(5)
             ->get();
 
