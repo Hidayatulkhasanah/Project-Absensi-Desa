@@ -1763,18 +1763,19 @@ function verifSPPD(st){
 // CONFIRM
 function showConf(type,id){
   confAct={type,id};
-  const icon={'abs':'<i class="bi bi-trash-fill"></i>','sppd':'<i class="bi bi-trash-fill"></i>','logout':'<i class="bi bi-box-arrow-right"></i>','reset':'<i class="bi bi-arrow-clockwise"></i>'}[type]||'<i class="bi bi-trash-fill"></i>';
+  const icon={'abs':'<i class="bi bi-trash-fill"></i>','sppd':'<i class="bi bi-trash-fill"></i>','logout':`<i class="bi bi-box-arrow-right"></i>`,'reset':'<i class="bi bi-arrow-clockwise"></i>'}[type]||'<i class="bi bi-trash-fill"></i>';
   const cls={'logout':'w','reset':'i'}[type]||'d';
   const title={'logout':'Keluar dari Sistem?','reset':'Reset Data Demo?','abs':'Hapus Data Absensi?','sppd':'Hapus Data SPPD?'}[type]||'Hapus Data?';
   const msg={'logout':'Sesi Anda akan diakhiri.','reset':'Semua data akan direset ke default.','abs':'Data absensi tidak dapat dikembalikan.','sppd':'Data SPPD tidak dapat dikembalikan.'}[type]||'Tindakan ini tidak dapat dikembalikan.';
   const btnTxt={'logout':'Ya, Keluar','reset':'Ya, Reset'}[type]||'Ya, Hapus';
-  document.getElementById('ci').textContent=icon;
+  document.getElementById('ci').innerHTML=icon;
   document.getElementById('ci').className=`conf-ic ${cls}`;
   document.getElementById('ct').textContent=title;
   document.getElementById('cm2').textContent=msg;
   document.getElementById('cok').textContent=btnTxt;
   om('m-conf');
 }
+
 function confOk(){
   if(!confAct){cm('m-conf');return;}
   const{type,id}=confAct;
